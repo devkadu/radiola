@@ -26,4 +26,20 @@ export const tmdbService = {
 
     return res.json();
   },
+
+  async getSeriesDetails(id: string) {
+    const res = await fetch(
+      `${BASE_URL}/tv/${id}?language=pt-BR&append_to_response=videos`,
+      {
+        headers: {
+          Authorization: `Bearer ${TMDB_TOKEN}`,
+        },
+        next: { revalidate: 3600 }, // Cache de 1 hora
+      }
+    );
+
+    if (!res.ok) throw new Error("Erro ao buscar detalhes da série");
+
+    return res.json();
+  },
 };
