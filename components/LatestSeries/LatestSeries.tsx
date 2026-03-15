@@ -9,7 +9,7 @@ export const LatestSeries = async () => {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 pb-24">
       {results.map((series: any) => (
         <Link
-          href={`/series/${series.id}`}
+          href={`/series/${series.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${series.id}`}
           key={series.id}
           className="group relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-800 border border-transparent hover:border-[var(--brand-yellow)] transition-all"
         >

@@ -27,6 +27,46 @@ export const tmdbService = {
     return res.json();
   },
 
+  async getPopularSeries(page = 1, genreId?: number | null) {
+    const params = new URLSearchParams({
+      language: "pt-BR",
+      page: page.toString(),
+      sort_by: "popularity.desc",
+    });
+    if (genreId) params.set("with_genres", genreId.toString());
+
+    const res = await fetch(`${BASE_URL}/discover/tv?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) throw new Error("Erro ao buscar séries populares");
+    return res.json();
+  },
+
+  async getSeasonDetails(seriesId: string, seasonNumber: number) {
+    const res = await fetch(
+      `${BASE_URL}/tv/${seriesId}/season/${seasonNumber}?language=pt-BR`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 3600 },
+      }
+    );
+    if (!res.ok) throw new Error("Erro ao buscar temporada");
+    return res.json();
+  },
+
+  async getEpisodeDetails(seriesId: string, seasonNumber: number, episodeNumber: number) {
+    const res = await fetch(
+      `${BASE_URL}/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}?language=pt-BR`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 3600 },
+      }
+    );
+    if (!res.ok) throw new Error("Erro ao buscar episódio");
+    return res.json();
+  },
+
   async getSeriesDetails(id: string) {
     const res = await fetch(
       `${BASE_URL}/tv/${id}?language=pt-BR&append_to_response=videos`,

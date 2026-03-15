@@ -1,15 +1,29 @@
-import { BottonNavigator } from "@/components/BottonNavigator";
+import { Suspense } from "react";
 import { Header } from "@/components/Header";
-import { LatestSeries } from "@/components/LatestSeries/LatestSeries";
-import { tmdbService } from "@/services/tmdb";
+import { Hero } from "@/components/Hero";
+import { SearchBar } from "@/components/SearchBar";
+import { GenreTags } from "@/components/GenreTags";
+import { PopularSeries } from "@/components/PopularSeries";
+import { NowDebating } from "@/components/NowDebating";
 
-const Home = async () => {
+interface Props {
+  searchParams: Promise<{ genre?: string }>;
+}
+
+const Home = async ({ searchParams }: Props) => {
+  const { genre } = await searchParams;
+  const genreId = genre ? Number(genre) : null;
+
   return (
     <main>
       <Header />
-      <LatestSeries />
-
-      <BottonNavigator />
+      <Hero />
+      <SearchBar />
+      <Suspense>
+        <GenreTags />
+      </Suspense>
+      <PopularSeries genreId={genreId} />
+      <NowDebating />
     </main>
   );
 };
