@@ -31,8 +31,8 @@ export const NowDebating = () => {
   return (
     <section className="px-4 pb-24">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-base font-semibold">Em debate agora</h3>
-        <Link href="/debates" className="text-sm text-[var(--brand-yellow)]">
+        <h3 className="text-base font-semibold text-[var(--text-primary)]">Em debate agora</h3>
+        <Link href="/debates" className="text-sm text-[var(--yellow)] hover:text-[var(--yellow-dim)] transition-colors">
           Ver mais →
         </Link>
       </div>
@@ -40,22 +40,22 @@ export const NowDebating = () => {
         {debates.map((item) => (
           <div
             key={item.rank}
-            className="flex items-center gap-4 bg-[#1a1a1a] rounded-xl px-4 py-3 border border-[var(--border-muted)]"
+            className="flex items-center gap-4 bg-[var(--bg-surface)] rounded-xl px-4 py-3 border border-[var(--border)] hover:border-[var(--text-muted)] transition-colors"
           >
-            <span className="text-2xl font-bold text-gray-600 w-6 shrink-0">
+            <span className="text-2xl font-bold text-[var(--text-muted)] w-6 shrink-0">
               {item.rank}
             </span>
-            <div className="w-8 h-8 rounded-full bg-gray-700 shrink-0" />
+            <div className="w-8 h-8 rounded-full bg-[var(--bg-elevated)] shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-[var(--brand-yellow)] font-medium">{item.series}</p>
-              <p className="text-sm font-medium truncate">
+              <p className="text-xs text-[var(--yellow)] font-medium">{item.series}</p>
+              <p className="text-sm font-medium truncate text-[var(--text-primary)]">
                 {item.episode} · {item.code}
               </p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
                 {item.comments} comentários · {item.time}
               </p>
             </div>
-            <span className="text-gray-600 text-lg">›</span>
+            <span className="text-[var(--text-muted)] text-lg">›</span>
           </div>
         ))}
       </div>

@@ -3,33 +3,44 @@
 @tailwind utilities;
 
 :root {
-  /* Fundo grafite (não preto puro) */
-  --background: #121212;
-  /* Texto principal (cinza muito claro para não agredir os olhos) */
-  --foreground: #e5e5e5;
-  /* O Amarelo Pastel para destaques e botões */
-  --brand-yellow: #fde68a;
-  /* Cor para bordas e divisores (vibe industrial) */
-  --border-muted: #262626;
+  /* Fundos */
+  --bg:             #121212;
+  --bg-surface:     #1a1a1a;
+  --bg-elevated:    #242424;
+
+  /* Bordas */
+  --border:         #2a2a2a;
+
+  /* Amarelo */
+  --yellow:         #F5C518;
+  --yellow-dim:     #C49B0F;
+  --yellow-muted:   #F5C51820;
+
+  /* Texto */
+  --text-primary:   #F0F0F0;
+  --text-secondary: #A0A0A0;
+  --text-muted:     #606060;
+
+  /* Utilitários */
+  --green:          #4CAF50;
+  --red:            #E53935;
+
+  /* Aliases de compatibilidade */
+  --background:     var(--bg);
+  --foreground:     var(--text-primary);
+  --brand-yellow:   var(--yellow);
+  --border-muted:   var(--border);
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  /* Prioriza a Geist Sans, que é excelente para o seu projeto */
+  background-color: var(--bg);
+  color: var(--text-primary);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   margin: 0;
   padding: 0;
-}
-
-/* Estilização rápida para links e botões de destaque */
-a,
-button.primary {
-  color: var(--brand-yellow);
-  transition: opacity 0.2s;
 }
 
 a:hover {

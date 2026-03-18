@@ -1,7 +1,5 @@
 import { Suspense } from "react";
-import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { SearchBar } from "@/components/SearchBar";
 import { GenreTags } from "@/components/GenreTags";
 import { PopularSeries } from "@/components/PopularSeries";
 import { NowDebating } from "@/components/NowDebating";
@@ -16,9 +14,7 @@ const Home = async ({ searchParams }: Props) => {
 
   return (
     <main>
-      <Header />
       <Hero />
-      <SearchBar />
       <Suspense>
         <GenreTags />
       </Suspense>

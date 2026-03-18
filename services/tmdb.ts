@@ -67,6 +67,21 @@ export const tmdbService = {
     return res.json();
   },
 
+  async searchSeries(query: string, page = 1) {
+    const params = new URLSearchParams({
+      language: "pt-BR",
+      query,
+      page: page.toString(),
+    });
+
+    const res = await fetch(`${BASE_URL}/search/tv?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) throw new Error("Erro ao buscar séries");
+    return res.json();
+  },
+
   async getSeriesDetails(id: string) {
     const res = await fetch(
       `${BASE_URL}/tv/${id}?language=pt-BR&append_to_response=videos`,

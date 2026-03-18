@@ -15,8 +15,8 @@ export const PopularSeries = async ({ genreId }: Props) => {
   return (
     <section className="pb-6">
       <div className="flex items-center justify-between px-4 mb-3">
-        <h3 className="text-base font-semibold">Séries populares</h3>
-        <Link href="/series" className="text-sm text-[var(--brand-yellow)]">
+        <h3 className="text-base font-semibold text-[var(--text-primary)]">Séries populares</h3>
+        <Link href="/series" className="text-sm text-[var(--yellow)] hover:text-[var(--yellow-dim)] transition-colors">
           Ver todas →
         </Link>
       </div>
@@ -25,7 +25,7 @@ export const PopularSeries = async ({ genreId }: Props) => {
           <Link
             key={series.id}
             href={`/series/${toSlug(series.name, series.id)}`}
-            className="shrink-0 w-36 rounded-xl overflow-hidden bg-gray-900 border border-[var(--border-muted)] hover:border-[var(--brand-yellow)] transition-colors"
+            className="shrink-0 w-36 rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--yellow)] transition-colors"
           >
             <div className="relative w-full aspect-[2/3]">
               {series.poster_path ? (
@@ -37,14 +37,14 @@ export const PopularSeries = async ({ genreId }: Props) => {
                   sizes="144px"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-800 text-3xl">
+                <div className="w-full h-full flex items-center justify-center bg-[var(--bg-elevated)] text-3xl">
                   📺
                 </div>
               )}
             </div>
             <div className="p-2">
-              <p className="text-xs font-medium truncate">{series.name}</p>
-              <p className="text-xs text-gray-500 mt-0.5">0 debates</p>
+              <p className="text-xs font-medium truncate text-[var(--text-primary)]">{series.name}</p>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">0 debates</p>
             </div>
           </Link>
         ))}

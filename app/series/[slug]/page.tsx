@@ -1,4 +1,5 @@
 import { tmdbService } from "@/services/tmdb";
+import { cacheService } from "@/services/cache";
 import { seasonSlug } from "@/lib/slugs";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,6 +13,17 @@ export default async function SeriesPage({ params }: Props) {
   // Slug format: "nome-da-serie-123" — ID is the last segment
   const id = slug.split("-").pop()!;
   const series = await tmdbService.getSeriesDetails(id);
+
+  // Cacheia série e episódios de todas as temporadas em paralelo
+  const seasons = series.seasons?.filter((s: any) => s.season_number > 0) ?? [];
+  const seasonDetails = await Promise.all(
+    seasons.map((s: any) => tmdbService.getSeasonDetails(id, s.season_number))
+  );
+  const allEpisodes = seasonDetails.flatMap((s: any) => s.episodes ?? []);
+  await Promise.all([
+    cacheService.cacheSeries(series),
+    cacheService.cacheEpisodes(series.id, allEpisodes),
+  ]);
 
   const trailer = series.videos?.results?.find(
     (v: any) => v.type === "Trailer" && v.site === "YouTube"

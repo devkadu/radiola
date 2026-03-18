@@ -18,7 +18,7 @@ interface Props {
 export const CommentList = ({ comments }: Props) => {
   return (
     <div>
-      <p className="text-xs font-semibold tracking-widest text-gray-500 mb-3 uppercase">
+      <p className="text-xs font-semibold tracking-widest text-[var(--text-muted)] mb-3 uppercase">
         Recentes
       </p>
       <div className="flex flex-col gap-3">
@@ -40,7 +40,7 @@ const CommentCard = ({ comment }: { comment: Comment }) => {
   };
 
   return (
-    <div className="bg-[#1a1a1a] border border-[var(--border-muted)] rounded-xl p-4">
+    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div
@@ -49,26 +49,26 @@ const CommentCard = ({ comment }: { comment: Comment }) => {
           >
             {comment.initials}
           </div>
-          <span className="text-sm font-medium">{comment.username}</span>
+          <span className="text-sm font-medium text-[var(--text-primary)]">{comment.username}</span>
         </div>
-        <span className="text-xs text-gray-500">{comment.time}</span>
+        <span className="text-xs text-[var(--text-muted)]">{comment.time}</span>
       </div>
-      <p className="text-sm text-gray-300 leading-relaxed mb-3">{comment.text}</p>
+      <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-3">{comment.text}</p>
       <div className="flex gap-2">
         <button
           onClick={toggleLike}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
             liked
-              ? "border-[var(--brand-yellow)] text-[var(--brand-yellow)]"
-              : "border-[var(--border-muted)] text-gray-400 hover:border-gray-500"
+              ? "border-[var(--yellow)] text-[var(--yellow)]"
+              : "border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-muted)]"
           }`}
         >
           ♥ {likes}
         </button>
-        <button className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border-muted)] text-gray-400 hover:border-gray-500 transition-colors">
+        <button className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-muted)] transition-colors">
           ↩ Reply
         </button>
-        <button className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border-muted)] text-gray-400 hover:border-gray-500 transition-colors">
+        <button className="px-3 py-1.5 rounded-lg text-xs font-medium border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--text-muted)] transition-colors">
           " Quote
         </button>
       </div>

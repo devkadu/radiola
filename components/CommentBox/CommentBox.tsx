@@ -9,8 +9,8 @@ export const CommentBox = ({ placeholder }: Props) => {
   const [text, setText] = useState("");
 
   return (
-    <div className="border border-[var(--border-muted)] rounded-xl overflow-hidden bg-[#1a1a1a]">
-      <p className="text-xs font-semibold tracking-widest text-gray-500 px-4 pt-4 pb-2 uppercase">
+    <div className="border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--bg-surface)]">
+      <p className="text-xs font-semibold tracking-widest text-[var(--text-muted)] px-4 pt-4 pb-2 uppercase">
         Deixe sua opinião sobre o episódio
       </p>
       <textarea
@@ -18,18 +18,18 @@ export const CommentBox = ({ placeholder }: Props) => {
         onChange={(e) => setText(e.target.value)}
         placeholder={placeholder ?? "Sem medo — aqui só quem chegou até aqui..."}
         rows={4}
-        className="w-full bg-transparent text-sm text-gray-200 placeholder-gray-600 px-4 pb-3 outline-none resize-none"
+        className="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] px-4 pb-3 outline-none resize-none"
       />
       <div className="flex justify-end gap-3 px-4 pb-4">
         <button
           onClick={() => setText("")}
-          className="px-5 py-2 rounded-full text-sm font-medium border border-[var(--border-muted)] text-gray-400 hover:text-white transition-colors"
+          className="px-5 py-2 rounded-full text-sm font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
         >
           Cancelar
         </button>
         <button
           disabled={!text.trim()}
-          className="px-5 py-2 rounded-full text-sm font-bold bg-white text-black disabled:opacity-30 hover:bg-gray-200 transition-colors"
+          className="px-5 py-2 rounded-full text-sm font-bold bg-[var(--yellow)] text-black disabled:opacity-30 hover:bg-[var(--yellow-dim)] transition-colors"
         >
           Publicar
         </button>
