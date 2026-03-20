@@ -1,7 +1,12 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaTableCells, FaTv, FaStar, FaUser } from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { FaTableCells, FaTv, FaStar, FaUser, FaMagnifyingGlass } from "react-icons/fa6";
+import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
+import { useSearchOverlay } from "@/context/SearchContext";
+import { favoritesService } from "@/services/favorites";
 
 const menuItems = [
   { href: "/", label: "Início", icon: FaTableCells },
@@ -10,15 +15,26 @@ const menuItems = [
   { href: "/perfil", label: "Meu perfil", icon: FaUser },
 ];
 
-const mySeries = [
-  { name: "Battlestar Galactica", emoji: "🚀", hasNew: true },
-  { name: "Breaking Bad", emoji: "🧪", hasNew: false },
-  { name: "Dark", emoji: "🧩", hasNew: false },
-  { name: "Severance", emoji: "👁️", hasNew: false },
-];
+interface Favorite {
+  series_id: number;
+  series_name: string;
+  series_slug: string;
+  poster_path: string | null;
+}
 
 export const Sidebar = () => {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const { open: openSearch } = useSearchOverlay();
+  const username = user?.user_metadata?.username || user?.email?.split("@")[0];
+  const avatarUrl = user?.user_metadata?.avatar_url ?? null;
+  const initials = username?.slice(0, 2).toUpperCase();
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+
+  useEffect(() => {
+    if (!user) { setFavorites([]); return; }
+    favoritesService.getFavorites(user.id).then(setFavorites);
+  }, [user, pathname]);
 
   return (
     <aside className="hidden lg:flex flex-col w-[260px] min-h-screen border-r border-[var(--border)] bg-[var(--bg)] sticky top-0 h-screen overflow-y-auto shrink-0">
@@ -27,6 +43,17 @@ export const Sidebar = () => {
         <Link href="/" className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
           radio<span className="text-[var(--yellow)]">la</span>
         </Link>
+      </div>
+
+      {/* Busca */}
+      <div className="px-3 mb-2">
+        <button
+          onClick={openSearch}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] transition-colors"
+        >
+          <FaMagnifyingGlass size={16} />
+          Buscar
+        </button>
       </div>
 
       {/* Menu */}
@@ -59,26 +86,63 @@ export const Sidebar = () => {
         <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] px-2 py-2">
           Minhas Séries
         </p>
-        {mySeries.map((s) => (
-          <div
-            key={s.name}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+        {!user && (
+          <p className="text-xs text-[var(--text-muted)] px-3 py-2">
+            Entre para ver suas séries
+          </p>
+        )}
+        {user && favorites.length === 0 && (
+          <p className="text-xs text-[var(--text-muted)] px-3 py-2">
+            Nenhuma série favoritada ainda
+          </p>
+        )}
+        {favorites.map((s) => (
+          <Link
+            key={s.series_id}
+            href={`/series/${s.series_slug}`}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+              pathname === `/series/${s.series_slug}`
+                ? "bg-[var(--yellow-muted)] text-[var(--yellow)]"
+                : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"
+            }`}
           >
-            <span className="text-base leading-none">{s.emoji}</span>
-            <span className="flex-1 truncate">{s.name}</span>
-            {s.hasNew && (
-              <span className="w-2 h-2 rounded-full bg-[var(--yellow)] shrink-0" />
-            )}
-          </div>
+            <div className="w-7 h-7 rounded overflow-hidden shrink-0 relative bg-[var(--bg-elevated)]">
+              {s.poster_path && (
+                <Image
+                  src={`https://image.tmdb.org/t/p/w92${s.poster_path}`}
+                  alt={s.series_name}
+                  fill
+                  className="object-cover"
+                  sizes="28px"
+                />
+              )}
+            </div>
+            <span className="flex-1 truncate">{s.series_name}</span>
+          </Link>
         ))}
       </div>
 
       {/* User */}
-      <div className="mt-auto px-4 py-4 border-t border-[var(--border)] flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-[#c0392b] flex items-center justify-center text-xs font-bold text-white shrink-0">
-          CP
-        </div>
-        <span className="text-sm text-[var(--text-secondary)] truncate">carlospadilha</span>
+      <div className="mt-auto px-4 py-4 border-t border-[var(--border)]">
+        {user ? (
+          <Link href="/perfil" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative bg-[var(--yellow)] flex items-center justify-center text-xs font-bold text-black">
+              {avatarUrl ? (
+                <Image src={avatarUrl} alt={username ?? ""} fill className="object-cover" sizes="32px" />
+              ) : initials}
+            </div>
+            <span className="text-sm text-[var(--text-secondary)] truncate">{username}</span>
+          </Link>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <Link href="/login" className="text-sm text-center py-2 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors">
+              Entrar
+            </Link>
+            <Link href="/criar-conta" className="text-sm text-center py-2 rounded-lg bg-[var(--yellow)] text-black font-semibold hover:bg-[var(--yellow-dim)] transition-colors">
+              Criar conta
+            </Link>
+          </div>
+        )}
       </div>
     </aside>
   );

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Header } from "@/components/Header";
-import { Sidebar } from "@/components/Sidebar";
-import { BottonNavigator } from "@/components/BottonNavigator";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,24 +18,14 @@ export const metadata: Metadata = {
   description: "Comentários e avaliações de séries de TV",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
-        <div className="lg:flex min-h-screen">
-          <Sidebar />
-          <div className="flex-1 min-w-0 flex flex-col">
-            <Header />
-            <div className="flex-1 max-w-[1296px] w-full mx-auto lg:px-8 lg:py-6">
-              {children}
-            </div>
-            <BottonNavigator />
-          </div>
-        </div>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

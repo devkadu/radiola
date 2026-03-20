@@ -1,5 +1,6 @@
 import { tmdbService } from "@/services/tmdb";
 import { idFromSeriesSlug, numberFromSeasonSlug, episodeSlug } from "@/lib/slugs";
+import { BackTopBar } from "@/components/BackTopBar/BackTopBar";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -18,9 +19,11 @@ export default async function SeasonPage({ params }: Props) {
   ]);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-white pb-24">
+    <main className="min-h-screen bg-[var(--background)] text-white pb-24 px-4">
+      <BackTopBar href={`/series/${slug}`} title={`${series.name} · ${seasonData.name}`} />
+
       {/* Header da temporada */}
-      <div className="relative">
+      <div className="relative -mx-4">
         {series.backdrop_path && (
           <div className="relative h-48 w-full">
             <Image
