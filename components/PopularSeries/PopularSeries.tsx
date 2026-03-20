@@ -13,19 +13,21 @@ export const PopularSeries = async ({ genreId }: Props) => {
   const { results } = await tmdbService.getPopularSeries(1, genreId);
 
   return (
-    <section className="pb-6">
-      <div className="flex items-center justify-between px-4 mb-3">
-        <h3 className="text-base font-semibold text-[var(--text-primary)]">Séries populares</h3>
-        <Link href="/series" className="text-sm text-[var(--yellow)] hover:text-[var(--yellow-dim)] transition-colors">
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs text-[var(--text-muted)]">As comunidades mais ativas esta semana</p>
+        <Link href="/series" className="text-sm text-[var(--yellow)] hover:text-[var(--yellow-dim)] transition-colors shrink-0">
           Ver todas →
         </Link>
       </div>
-      <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
-        {results.slice(0, 10).map((series: any) => (
+
+      {/* Mobile: scroll horizontal / Desktop: grid 4 colunas */}
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-4 lg:overflow-visible">
+        {results.slice(0, 8).map((series: any) => (
           <Link
             key={series.id}
             href={`/series/${toSlug(series.name, series.id)}`}
-            className="shrink-0 w-36 rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--yellow)] transition-colors"
+            className="shrink-0 w-40 lg:w-auto rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--yellow)] transition-colors"
           >
             <div className="relative w-full aspect-[2/3]">
               {series.poster_path ? (
@@ -34,7 +36,7 @@ export const PopularSeries = async ({ genreId }: Props) => {
                   alt={series.name}
                   fill
                   className="object-cover"
-                  sizes="144px"
+                  sizes="(min-width: 1024px) 25vw, 160px"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-[var(--bg-elevated)] text-3xl">
@@ -42,13 +44,18 @@ export const PopularSeries = async ({ genreId }: Props) => {
                 </div>
               )}
             </div>
-            <div className="p-2">
-              <p className="text-xs font-medium truncate text-[var(--text-primary)]">{series.name}</p>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">0 debates</p>
+            <div className="p-3">
+              <p className="text-sm font-semibold text-[var(--text-primary)] leading-tight">{series.name}</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                {series.first_air_date?.split("-")[0] ?? "—"}
+              </p>
+              <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded-full bg-[var(--yellow-muted)] text-[var(--yellow)]">
+                0 debates
+              </span>
             </div>
           </Link>
         ))}
       </div>
-    </section>
+    </div>
   );
 };

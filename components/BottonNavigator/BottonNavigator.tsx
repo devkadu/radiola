@@ -13,7 +13,7 @@ export const BottonNavigator = () => {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[var(--bg)] border-t border-[var(--border)] flex justify-around items-center py-3 z-50">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg)] border-t border-[var(--border)] flex justify-around items-center py-3 z-50">
       {items.map(({ label, href, icon: Icon }) => {
         const active = pathname === href;
         return (

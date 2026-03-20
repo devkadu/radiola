@@ -38,9 +38,20 @@ export default async function EpisodePage({ params }: Props) {
   const episodeNumber = numberFromEpisodeSlug(episodeParam);
 
   const [series, ep] = await Promise.all([
-    tmdbService.getSeriesDetails(seriesId),
-    tmdbService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber),
+    tmdbService.getSeriesDetails(seriesId).catch(() => null),
+    tmdbService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber).catch(() => null),
   ]);
+
+  if (!series || !ep) {
+    return (
+      <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-[var(--text-muted)]">
+        <p className="text-4xl">📺</p>
+        <p className="text-lg font-semibold text-[var(--text-primary)]">Episódio não encontrado</p>
+        <p className="text-sm">Verifique se o link está correto.</p>
+        <Link href="/" className="mt-2 text-sm text-[var(--yellow)] hover:underline">← Voltar para o início</Link>
+      </main>
+    );
+  }
 
   const meta = `T${String(seasonNumber).padStart(2, "0")} · E${String(episodeNumber).padStart(2, "0")}${ep.runtime ? ` · ${ep.runtime} min` : ""}`;
 

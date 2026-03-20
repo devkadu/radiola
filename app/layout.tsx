@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
 import { BottonNavigator } from "@/components/BottonNavigator";
 import "./globals.css";
 
@@ -26,13 +27,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Header />
-        <div className="max-w-[1296px] mx-auto">
-          {children}
-          <BottonNavigator />
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
+        <div className="lg:flex min-h-screen">
+          <Sidebar />
+          <div className="flex-1 min-w-0 flex flex-col">
+            <Header />
+            <div className="flex-1 max-w-[1296px] w-full mx-auto lg:px-8 lg:py-6">
+              {children}
+            </div>
+            <BottonNavigator />
+          </div>
         </div>
       </body>
     </html>

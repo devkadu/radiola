@@ -58,14 +58,14 @@ function SearchResults({
           <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] px-4 pt-3 pb-1">
             Episódios
           </p>
-          {results.episodes.map((ep) => {
+          {results.episodes.map((ep, i) => {
             const s = ep.series as any;
             return (
               <Link
                 key={ep.id}
                 href={`/series/${s.slug}/temporada-${ep.season_number}/episodio-${ep.episode_number}-${ep.slug.replace(/^episodio-\d+-/, "")}`}
                 onClick={onSelect}
-                className="flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--bg-elevated)] transition-colors"
+                className={`flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--bg-elevated)] transition-colors ${i > 0 ? "border-t border-[var(--border)]" : ""}`}
               >
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-[var(--yellow)] truncate">{s.name}</p>
@@ -85,21 +85,21 @@ function SearchResults({
           <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] px-4 pt-3 pb-1">
             Séries
           </p>
-          {results.series.map((series) => (
+          {results.series.map((series, i) => (
             <Link
               key={series.id}
               href={`/series/${series.slug}`}
               onClick={onSelect}
-              className="flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--bg-elevated)] transition-colors"
+              className={`flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--bg-elevated)] transition-colors ${i > 0 ? "border-t border-[var(--border)]" : ""}`}
             >
-              <div className="w-8 h-12 rounded overflow-hidden bg-[var(--bg-elevated)] shrink-0 relative">
+              <div className="w-12 h-16 rounded overflow-hidden bg-[var(--bg-elevated)] shrink-0 relative">
                 {series.poster_path ? (
                   <Image
                     src={`https://image.tmdb.org/t/p/w92${series.poster_path}`}
                     alt={series.name}
                     fill
                     className="object-cover"
-                    sizes="32px"
+                    sizes="48px"
                   />
                 ) : (
                   <div className="w-full h-full bg-[var(--bg-elevated)]" />
@@ -177,42 +177,52 @@ export const Header = () => {
     <>
       <header className="border-b border-[var(--border)] bg-[var(--bg)]">
         <div className="max-w-[1296px] mx-auto flex items-center px-4 py-3 gap-3">
-          <Link href="/" className="text-3xl font-bold tracking-tight text-[var(--text-primary)] shrink-0">
+          {/* Logo — só no mobile (desktop fica no sidebar) */}
+          <Link href="/" className="lg:hidden text-3xl font-bold tracking-tight text-[var(--text-primary)] shrink-0">
             radio<span className="text-[var(--yellow)]">la</span>
           </Link>
 
-          {/* Busca desktop */}
-          <div ref={wrapperRef} className="relative flex-1 hidden sm:block">
-            <div className="flex items-center gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[4px] px-3 py-2">
-              <FaMagnifyingGlass size={13} className="text-[var(--text-muted)] shrink-0" />
-              <input
-                type="text"
-                placeholder="Buscar série ou episódio..."
-                className="bg-transparent text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none w-full"
-                value={query}
-                onChange={(e) => { setQuery(e.target.value); setDropdownOpen(true); }}
-                onKeyDown={handleDesktopKeyDown}
-                onFocus={() => results && setDropdownOpen(true)}
-              />
-              {query && (
-                <button
-                  onClick={() => { setQuery(""); setDropdownOpen(false); }}
-                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors shrink-0"
-                >
-                  <FaXmark size={13} />
-                </button>
+          {/* Grupo direito: busca + entrar */}
+          <div className="hidden sm:flex items-center gap-3 lg:ml-0 ml-auto w-1/2 lg:w-full">
+            <div ref={wrapperRef} className="relative flex-1">
+              <div className="flex items-center gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[4px] px-3 py-2">
+                <FaMagnifyingGlass size={13} className="text-[var(--text-muted)] shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Buscar série ou episódio..."
+                  className="bg-transparent text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none w-full"
+                  value={query}
+                  onChange={(e) => { setQuery(e.target.value); setDropdownOpen(true); }}
+                  onKeyDown={handleDesktopKeyDown}
+                  onFocus={() => results && setDropdownOpen(true)}
+                />
+                {query && (
+                  <button
+                    onClick={() => { setQuery(""); setDropdownOpen(false); }}
+                    className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors shrink-0"
+                  >
+                    <FaXmark size={13} />
+                  </button>
+                )}
+              </div>
+
+              {dropdownOpen && results && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded-[4px] z-50 overflow-hidden shadow-xl">
+                  <SearchResults
+                    query={query}
+                    results={results}
+                    onSelect={() => { setQuery(""); setDropdownOpen(false); }}
+                  />
+                </div>
               )}
             </div>
 
-            {dropdownOpen && results && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg-surface)] border border-[var(--border)] rounded-[4px] z-50 overflow-hidden shadow-xl">
-                <SearchResults
-                  query={query}
-                  results={results}
-                  onSelect={() => { setQuery(""); setDropdownOpen(false); }}
-                />
-              </div>
-            )}
+            <button className="text-sm px-4 py-1.5 rounded-full border border-[var(--border)] text-[var(--text-primary)] hover:bg-white/10 transition-colors shrink-0">
+              Entrar
+            </button>
+            <button className="hidden lg:block text-sm px-4 py-1.5 rounded-full bg-[var(--yellow)] text-black font-semibold hover:bg-[var(--yellow-dim)] transition-colors shrink-0">
+              Criar conta
+            </button>
           </div>
 
           {/* Ícone de busca mobile */}
@@ -223,7 +233,7 @@ export const Header = () => {
             <FaMagnifyingGlass size={18} />
           </button>
 
-          <button className="text-sm px-4 py-1.5 rounded-full border border-[var(--border)] text-[var(--text-primary)] hover:bg-white/10 transition-colors shrink-0">
+          <button className="sm:hidden text-sm px-4 py-1.5 rounded-full border border-[var(--border)] text-[var(--text-primary)] hover:bg-white/10 transition-colors shrink-0">
             Entrar
           </button>
         </div>
