@@ -46,3 +46,8 @@ body {
 a:hover {
   opacity: 0.8;
 }
+
+/* Previne zoom automático no iOS ao focar inputs */
+input, textarea, select {
+  font-size: 16px !important;
+}

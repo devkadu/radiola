@@ -28,7 +28,7 @@ function UserAvatar({ avatarUrl, username }: { avatarUrl: string | null; usernam
   const color = colors[username.charCodeAt(0) % colors.length];
 
   return (
-    <div className="w-8 h-8 rounded-lg shrink-0 overflow-hidden relative flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: avatarUrl ? undefined : color }}>
+    <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: avatarUrl ? undefined : color }}>
       {avatarUrl
         ? <Image src={avatarUrl} alt={username} fill className="object-cover" sizes="32px" />
         : initials}
@@ -43,6 +43,7 @@ export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, placeho
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "";
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
@@ -57,12 +58,13 @@ export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, placeho
   const handleSubmit = async () => {
     if (!text.trim() || !user || submitting) return;
     setSubmitting(true);
+    setError(null);
     try {
       const newComment = await commentsService.addComment(epId, user.id, username, avatarUrl, text.trim());
       setComments((prev) => [newComment, ...prev]);
       setText("");
-    } catch {
-      // silently fail
+    } catch (e: any) {
+      setError(e?.message ?? "Erro ao publicar comentário. Verifique se a tabela foi criada no Supabase.");
     } finally {
       setSubmitting(false);
     }
@@ -127,6 +129,9 @@ export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, placeho
             rows={4}
             className="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] px-4 pb-3 outline-none resize-none"
           />
+          {error && (
+            <p className="text-xs text-red-400 px-4 pb-2">{error}</p>
+          )}
           <div className="flex justify-end gap-3 px-4 pb-4">
             <button
               onClick={() => setText("")}

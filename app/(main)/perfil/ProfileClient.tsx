@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
+import { favoritesService } from "@/services/favorites";
 import { User } from "@supabase/supabase-js";
 import { FaCamera } from "react-icons/fa6";
 
@@ -42,6 +44,18 @@ export const ProfileClient = ({ user }: Props) => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user.user_metadata?.avatar_url ?? null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Awaited<ReturnType<typeof favoritesService.getFavorites>>>([]);
+  const [commentCount, setCommentCount] = useState<number>(0);
+
+  useEffect(() => {
+    favoritesService.getFavorites(user.id).then(setFavorites);
+    const supabase = createClient();
+    supabase
+      .from("comments")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .then(({ count }) => setCommentCount(count ?? 0));
+  }, [user.id]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -150,17 +164,53 @@ export const ProfileClient = ({ user }: Props) => {
       </div>
 
       {/* Stats mock */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-2 gap-3 mb-8">
         {[
-          { label: "Comentários", value: "0" },
-          { label: "Séries", value: "0" },
-          { label: "Debates", value: "0" },
+          { label: "Comentários", value: commentCount },
+          { label: "Séries", value: favorites.length },
         ].map((stat) => (
           <div key={stat.label} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 text-center">
             <p className="text-2xl font-bold text-[var(--text-primary)]">{stat.value}</p>
             <p className="text-xs text-[var(--text-muted)] mt-1">{stat.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Séries favoritas */}
+      <div className="mb-8">
+        <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">
+          Séries favoritas
+        </h2>
+        {favorites.length === 0 ? (
+          <p className="text-sm text-[var(--text-muted)]">Nenhuma série favoritada ainda.</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-3">
+            {favorites.map((s) => (
+              <Link
+                key={s.series_id}
+                href={`/series/${s.series_slug}`}
+                className="group flex flex-col gap-1.5"
+              >
+                <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-[var(--bg-elevated)]">
+                  {s.poster_path ? (
+                    <Image
+                      src={`https://image.tmdb.org/t/p/w300${s.poster_path}`}
+                      alt={s.series_name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="33vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-2xl">📺</div>
+                  )}
+                </div>
+                <p className="text-xs text-[var(--text-secondary)] truncate group-hover:text-[var(--yellow)] transition-colors">
+                  {s.series_name}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-3">

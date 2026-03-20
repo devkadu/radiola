@@ -1,12 +1,19 @@
 import { tmdbService } from "@/services/tmdb";
 import { idFromSeriesSlug, numberFromSeasonSlug, numberFromEpisodeSlug } from "@/lib/slugs";
 import { EpisodeComments } from "@/components/EpisodeComments/EpisodeComments";
+import { EpisodeLikeButton } from "@/components/EpisodeLikeButton/EpisodeLikeButton";
 import { BackTopBar } from "@/components/BackTopBar/BackTopBar";
 import Image from "next/image";
 import Link from "next/link";
 
 interface Props {
   params: Promise<{ slug: string; season: string; episode: string }>;
+}
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr + "T12:00:00").toLocaleDateString("pt-BR", {
+    day: "numeric", month: "long", year: "numeric",
+  });
 }
 
 export default async function EpisodePage({ params }: Props) {
@@ -32,6 +39,7 @@ export default async function EpisodePage({ params }: Props) {
   }
 
   const meta = `T${String(seasonNumber).padStart(2, "0")} · E${String(episodeNumber).padStart(2, "0")}${ep.runtime ? ` · ${ep.runtime} min` : ""}`;
+  const genres: { id: number; name: string }[] = series.genres ?? [];
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-white pb-32">
@@ -55,12 +63,39 @@ export default async function EpisodePage({ params }: Props) {
             </div>
           )}
 
+          {/* Like button sobre a imagem */}
+          <div className="absolute bottom-3 left-3 z-10">
+            <EpisodeLikeButton
+              seriesId={seriesId}
+              seasonNumber={seasonNumber}
+              episodeNumber={episodeNumber}
+            />
+          </div>
+
           <div className="relative ml-[45%] p-4 flex flex-col items-end text-right">
             <Link href={`/series/${slug}`} className="text-sm font-medium text-[var(--yellow)] hover:opacity-80 transition-opacity">
               {series.name}
             </Link>
             <p className="text-base font-bold mt-0.5 leading-snug">&ldquo;{ep.name}&rdquo;</p>
             <p className="text-xs text-gray-500 mt-1">{meta}</p>
+
+            {/* Data de exibição */}
+            {ep.air_date && (
+              <p className="text-xs text-[var(--text-muted)] mt-1">
+                {formatDate(ep.air_date)}
+              </p>
+            )}
+
+            {/* Gêneros */}
+            {genres.length > 0 && (
+              <div className="flex gap-1.5 mt-2 flex-wrap justify-end">
+                {genres.slice(0, 3).map((g) => (
+                  <span key={g.id} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)]">
+                    {g.name}
+                  </span>
+                ))}
+              </div>
+            )}
 
             <div className="flex gap-2 mt-3 flex-wrap justify-end">
               {ep.vote_average > 0 && (
