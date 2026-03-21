@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* App-like feel — remove browser gestures */
+html, body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+* {
+  -webkit-touch-callout: none;
+}
+
 :root {
   /* Fundos */
   --bg:             #121212;

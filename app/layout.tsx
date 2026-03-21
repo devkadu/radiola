@@ -22,7 +22,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Radiola",
-  description: "Comentários e avaliações de séries de TV",
+  description: "Debate cada episódio no seu tempo",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Radiola",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
