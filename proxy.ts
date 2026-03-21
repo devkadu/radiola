@@ -5,7 +5,7 @@ export async function proxy(request: NextRequest) {
 
   // Detecta cookie de sessão do Supabase (sb-*-auth-token)
   const hasSession = request.cookies.getAll().some(
-    (c) => c.name.startsWith("sb-") && c.name.endsWith("-auth-token")
+    (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token")
   );
 
   // Protege /perfil
