@@ -18,17 +18,22 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setError("E-mail ou senha incorretos.");
+      if (error) {
+        setError(error.message || "E-mail ou senha incorretos.");
+        return;
+      }
+
+      router.push("/");
+      router.refresh();
+    } catch (err: any) {
+      setError(err?.message || "Erro inesperado. Verifique a conexão.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    router.push("/");
-    router.refresh();
   };
 
   return (

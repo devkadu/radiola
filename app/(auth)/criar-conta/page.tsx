@@ -28,25 +28,27 @@ export default function CriarContaPage() {
       return;
     }
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { username },
-      },
-    });
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { username } },
+      });
 
-    if (error) {
-      setError(error.message === "User already registered"
-        ? "Este e-mail já está cadastrado."
-        : "Erro ao criar conta. Tente novamente.");
+      if (error) {
+        setError(error.message === "User already registered"
+          ? "Este e-mail já está cadastrado."
+          : error.message || "Erro ao criar conta. Tente novamente.");
+        return;
+      }
+
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err?.message || "Erro inesperado. Verifique a conexão.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setSuccess(true);
-    setLoading(false);
   };
 
   const handleResend = async () => {
