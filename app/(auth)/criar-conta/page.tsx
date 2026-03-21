@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import { OAuthButtons } from "@/components/OAuthButtons/OAuthButtons";
 
 export default function CriarContaPage() {
   const router = useRouter();
@@ -155,6 +156,16 @@ export default function CriarContaPage() {
             {loading ? "Criando conta..." : "Criar conta grátis"}
           </button>
         </form>
+
+        {/* Divisor */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-[var(--border)]" />
+          <span className="text-xs text-[var(--text-muted)]">ou</span>
+          <div className="flex-1 h-px bg-[var(--border)]" />
+        </div>
+
+        {/* OAuth */}
+        <OAuthButtons />
 
         {/* Footer */}
         <p className="text-center text-sm text-[var(--text-muted)]">

@@ -141,7 +141,10 @@ export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, refresh
                 className={`py-4 ${i < sortedComments.length - 1 ? "border-b border-[var(--border)]" : ""}`}
               >
                 <div className="flex items-start gap-3">
-                  <UserAvatar avatarUrl={c.avatar_url} username={c.username} />
+                  <UserAvatar
+                    avatarUrl={c.user_id === user?.id ? (user.user_metadata?.avatar_url ?? c.avatar_url) : c.avatar_url}
+                    username={c.username}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-bold text-[var(--text-primary)]">{c.username}</span>

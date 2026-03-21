@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaTableCells, FaTv, FaStar, FaUser, FaMagnifyingGlass } from "react-icons/fa6";
+import { FaTableCells, FaTv, FaStar, FaUser, FaMagnifyingGlass, FaArrowRightFromBracket } from "react-icons/fa6";
+import { createClient } from "@/lib/supabase-browser";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { useSearchOverlay } from "@/context/SearchContext";
@@ -24,8 +25,16 @@ interface Favorite {
 
 export const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
   const { open: openSearch } = useSearchOverlay();
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
   const username = user?.user_metadata?.username || user?.email?.split("@")[0];
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
   const initials = username?.slice(0, 2).toUpperCase();
@@ -125,14 +134,23 @@ export const Sidebar = () => {
       {/* User */}
       <div className="mt-auto px-4 py-4 border-t border-[var(--border)]">
         {user ? (
-          <Link href="/perfil" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative bg-[var(--yellow)] flex items-center justify-center text-xs font-bold text-black">
-              {avatarUrl ? (
-                <Image src={avatarUrl} alt={username ?? ""} fill className="object-cover" sizes="32px" />
-              ) : initials}
-            </div>
-            <span className="text-sm text-[var(--text-secondary)] truncate">{username}</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/perfil" className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1 min-w-0">
+              <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative bg-[var(--yellow)] flex items-center justify-center text-xs font-bold text-black">
+                {avatarUrl ? (
+                  <Image src={avatarUrl} alt={username ?? ""} fill className="object-cover" sizes="32px" />
+                ) : initials}
+              </div>
+              <span className="text-sm text-[var(--text-secondary)] truncate">{username}</span>
+            </Link>
+            <button
+              onClick={handleSignOut}
+              title="Sair"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-red-400 hover:bg-[var(--bg-elevated)] transition-colors shrink-0"
+            >
+              <FaArrowRightFromBracket size={14} />
+            </button>
+          </div>
         ) : (
           <div className="flex flex-col gap-2">
             <Link href="/login" className="text-sm text-center py-2 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] transition-colors">

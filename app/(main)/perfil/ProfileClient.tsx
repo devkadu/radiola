@@ -13,8 +13,8 @@ interface Props {
   user: User;
 }
 
-const MAX_SIZE_BYTES = 500 * 1024; // 500 KB
-const MAX_DIMENSION = 256;
+const MAX_INPUT_BYTES = 15 * 1024 * 1024; // 15 MB — limite de entrada generoso
+const MAX_DIMENSION = 400; // output: 400×400 px máximo
 
 async function compressImage(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
@@ -66,8 +66,8 @@ export const ProfileClient = ({ user }: Props) => {
       setError("Selecione uma imagem válida.");
       return;
     }
-    if (file.size > MAX_SIZE_BYTES) {
-      setError("A foto deve ter no máximo 500 KB.");
+    if (file.size > MAX_INPUT_BYTES) {
+      setError("A foto deve ter no máximo 15 MB.");
       return;
     }
 
@@ -161,6 +161,15 @@ export const ProfileClient = ({ user }: Props) => {
           </button>
           {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
         </div>
+
+        {/* Sair — sempre visível aqui */}
+        <button
+          onClick={handleSignOut}
+          title="Sair da conta"
+          className="shrink-0 flex items-center gap-1.5 text-xs text-[var(--text-muted)] hover:text-red-400 transition-colors px-2 py-1.5 rounded-lg hover:bg-[var(--bg-elevated)]"
+        >
+          <span>Sair</span>
+        </button>
       </div>
 
       {/* Stats mock */}
@@ -213,14 +222,6 @@ export const ProfileClient = ({ user }: Props) => {
         )}
       </div>
 
-      <div className="flex flex-col gap-3">
-        <button
-          onClick={handleSignOut}
-          className="w-full border border-[var(--border)] text-[var(--text-secondary)] font-medium py-3 rounded-lg text-sm hover:border-red-500 hover:text-red-500 transition-colors"
-        >
-          Sair da conta
-        </button>
-      </div>
     </main>
   );
 };
