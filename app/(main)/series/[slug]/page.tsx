@@ -1,10 +1,9 @@
 import { tmdbService } from "@/services/tmdb";
 import { cacheService } from "@/services/cache";
-import { seasonSlug } from "@/lib/slugs";
 import { SeriesTopBar } from "@/components/SeriesTopBar/SeriesTopBar";
+import { VideoPlayButton } from "@/components/VideoModal/VideoModal";
+import { SeasonTabs } from "@/components/SeasonTabs/SeasonTabs";
 import Image from "next/image";
-import Link from "next/link";
-import { FaPlay, FaChevronRight } from "react-icons/fa6";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -25,45 +24,75 @@ export default async function SeriesPage({ params }: Props) {
     cacheService.cacheEpisodes(series.id, allEpisodes),
   ]);
 
+  const seasonsWithEpisodes = seasonDetails.map((sd: any) => ({
+    season_number: sd.season_number,
+    name: sd.name,
+    episodes: sd.episodes ?? [],
+  }));
+
+  const providersData = await tmdbService.getWatchProviders(id).catch(() => ({ results: {} }));
+  const brProviders: { logo_path: string; provider_name: string }[] =
+    providersData.results?.BR?.flatrate ?? [];
+
   const trailer = series.videos?.results?.find(
-    (v: any) => v.type === "Trailer" && v.site === "YouTube"
+    (v: any) => ["Trailer", "Teaser", "Clip"].includes(v.type) && v.site === "YouTube"
   );
 
   const releaseYear = series.first_air_date?.split("-")[0];
 
   return (
     <main className="relative min-h-screen text-white">
-      {/* Background blur */}
-      {series.backdrop_path && (
-        <div className="fixed inset-0 -z-10">
+
+      {/* Hero backdrop */}
+      <div className="relative w-full aspect-video lg:aspect-auto lg:h-[360px] bg-[var(--bg-elevated)]">
+        {series.backdrop_path ? (
           <Image
-            src={`https://image.tmdb.org/t/p/original${series.backdrop_path}`}
-            alt=""
+            src={`https://image.tmdb.org/t/p/w1280${series.backdrop_path}`}
+            alt={series.name}
             fill
-            className="object-cover opacity-20 blur-sm scale-105"
+            className="object-cover"
+            sizes="100vw"
             priority
           />
-          <div className="absolute inset-0 bg-[var(--bg)]/80" />
+        ) : series.poster_path ? (
+          <Image
+            src={`https://image.tmdb.org/t/p/w780${series.poster_path}`}
+            alt={series.name}
+            fill
+            className="object-cover object-top"
+            sizes="100vw"
+            priority
+          />
+        ) : null}
+
+        {/* Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-[var(--bg)]" />
+
+        {/* Play button */}
+        {trailer && (
+          <VideoPlayButton youtubeKey={trailer.key} title={`Trailer — ${series.name}`} />
+        )}
+
+        {/* Top bar overlaid */}
+        <div className="absolute inset-x-0 top-0">
+          <SeriesTopBar
+            heroHeight={150}
+            series={{
+              id: series.id,
+              name: series.name,
+              slug,
+              poster_path: series.poster_path ?? null,
+            }}
+          />
         </div>
-      )}
+      </div>
 
-      <div className="px-4 py-6 pb-28">
-        <SeriesTopBar
-          series={{
-            id: series.id,
-            name: series.name,
-            slug,
-            poster_path: series.poster_path ?? null,
-          }}
-        />
+      <div className="px-4 pt-4 pb-28 flex flex-col gap-6">
 
-        {/* Title */}
-        <h1 className="text-3xl font-bold mb-5">{series.name}</h1>
-
-        {/* Poster + Info */}
-        <div className="flex gap-4 mb-6">
+        {/* Title + meta */}
+        <div className="flex gap-4">
           {series.poster_path && (
-            <div className="relative w-28 h-40 rounded-xl overflow-hidden shrink-0">
+            <div className="relative w-20 h-28 rounded-xl overflow-hidden shrink-0 -mt-10 ring-2 ring-[var(--border)] shadow-xl">
               <Image
                 src={`https://image.tmdb.org/t/p/w300${series.poster_path}`}
                 alt={series.name}
@@ -72,22 +101,14 @@ export default async function SeriesPage({ params }: Props) {
               />
             </div>
           )}
-          <div className="flex flex-col justify-between py-1 min-w-0">
-            <div>
+          <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+            <h1 className="text-2xl font-bold leading-tight">{series.name}</h1>
+            <div className="flex items-center gap-3 flex-wrap">
               {releaseYear && (
-                <p className="text-xs text-[var(--yellow)] font-medium mb-1">
-                  Lançamento: {releaseYear}
-                </p>
+                <span className="text-xs text-[var(--yellow)] font-medium">{releaseYear}</span>
               )}
-              {series.overview && (
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-5">
-                  {series.overview}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-3 mt-3 flex-wrap">
               {series.vote_average > 0 && (
-                <span className="flex items-center gap-1 text-sm font-semibold text-[var(--yellow)]">
+                <span className="text-xs font-semibold text-[var(--yellow)]">
                   ★ {series.vote_average.toFixed(1)}
                 </span>
               )}
@@ -100,51 +121,42 @@ export default async function SeriesPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Trailer button */}
-        {trailer && (
-          <a
-            href={`https://www.youtube.com/watch?v=${trailer.key}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 w-full justify-center py-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-sm font-medium hover:border-[var(--yellow)] hover:text-[var(--yellow)] transition-colors mb-6"
-          >
-            <FaPlay size={12} />
-            Ver Trailer
-          </a>
+        {/* Overview */}
+        {series.overview && (
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            {series.overview}
+          </p>
         )}
 
-        {/* Seasons list */}
-        {seasons.length > 0 && (
-          <div>
-            <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">
-              Temporadas
-            </h2>
-            <div className="flex flex-col">
-              {seasons.map((season: any, i: number) => (
-                <Link
-                  key={season.id}
-                  href={`/series/${slug}/${seasonSlug(season.season_number)}`}
-                  className={`flex items-center gap-4 px-4 py-4 hover:bg-[var(--bg-surface)] transition-colors group ${
-                    i < seasons.length - 1 ? "border-b border-[var(--border)]" : ""
-                  }`}
-                >
-                  <div className="w-10 h-10 rounded-lg bg-[var(--bg-elevated)] flex items-center justify-center shrink-0 text-xs font-bold text-[var(--text-muted)] group-hover:text-[var(--yellow)] transition-colors">
-                    T{season.season_number}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">
-                      {season.name}
-                    </p>
-                    <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                      {season.episode_count} episódio{season.episode_count !== 1 ? "s" : ""}
-                      {season.air_date ? ` · ${season.air_date.split("-")[0]}` : ""}
-                    </p>
-                  </div>
-                  <FaChevronRight size={12} className="text-[var(--text-muted)] group-hover:text-[var(--yellow)] transition-colors shrink-0" />
-                </Link>
-              ))}
-            </div>
-          </div>
+        {/* Watch providers */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs text-[var(--text-muted)] shrink-0">Assista em</span>
+          {brProviders.length > 0 ? (
+            brProviders.map((p) => (
+              <div
+                key={p.provider_name}
+                className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0"
+                title={p.provider_name}
+              >
+                <Image
+                  src={`https://image.tmdb.org/t/p/original${p.logo_path}`}
+                  alt={p.provider_name}
+                  fill
+                  className="object-cover"
+                  sizes="32px"
+                />
+              </div>
+            ))
+          ) : (
+            <span className="text-xs font-medium px-3 py-1 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)]">
+              Indisponível no Brasil
+            </span>
+          )}
+        </div>
+
+        {/* Seasons + Episodes */}
+        {seasonsWithEpisodes.length > 0 && (
+          <SeasonTabs slug={slug} seriesId={id} seasons={seasonsWithEpisodes} />
         )}
       </div>
     </main>

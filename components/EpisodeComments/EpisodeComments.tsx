@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { commentsService, Comment, episodeId } from "@/services/comments";
 import { FaTrash } from "react-icons/fa6";
@@ -12,6 +11,7 @@ interface Props {
   seasonNumber: number;
   episodeNumber: number;
   placeholder?: string;
+  refreshKey?: number;
 }
 
 function relativeTime(date: string) {
@@ -28,7 +28,10 @@ function UserAvatar({ avatarUrl, username }: { avatarUrl: string | null; usernam
   const color = colors[username.charCodeAt(0) % colors.length];
 
   return (
-    <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: avatarUrl ? undefined : color }}>
+    <div
+      className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative flex items-center justify-center text-xs font-bold text-white"
+      style={{ backgroundColor: avatarUrl ? undefined : color }}
+    >
       {avatarUrl
         ? <Image src={avatarUrl} alt={username} fill className="object-cover" sizes="32px" />
         : initials}
@@ -36,77 +39,143 @@ function UserAvatar({ avatarUrl, username }: { avatarUrl: string | null; usernam
   );
 }
 
-export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, placeholder }: Props) => {
+type Tab = "recentes" | "relevantes";
+
+interface LikeState {
+  [commentId: string]: { liked: boolean; count: number };
+}
+
+export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, refreshKey }: Props) => {
   const { user } = useAuth();
   const epId = episodeId(seriesId, seasonNumber, episodeNumber);
+
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [text, setText] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "";
-  const avatarUrl = user?.user_metadata?.avatar_url ?? null;
+  const [tab, setTab] = useState<Tab>("recentes");
+  const [likeState, setLikeState] = useState<LikeState>({});
 
   useEffect(() => {
+    setLoading(true);
     commentsService.getComments(epId).then((data) => {
       setComments(data);
+      const initial: LikeState = {};
+      for (const c of data) {
+        initial[c.id] = { liked: false, count: c.likes ?? 0 };
+      }
+      setLikeState(initial);
       setLoading(false);
     });
-  }, [epId]);
+  }, [epId, refreshKey]);
 
-  const handleSubmit = async () => {
-    if (!text.trim() || !user || submitting) return;
-    setSubmitting(true);
-    setError(null);
-    try {
-      const newComment = await commentsService.addComment(epId, user.id, username, avatarUrl, text.trim());
-      setComments((prev) => [newComment, ...prev]);
-      setText("");
-    } catch (e: any) {
-      setError(e?.message ?? "Erro ao publicar comentário. Verifique se a tabela foi criada no Supabase.");
-    } finally {
-      setSubmitting(false);
+  const sortedComments = [...comments].sort((a, b) => {
+    if (tab === "recentes") {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     }
-  };
+    const likesA = likeState[a.id]?.count ?? a.likes ?? 0;
+    const likesB = likeState[b.id]?.count ?? b.likes ?? 0;
+    return likesB - likesA;
+  });
 
   const handleDelete = async (id: string) => {
     await commentsService.deleteComment(id);
     setComments((prev) => prev.filter((c) => c.id !== id));
+    setLikeState((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const handleLike = (id: string) => {
+    setLikeState((prev) => {
+      const current = prev[id] ?? { liked: false, count: 0 };
+      return {
+        ...prev,
+        [id]: {
+          liked: !current.liked,
+          count: current.liked ? current.count - 1 : current.count + 1,
+        },
+      };
+    });
   };
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Lista de comentários */}
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-semibold text-[var(--text-primary)]">
+          {loading ? "..." : comments.length} comentário{comments.length !== 1 ? "s" : ""}
+        </p>
+        <div className="flex gap-1.5">
+          <button
+            onClick={() => setTab("recentes")}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+              tab === "recentes"
+                ? "bg-[var(--yellow-muted)] border-[var(--yellow)] text-[var(--yellow)]"
+                : "bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
+            }`}
+          >
+            Recentes
+          </button>
+          <button
+            onClick={() => setTab("relevantes")}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+              tab === "relevantes"
+                ? "bg-[var(--yellow-muted)] border-[var(--yellow)] text-[var(--yellow)]"
+                : "bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
+            }`}
+          >
+            Relevantes
+          </button>
+        </div>
+      </div>
+
+      {/* Comment list */}
       {!loading && comments.length > 0 && (
-        <div>
-          <p className="text-xs font-semibold tracking-widest text-[var(--text-muted)] mb-3 uppercase">
-            {comments.length} comentário{comments.length !== 1 ? "s" : ""}
-          </p>
-          <div className="flex flex-col gap-3">
-            {comments.map((c) => (
-              <div key={c.id} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <UserAvatar avatarUrl={c.avatar_url} username={c.username} />
-                    <span className="text-sm font-medium text-[var(--text-primary)]">{c.username}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-[var(--text-muted)]">{relativeTime(c.created_at)}</span>
-                    {user?.id === c.user_id && (
+        <div className="flex flex-col">
+          {sortedComments.map((c, i) => {
+            const likes = likeState[c.id] ?? { liked: false, count: c.likes ?? 0 };
+            return (
+              <div
+                key={c.id}
+                className={`py-4 ${i < sortedComments.length - 1 ? "border-b border-[var(--border)]" : ""}`}
+              >
+                <div className="flex items-start gap-3">
+                  <UserAvatar avatarUrl={c.avatar_url} username={c.username} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-bold text-[var(--text-primary)]">{c.username}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-[var(--text-muted)]">{relativeTime(c.created_at)}</span>
+                        {user?.id === c.user_id && (
+                          <button
+                            onClick={() => handleDelete(c.id)}
+                            className="text-[var(--text-muted)] hover:text-red-400 transition-colors"
+                            aria-label="Apagar comentário"
+                          >
+                            <FaTrash size={11} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-2">{c.text}</p>
+                    <div className="flex items-center gap-4">
                       <button
-                        onClick={() => handleDelete(c.id)}
-                        className="text-[var(--text-muted)] hover:text-red-400 transition-colors"
+                        onClick={() => handleLike(c.id)}
+                        className={`text-xs transition-colors flex items-center gap-1 ${
+                          likes.liked
+                            ? "text-red-400"
+                            : "text-[var(--text-muted)] hover:text-red-400"
+                        }`}
                       >
-                        <FaTrash size={11} />
+                        ♥ {likes.count}
                       </button>
-                    )}
+                    </div>
                   </div>
                 </div>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{c.text}</p>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       )}
 
@@ -114,52 +183,6 @@ export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, placeho
         <p className="text-sm text-[var(--text-muted)] text-center py-4">
           Seja o primeiro a comentar este episódio.
         </p>
-      )}
-
-      {/* Caixa de comentário */}
-      {user ? (
-        <div className="border border-[var(--border)] rounded-xl overflow-hidden bg-[var(--bg-surface)]">
-          <p className="text-xs font-semibold tracking-widest text-[var(--text-muted)] px-4 pt-4 pb-2 uppercase">
-            Deixe sua opinião sobre o episódio
-          </p>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={placeholder ?? "Sem medo — aqui só quem chegou até aqui..."}
-            rows={4}
-            className="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] px-4 pb-3 outline-none resize-none"
-          />
-          {error && (
-            <p className="text-xs text-red-400 px-4 pb-2">{error}</p>
-          )}
-          <div className="flex justify-end gap-3 px-4 pb-4">
-            <button
-              onClick={() => setText("")}
-              className="px-5 py-2 rounded-full text-sm font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={!text.trim() || submitting}
-              className="px-5 py-2 rounded-full text-sm font-bold bg-[var(--yellow)] text-black disabled:opacity-30 hover:bg-[var(--yellow-dim)] transition-colors"
-            >
-              {submitting ? "Publicando..." : "Publicar"}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="border border-[var(--border)] rounded-xl p-5 text-center flex flex-col gap-3 bg-[var(--bg-surface)]">
-          <p className="text-sm text-[var(--text-secondary)]">Entre para comentar este episódio.</p>
-          <div className="flex gap-3 justify-center">
-            <Link href="/login" className="text-sm px-5 py-2 rounded-full border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
-              Entrar
-            </Link>
-            <Link href="/criar-conta" className="text-sm px-5 py-2 rounded-full bg-[var(--yellow)] text-black font-semibold hover:bg-[var(--yellow-dim)] transition-colors">
-              Criar conta
-            </Link>
-          </div>
-        </div>
       )}
     </div>
   );

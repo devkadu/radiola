@@ -14,11 +14,12 @@ interface Props {
     slug: string;
     poster_path: string | null;
   };
+  compact?: boolean;
 }
 
 type Toast = { type: "success" | "auth"; message: string } | null;
 
-export const FavoriteButton = ({ series }: Props) => {
+export const FavoriteButton = ({ series, compact }: Props) => {
   const { user } = useAuth();
   const router = useRouter();
   const [favorited, setFavorited] = useState(false);
@@ -55,7 +56,23 @@ export const FavoriteButton = ({ series }: Props) => {
     router.refresh();
   };
 
-  if (loading) return <div className="w-10 h-10" />;
+  if (loading) return <div className={compact ? "w-7 h-7" : "w-10 h-10"} />;
+
+  if (compact) {
+    return (
+      <div className="relative">
+        <button
+          onClick={(e) => { e.preventDefault(); toggle(); }}
+          className={`w-7 h-7 rounded-full flex items-center justify-center transition-all bg-black/60 ${
+            favorited ? "text-red-400" : "text-white/70 hover:text-red-400"
+          }`}
+          aria-label={favorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+        >
+          {favorited ? <FaHeart size={11} /> : <FaRegHeart size={11} />}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">

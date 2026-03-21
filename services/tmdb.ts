@@ -67,6 +67,85 @@ export const tmdbService = {
     return res.json();
   },
 
+  async getWatchProvidersList() {
+    const res = await fetch(
+      `${BASE_URL}/watch/providers/tv?language=pt-BR&watch_region=BR`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 86400 },
+      }
+    );
+    if (!res.ok) return { results: [] };
+    return res.json();
+  },
+
+  async getGenres() {
+    const res = await fetch(
+      `${BASE_URL}/genre/tv/list?language=pt-BR`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 86400 },
+      }
+    );
+    if (!res.ok) return { genres: [] };
+    return res.json();
+  },
+
+  async discoverSeries({
+    page = 1,
+    sortBy = "popularity.desc",
+    genreId,
+    providerId,
+  }: {
+    page?: number;
+    sortBy?: string;
+    genreId?: number | null;
+    providerId?: number | null;
+  } = {}) {
+    const params = new URLSearchParams({
+      language: "pt-BR",
+      page: page.toString(),
+      sort_by: sortBy,
+      watch_region: "BR",
+      "vote_count.gte": "20",
+      include_null_first_air_dates: "false",
+    });
+    if (genreId) params.set("with_genres", genreId.toString());
+    if (providerId) {
+      params.set("with_watch_providers", providerId.toString());
+    }
+    const res = await fetch(`${BASE_URL}/discover/tv?${params}`, {
+      headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+      next: { revalidate: 1800 },
+    });
+    if (!res.ok) throw new Error("Erro ao descobrir séries");
+    return res.json();
+  },
+
+  async getWatchProviders(seriesId: string) {
+    const res = await fetch(
+      `${BASE_URL}/tv/${seriesId}/watch/providers`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 86400 },
+      }
+    );
+    if (!res.ok) return { results: {} };
+    return res.json();
+  },
+
+  async getEpisodeVideos(seriesId: string, seasonNumber: number, episodeNumber: number) {
+    const res = await fetch(
+      `${BASE_URL}/tv/${seriesId}/season/${seasonNumber}/episode/${episodeNumber}/videos?language=pt-BR`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 3600 },
+      }
+    );
+    if (!res.ok) return { results: [] };
+    return res.json();
+  },
+
   async searchSeries(query: string, page = 1) {
     const params = new URLSearchParams({
       language: "pt-BR",
