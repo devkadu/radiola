@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { BottonNavigator } from "@/components/BottonNavigator";
 import { SearchOverlay } from "@/components/SearchOverlay/SearchOverlay";
 import { SearchProvider } from "@/context/SearchContext";
+import { TmdbAttribution } from "@/components/TmdbAttribution/TmdbAttribution";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <div className="flex-1 max-w-[1296px] w-full mx-auto">
             {children}
           </div>
+          <TmdbAttribution />
           <BottonNavigator />
         </div>
       </div>

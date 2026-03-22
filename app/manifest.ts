@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Radiola",
-    short_name: "Radiola",
-    description: "Debate cada episódio no seu tempo",
+    name: "Segunda Temporada",
+    short_name: "2ª Temporada",
+    description: "onde a sua série continua",
     start_url: "/",
     display: "standalone",
-    background_color: "#121212",
-    theme_color: "#121212",
+    background_color: "#0F0E0C",
+    theme_color: "#0F0E0C",
     orientation: "portrait",
     icons: [
       {

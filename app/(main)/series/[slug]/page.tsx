@@ -3,10 +3,39 @@ import { cacheService } from "@/services/cache";
 import { SeriesTopBar } from "@/components/SeriesTopBar/SeriesTopBar";
 import { VideoPlayButton } from "@/components/VideoModal/VideoModal";
 import { SeasonTabs } from "@/components/SeasonTabs/SeasonTabs";
+import { FavoriteButton } from "@/components/FavoriteButton/FavoriteButton";
 import Image from "next/image";
+import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const id = slug.split("-").pop()!;
+  const series = await tmdbService.getSeriesDetails(id).catch(() => null);
+  if (!series) return {};
+
+  const description =
+    series.overview?.slice(0, 160) ??
+    `Debate os episódios de ${series.name} sem spoilers.`;
+  const image = series.backdrop_path
+    ? `https://image.tmdb.org/t/p/w1280${series.backdrop_path}`
+    : series.poster_path
+    ? `https://image.tmdb.org/t/p/w780${series.poster_path}`
+    : null;
+
+  return {
+    title: series.name,
+    description,
+    openGraph: {
+      title: series.name,
+      description,
+      type: "video.tv_show",
+      ...(image && { images: [{ url: image, width: 1280, height: 720, alt: series.name }] }),
+    },
+  };
 }
 
 export default async function SeriesPage({ params }: Props) {
@@ -43,87 +72,117 @@ export default async function SeriesPage({ params }: Props) {
   return (
     <main className="relative min-h-screen text-white">
 
-      {/* Hero backdrop */}
-      <div className="relative w-full aspect-video lg:aspect-auto lg:h-[360px] bg-[var(--bg-elevated)]">
-        {series.backdrop_path ? (
-          <Image
-            src={`https://image.tmdb.org/t/p/w1280${series.backdrop_path}`}
-            alt={series.name}
-            fill
-            className="object-cover"
-            sizes="100vw"
-            priority
-          />
-        ) : series.poster_path ? (
-          <Image
-            src={`https://image.tmdb.org/t/p/w780${series.poster_path}`}
-            alt={series.name}
-            fill
-            className="object-cover object-top"
-            sizes="100vw"
-            priority
-          />
-        ) : null}
+      {/* Hero: poster (esq) + backdrop (dir) no desktop */}
+      <div className="relative w-full lg:flex lg:gap-3">
 
-        {/* Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-[var(--bg)]" />
-
-        {/* Play button */}
-        {trailer && (
-          <VideoPlayButton youtubeKey={trailer.key} title={`Trailer — ${series.name}`} />
+        {/* Poster — esquerda no desktop */}
+        {series.poster_path && (
+          <div className="hidden lg:block relative w-[280px] shrink-0 h-[420px] bg-[var(--bg-elevated)]">
+            <Image
+              src={`https://image.tmdb.org/t/p/w342${series.poster_path}`}
+              alt={series.name}
+              fill
+              className="object-cover"
+              sizes="280px"
+              priority
+            />
+            {/* fade suave para o backdrop à direita */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[var(--bg)]/40" />
+          </div>
         )}
 
-        {/* Top bar overlaid */}
-        <div className="absolute inset-x-0 top-0">
-          <SeriesTopBar
-            heroHeight={150}
-            series={{
-              id: series.id,
-              name: series.name,
-              slug,
-              poster_path: series.poster_path ?? null,
-            }}
-          />
+        {/* Backdrop */}
+        <div className="relative flex-1 aspect-video lg:aspect-auto lg:h-[420px] bg-[var(--bg-elevated)]">
+          {series.backdrop_path ? (
+            <Image
+              src={`https://image.tmdb.org/t/p/w1280${series.backdrop_path}`}
+              alt={series.name}
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 75vw"
+              priority
+            />
+          ) : series.poster_path ? (
+            <Image
+              src={`https://image.tmdb.org/t/p/w780${series.poster_path}`}
+              alt={series.name}
+              fill
+              className="object-cover object-top"
+              sizes="(max-width: 1024px) 100vw, 75vw"
+              priority
+            />
+          ) : null}
+
+          {/* Gradient: mobile fade para baixo / desktop fade para esquerda (junta com o poster) */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-[var(--bg)] lg:bg-gradient-to-l lg:from-transparent lg:via-transparent lg:to-[var(--bg)]/60" />
+
+          {/* Play button */}
+          {trailer && (
+            <VideoPlayButton youtubeKey={trailer.key} title={`Trailer — ${series.name}`} />
+          )}
+
+          {/* Top bar */}
+          <div className="absolute inset-x-0 top-0">
+            <SeriesTopBar
+              heroHeight={150}
+              series={{
+                id: series.id,
+                name: series.name,
+                slug,
+                poster_path: series.poster_path ?? null,
+              }}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="px-4 pt-4 pb-28 flex flex-col gap-6">
+      <div className="px-4 lg:px-8 pt-5 pb-28 flex flex-col gap-5">
 
-        {/* Title + meta */}
-        <div className="flex gap-4">
-          {series.poster_path && (
-            <div className="relative w-20 h-28 rounded-xl overflow-hidden shrink-0 -mt-10 ring-2 ring-[var(--border)] shadow-xl">
-              <Image
-                src={`https://image.tmdb.org/t/p/w300${series.poster_path}`}
-                alt={series.name}
-                fill
-                className="object-cover"
+        {/* Info: título + botão numa linha, chips na linha de baixo */}
+        <div className="flex flex-col gap-1.5">
+
+          {/* Linha 1: poster | título | botão */}
+          <div className="flex items-center gap-3">
+            {series.poster_path && (
+              <div className="lg:hidden relative w-20 h-28 rounded-xl overflow-hidden shrink-0 -mt-12 ring-2 ring-[var(--border)] shadow-xl">
+                <Image
+                  src={`https://image.tmdb.org/t/p/w300${series.poster_path}`}
+                  alt={series.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+            <h1 className="text-2xl lg:text-3xl font-bold leading-none flex-1 min-w-0">{series.name}</h1>
+            <div className="shrink-0">
+              <FavoriteButton
+                series={{ id: series.id, name: series.name, slug, poster_path: series.poster_path ?? null }}
+                variant="list"
               />
             </div>
-          )}
-          <div className="flex flex-col gap-1.5 min-w-0 flex-1">
-            <h1 className="text-2xl font-bold leading-tight">{series.name}</h1>
-            <div className="flex items-center gap-3 flex-wrap">
-              {releaseYear && (
-                <span className="text-xs text-[var(--yellow)] font-medium">{releaseYear}</span>
-              )}
-              {series.vote_average > 0 && (
-                <span className="text-xs font-semibold text-[var(--yellow)]">
-                  ★ {series.vote_average.toFixed(1)}
-                </span>
-              )}
-              {series.genres?.slice(0, 2).map((g: any) => (
-                <span key={g.id} className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]">
-                  {g.name}
-                </span>
-              ))}
-            </div>
+          </div>
+
+          {/* Linha 2: chips — largura total */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {releaseYear && (
+              <span className="text-xs text-[var(--yellow)] font-medium">{releaseYear}</span>
+            )}
+            {series.vote_average > 0 && (
+              <span className="text-xs font-semibold text-[var(--yellow)]">
+                ★ {series.vote_average.toFixed(1)}
+              </span>
+            )}
+            {series.genres?.slice(0, 2).map((g: any) => (
+              <span key={g.id} className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]">
+                {g.name}
+              </span>
+            ))}
           </div>
         </div>
 
-        {/* Overview */}
+        {/* Overview — ocupa toda a largura disponível */}
         {series.overview && (
-          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+          <p className="text-sm lg:text-base text-[var(--text-secondary)] leading-relaxed">
             {series.overview}
           </p>
         )}

@@ -2,37 +2,89 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { FaShareNodes, FaCheck } from "react-icons/fa6";
 
 interface Props {
   href: string;
   title: string;
+  scrollThreshold?: number;
 }
 
-export const BackTopBar = ({ href, title }: Props) => {
+export const BackTopBar = ({ href, title, scrollThreshold = 200 }: Props) => {
   const [scrolled, setScrolled] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 80);
+    const handler = () => setScrolled(window.scrollY > scrollThreshold);
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
-  }, []);
+  }, [scrollThreshold]);
+
+  const share = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try { await navigator.share({ title, url }); } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
 
   return (
-    <div className="sticky top-0 z-30 flex items-center justify-between py-3 bg-[var(--bg)]/80 backdrop-blur-sm -mx-4 px-4 mb-6">
-      <Link
-        href={href}
-        className="w-10 h-10 rounded-full bg-[var(--bg-surface)] border border-[var(--border)] flex items-center justify-center hover:border-[var(--yellow)] transition-colors shrink-0"
+    <>
+      {/* Overlay transparente no hero — só ← e compartilhar */}
+      <div className="flex items-center justify-between py-3 px-4">
+        <Link
+          href={href}
+          className="w-10 h-10 rounded-full bg-black/40 border border-white/20 flex items-center justify-center hover:bg-black/60 transition-colors shrink-0"
+        >
+          <span className="text-lg leading-none text-white">←</span>
+        </Link>
+        <button
+          onClick={share}
+          aria-label="Compartilhar"
+          className="w-10 h-10 rounded-full bg-black/40 border border-white/20 flex items-center justify-center hover:bg-black/60 transition-colors shrink-0"
+        >
+          {copied
+            ? <FaCheck size={14} className="text-white" />
+            : <FaShareNodes size={15} className="text-white" />}
+        </button>
+      </div>
+
+      {/* Barra fixa — aparece só ao rolar, com título e compartilhar */}
+      <div
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+          scrolled
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none"
+        }`}
       >
-        <span className="text-lg leading-none">←</span>
-      </Link>
+        <div className="lg:pl-64">
+          <div className="flex items-center justify-between px-4 py-3 bg-[var(--bg)]/90 backdrop-blur-md border-b border-[var(--border)]">
+            <Link
+              href={href}
+              className="w-9 h-9 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center hover:border-[var(--yellow)] transition-colors shrink-0"
+            >
+              <span className="text-base leading-none">←</span>
+            </Link>
 
-      <p className={`text-sm font-semibold text-[var(--text-primary)] truncate mx-4 transition-all duration-300 ${
-        scrolled ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
-      }`}>
-        {title}
-      </p>
+            <p className="text-sm font-semibold text-[var(--text-primary)] truncate mx-4">
+              {title}
+            </p>
 
-      <div className="w-10" />
-    </div>
+            <button
+              onClick={share}
+              aria-label="Compartilhar"
+              className="w-9 h-9 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center hover:border-[var(--yellow)] transition-colors shrink-0"
+            >
+              {copied
+                ? <FaCheck size={13} className="text-[var(--yellow)]" />
+                : <FaShareNodes size={14} className="text-[var(--text-muted)]" />}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };

@@ -3,9 +3,18 @@ import { cacheService } from "@/services/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import type { Metadata } from "next";
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>;
+}
+
+export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
+  const { q } = await searchParams;
+  return {
+    title: q ? `Busca: "${q}"` : "Busca",
+    robots: { index: false, follow: false },
+  };
 }
 
 export default async function BuscaPage({ searchParams }: SearchPageProps) {

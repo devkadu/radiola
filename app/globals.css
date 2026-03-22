@@ -15,22 +15,22 @@ html, body {
 
 :root {
   /* Fundos */
-  --bg:             #121212;
-  --bg-surface:     #1a1a1a;
-  --bg-elevated:    #242424;
+  --bg:             #0F0E0C;
+  --bg-surface:     #161410;
+  --bg-elevated:    #1e1b15;
 
   /* Bordas */
-  --border:         #2a2a2a;
+  --border:         rgba(232,168,48,0.12);
 
-  /* Amarelo */
-  --yellow:         #F5C518;
-  --yellow-dim:     #C49B0F;
-  --yellow-muted:   #F5C51820;
+  /* Amber (antes: amarelo) */
+  --yellow:         #E8A830;
+  --yellow-dim:     #C07820;
+  --yellow-muted:   rgba(232,168,48,0.12);
 
   /* Texto */
-  --text-primary:   #F0F0F0;
-  --text-secondary: #A0A0A0;
-  --text-muted:     #606060;
+  --text-primary:   #F5F0E8;
+  --text-secondary: rgba(245,240,232,0.55);
+  --text-muted:     rgba(245,240,232,0.3);
 
   /* Utilitários */
   --green:          #4CAF50;
@@ -46,12 +46,20 @@ html, body {
 body {
   background-color: var(--bg);
   color: var(--text-primary);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui;
+  font-family: var(--font-body), ui-sans-serif, system-ui;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   margin: 0;
   padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display), ui-sans-serif, system-ui;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
 }
 
 a:hover {
@@ -62,3 +70,15 @@ a:hover {
 input, textarea, select {
   font-size: 16px !important;
 }
+
+/* Sheet animations */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+.animate-slide-up        { animation: slide-up 0.28s cubic-bezier(0.32,0.72,0,1); }
+.animate-slide-in-right  { animation: slide-in-right 0.28s cubic-bezier(0.32,0.72,0,1); }

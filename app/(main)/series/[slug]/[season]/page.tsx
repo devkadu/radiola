@@ -3,9 +3,34 @@ import { idFromSeriesSlug, numberFromSeasonSlug, episodeSlug } from "@/lib/slugs
 import { BackTopBar } from "@/components/BackTopBar/BackTopBar";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ slug: string; season: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug, season: seasonParam } = await params;
+  const seriesId = idFromSeriesSlug(slug);
+  const seasonNumber = numberFromSeasonSlug(seasonParam);
+
+  const [series, seasonData] = await Promise.all([
+    tmdbService.getSeriesDetails(seriesId).catch(() => null),
+    tmdbService.getSeasonDetails(seriesId, seasonNumber).catch(() => null),
+  ]);
+
+  if (!series || !seasonData) return {};
+
+  const title = `${series.name} — ${seasonData.name}`;
+  const description =
+    seasonData.overview?.slice(0, 160) ??
+    `Debate os episódios da ${seasonData.name} de ${series.name} sem spoilers.`;
+
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "video.tv_show" },
+  };
 }
 
 export default async function SeasonPage({ params }: Props) {

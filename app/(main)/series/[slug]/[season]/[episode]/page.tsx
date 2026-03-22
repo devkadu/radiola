@@ -12,9 +12,45 @@ import { EpisodeCommentsSection } from "./_section";
 import { EpisodeVideoButton } from "./_video";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ slug: string; season: string; episode: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug, season: seasonParam, episode: episodeParam } = await params;
+  const seriesId = idFromSeriesSlug(slug);
+  const seasonNumber = numberFromSeasonSlug(seasonParam);
+  const episodeNumber = numberFromEpisodeSlug(episodeParam);
+
+  const [series, ep] = await Promise.all([
+    tmdbService.getSeriesDetails(seriesId).catch(() => null),
+    tmdbService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber).catch(() => null),
+  ]);
+
+  if (!series || !ep) return {};
+
+  const seasonLabel = `T${String(seasonNumber).padStart(2, "0")}`;
+  const episodeLabel = `E${String(episodeNumber).padStart(2, "0")}`;
+  const title = `"${ep.name}" · ${series.name} ${seasonLabel}${episodeLabel}`;
+  const description =
+    ep.overview?.slice(0, 160) ??
+    `Debate o episódio ${episodeLabel} da ${seasonLabel} de ${series.name} sem spoilers.`;
+  const image = ep.still_path
+    ? `https://image.tmdb.org/t/p/w780${ep.still_path}`
+    : null;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "video.episode",
+      ...(image && { images: [{ url: image, width: 780, height: 439, alt: ep.name }] }),
+    },
+  };
 }
 
 function formatDate(dateStr: string) {

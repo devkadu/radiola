@@ -355,7 +355,7 @@ export const EpisodeReactions = ({ episodeId }: Props) => {
               <p className="text-2xl font-bold text-[var(--yellow)] leading-none">
                 {score.toFixed(1)}
                 <span className="text-sm font-normal text-[var(--text-muted)]">/10</span>
-                <span className="text-xs font-normal text-[var(--text-muted)] ml-1">nota Radiola</span>
+                <span className="text-xs font-normal text-[var(--text-muted)] ml-1">nota Segunda Temporada</span>
               </p>
               <p className="text-xs text-[var(--text-muted)] text-right">
                 Baseado em {total} avaliações

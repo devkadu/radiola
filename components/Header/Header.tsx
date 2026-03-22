@@ -74,8 +74,16 @@ export const Header = () => {
     <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg)]">
       <div className="flex items-center px-4 py-3 gap-3">
         {/* Logo — só no mobile */}
-        <Link href="/" className="lg:hidden text-3xl font-bold tracking-tight text-[var(--text-primary)] shrink-0">
-          radio<span className="text-[var(--yellow)]">la</span>
+        <Link href="/" className="lg:hidden flex items-center gap-2.5 shrink-0">
+          <div className="w-8 h-8 bg-[var(--yellow)] rounded-[8px] flex items-center justify-center shrink-0">
+            <svg width="18" height="18" viewBox="0 0 30 30" fill="none">
+              <path d="M8 7l10 8-10 8V7z" fill="#0F0E0C"/>
+              <path d="M18 7l10 8-10 8V7z" fill="rgba(15,14,12,0.4)"/>
+            </svg>
+          </div>
+          <span className="text-sm font-extrabold tracking-tight text-[var(--text-primary)] leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+            Segunda<br/>Temporada
+          </span>
         </Link>
 
         {/* Desktop: busca ocupa da metade até os botões */}

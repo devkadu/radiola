@@ -49,8 +49,17 @@ export const Sidebar = () => {
     <aside className="hidden lg:flex flex-col w-[260px] min-h-screen border-r border-[var(--border)] bg-[var(--bg)] sticky top-0 h-screen overflow-y-auto shrink-0">
       {/* Logo */}
       <div className="px-5 py-5">
-        <Link href="/" className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">
-          radio<span className="text-[var(--yellow)]">la</span>
+        <Link href="/" className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[var(--yellow)] rounded-[10px] flex items-center justify-center shrink-0">
+            <svg width="22" height="22" viewBox="0 0 30 30" fill="none">
+              <path d="M8 7l10 8-10 8V7z" fill="#0F0E0C"/>
+              <path d="M18 7l10 8-10 8V7z" fill="rgba(15,14,12,0.4)"/>
+            </svg>
+          </div>
+          <div className="flex flex-col leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="text-base font-extrabold tracking-tight text-[var(--text-primary)]">Segunda</span>
+            <span className="text-base font-extrabold tracking-tight text-[var(--text-primary)]">Temporada</span>
+          </div>
         </Link>
       </div>
 

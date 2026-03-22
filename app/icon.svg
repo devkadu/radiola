@@ -1,0 +1,5 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
+  <rect width='32' height='32' rx='7' fill='#E8A830'/>
+  <path d='M7 9l8 7-8 7V9z' fill='#0F0E0C'/>
+  <path d='M16 9l8 7-8 7V9z' fill='rgba(15,14,12,0.55)'/>
+</svg>
