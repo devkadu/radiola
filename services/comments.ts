@@ -8,6 +8,7 @@ export interface Comment {
   text: string;
   likes: number;
   created_at: string;
+  parent_id: string | null;
 }
 
 export function episodeId(seriesId: string, season: number, episode: number) {
@@ -21,15 +22,22 @@ export const commentsService = {
       .from("comments")
       .select("*")
       .eq("episode_id", epId)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: true });
     return data ?? [];
   },
 
-  async addComment(epId: string, userId: string, username: string, avatarUrl: string | null, text: string): Promise<Comment> {
+  async addComment(
+    epId: string,
+    userId: string,
+    username: string,
+    avatarUrl: string | null,
+    text: string,
+    parentId?: string | null,
+  ): Promise<Comment> {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("comments")
-      .insert({ episode_id: epId, user_id: userId, username, avatar_url: avatarUrl, text })
+      .insert({ episode_id: epId, user_id: userId, username, avatar_url: avatarUrl, text, parent_id: parentId ?? null })
       .select()
       .single();
     if (error) throw error;

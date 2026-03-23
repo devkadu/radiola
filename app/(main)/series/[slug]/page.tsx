@@ -5,7 +5,15 @@ import { VideoPlayButton } from "@/components/VideoModal/VideoModal";
 import { SeasonTabs } from "@/components/SeasonTabs/SeasonTabs";
 import { FavoriteButton } from "@/components/FavoriteButton/FavoriteButton";
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
+
+interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+}
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -59,7 +67,11 @@ export default async function SeriesPage({ params }: Props) {
     episodes: sd.episodes ?? [],
   }));
 
-  const providersData = await tmdbService.getWatchProviders(id).catch(() => ({ results: {} }));
+  const [providersData, creditsData] = await Promise.all([
+    tmdbService.getWatchProviders(id).catch(() => ({ results: {} })),
+    tmdbService.getSeriesCredits(id).catch(() => ({ cast: [] })),
+  ]);
+  const cast: CastMember[] = (creditsData.cast ?? []).slice(0, 12);
   const brProviders: { logo_path: string; provider_name: string }[] =
     providersData.results?.BR?.flatrate ?? [];
 
@@ -212,6 +224,44 @@ export default async function SeriesPage({ params }: Props) {
             </span>
           )}
         </div>
+
+        {/* Elenco */}
+        {cast.length > 0 && (
+          <div>
+            <h2 className="text-base font-bold text-[var(--text-primary)] mb-3">Elenco principal</h2>
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {cast.map((member) => (
+                <Link
+                  key={member.id}
+                  href={`/pessoa/${member.id}`}
+                  className="shrink-0 w-20 flex flex-col gap-1 group"
+                >
+                  <div className="relative w-20 h-20 rounded-full overflow-hidden bg-[var(--bg-elevated)] ring-2 ring-[var(--border)] group-hover:ring-[var(--yellow)] transition-all">
+                    {member.profile_path ? (
+                      <Image
+                        src={`https://image.tmdb.org/t/p/w185${member.profile_path}`}
+                        alt={member.name}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-2xl text-[var(--text-muted)]">
+                        👤
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[11px] font-semibold text-[var(--text-primary)] text-center line-clamp-1 leading-tight">
+                    {member.name}
+                  </p>
+                  <p className="text-[10px] text-[var(--text-muted)] text-center line-clamp-1 leading-tight">
+                    {member.character}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Seasons + Episodes */}
         {seasonsWithEpisodes.length > 0 && (

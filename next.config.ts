@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
         hostname: "*.googleusercontent.com",
       },
     ],
+    // TMDB já serve imagens otimizadas por tamanho (w92, w185, w342, etc.)
+    // Não precisamos gastar transformações da Vercel re-otimizando
+    unoptimized: true,
   },
 };
 

@@ -36,7 +36,7 @@ export const Sidebar = () => {
     router.refresh();
   };
   const username = user?.user_metadata?.username || user?.email?.split("@")[0];
-  const avatarUrl = user?.user_metadata?.avatar_url ?? null;
+  const avatarUrl = user?.user_metadata?.avatar_url ?? user?.user_metadata?.picture ?? null;
   const initials = username?.slice(0, 2).toUpperCase();
   const [favorites, setFavorites] = useState<Favorite[]>([]);
 
@@ -46,7 +46,7 @@ export const Sidebar = () => {
   }, [user, pathname]);
 
   return (
-    <aside className="hidden lg:flex flex-col w-[260px] min-h-screen border-r border-[var(--border)] bg-[var(--bg)] sticky top-0 h-screen overflow-y-auto shrink-0">
+    <aside className="hidden lg:flex flex-col w-[260px] border-r border-[var(--border)] bg-[var(--bg)] sticky top-0 h-screen shrink-0">
       {/* Logo */}
       <div className="px-5 py-5">
         <Link href="/" className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export const Sidebar = () => {
       </nav>
 
       {/* Minhas séries */}
-      <div className="px-3 mt-6 flex flex-col gap-0.5">
+      <div className="px-3 mt-6 flex flex-col gap-0.5 flex-1 overflow-y-auto min-h-0">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] px-2 py-2">
           Minhas Séries
         </p>
@@ -145,9 +145,10 @@ export const Sidebar = () => {
         {user ? (
           <div className="flex items-center gap-2">
             <Link href="/perfil" className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1 min-w-0">
-              <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative bg-[var(--yellow)] flex items-center justify-center text-xs font-bold text-black">
+              <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden bg-[var(--yellow)] flex items-center justify-center text-xs font-bold text-black">
                 {avatarUrl ? (
-                  <Image src={avatarUrl} alt={username ?? ""} fill className="object-cover" sizes="32px" />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt={username ?? ""} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 ) : initials}
               </div>
               <span className="text-sm text-[var(--text-secondary)] truncate">{username}</span>

@@ -8,8 +8,11 @@ import { FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
 import Image from "next/image";
 
 const Avatar = ({ avatarUrl, initials }: { avatarUrl: string | null; initials?: string }) => (
-  <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative bg-[var(--yellow)] flex items-center justify-center text-xs font-bold text-black">
-    {avatarUrl ? <Image src={avatarUrl} alt="" fill className="object-cover" sizes="32px" /> : initials}
+  <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden bg-[var(--yellow)] flex items-center justify-center text-xs font-bold text-black">
+    {avatarUrl ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={avatarUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+    ) : initials}
   </div>
 );
 
@@ -42,7 +45,7 @@ export const Header = () => {
   const { open } = useSearchOverlay();
   const username = user?.user_metadata?.username || user?.email?.split("@")[0];
   const initials = username?.slice(0, 2).toUpperCase();
-  const avatarUrl = user?.user_metadata?.avatar_url ?? null;
+  const avatarUrl = user?.user_metadata?.avatar_url ?? user?.user_metadata?.picture ?? null;
 
   const [query, setQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);

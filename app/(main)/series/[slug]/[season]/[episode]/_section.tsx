@@ -9,9 +9,11 @@ interface Props {
   seasonNumber: number;
   episodeNumber: number;
   placeholder: string;
+  episodeTitle?: string;
+  episodeUrl?: string;
 }
 
-export function EpisodeCommentsSection({ seriesId, seasonNumber, episodeNumber, placeholder }: Props) {
+export function EpisodeCommentsSection({ seriesId, seasonNumber, episodeNumber, placeholder, episodeTitle, episodeUrl }: Props) {
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
@@ -20,6 +22,8 @@ export function EpisodeCommentsSection({ seriesId, seasonNumber, episodeNumber, 
         seriesId={seriesId}
         seasonNumber={seasonNumber}
         episodeNumber={episodeNumber}
+        episodeTitle={episodeTitle}
+        episodeUrl={episodeUrl}
         refreshKey={refreshKey}
       />
       <CommentDrawer

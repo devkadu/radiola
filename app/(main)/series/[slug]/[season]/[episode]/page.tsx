@@ -192,6 +192,8 @@ export default async function EpisodePage({ params }: Props) {
           seasonNumber={seasonNumber}
           episodeNumber={episodeNumber}
           placeholder={placeholder}
+          episodeTitle={`"${ep.name}" · ${series.name} ${seasonLabel}${episodeLabel}`}
+          episodeUrl={`/series/${slug}/${seasonParam}/${episodeParam}`}
         />
 
       </div>

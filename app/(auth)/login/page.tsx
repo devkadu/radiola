@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
@@ -8,10 +8,15 @@ import { OAuthButtons } from "@/components/OAuthButtons/OAuthButtons";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [cadastroOk, setCadastroOk] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setCadastroOk(new URLSearchParams(window.location.search).get("cadastro") === "ok");
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +43,13 @@ export default function LoginPage() {
 
   return (
     <div className="w-full max-w-sm flex flex-col gap-6">
+        {cadastroOk && (
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg px-4 py-3 flex items-center gap-3">
+            <span className="text-lg">🎉</span>
+            <p className="text-sm text-green-400 font-medium">Conta criada com sucesso! Faça login para entrar.</p>
+          </div>
+        )}
+
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Entrar</h1>
           <p className="text-sm text-[var(--text-muted)] mt-1">Entre para debater cada episódio</p>

@@ -176,4 +176,74 @@ export const tmdbService = {
 
     return res.json();
   },
+
+  async getSeriesCredits(id: string) {
+    const res = await fetch(
+      `${BASE_URL}/tv/${id}/credits?language=pt-BR`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 86400 },
+      }
+    );
+    if (!res.ok) return { cast: [] };
+    return res.json();
+  },
+
+  async getPersonDetails(id: string) {
+    const res = await fetch(
+      `${BASE_URL}/person/${id}?language=pt-BR`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 86400 },
+      }
+    );
+    if (!res.ok) throw new Error("Erro ao buscar pessoa");
+    return res.json();
+  },
+
+  async getPersonTvCredits(id: string) {
+    const res = await fetch(
+      `${BASE_URL}/person/${id}/tv_credits?language=pt-BR`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 86400 },
+      }
+    );
+    if (!res.ok) return { cast: [] };
+    return res.json();
+  },
+
+  async getTrendingNow(timeWindow: "day" | "week" = "day") {
+    const res = await fetch(
+      `${BASE_URL}/trending/tv/${timeWindow}?language=pt-BR`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: timeWindow === "day" ? 3600 : 86400 },
+      }
+    );
+    if (!res.ok) throw new Error("Erro ao buscar trending");
+    return res.json();
+  },
+
+  async getUpcomingSeries() {
+    const today = new Date().toISOString().split("T")[0];
+    const oneYearAhead = new Date();
+    oneYearAhead.setFullYear(oneYearAhead.getFullYear() + 1);
+    const maxDate = oneYearAhead.toISOString().split("T")[0];
+
+    const params = new URLSearchParams({
+      language: "pt-BR",
+      sort_by: "popularity.desc",
+      "first_air_date.gte": today,
+      "first_air_date.lte": maxDate,
+      include_null_first_air_dates: "false",
+    });
+
+    const res = await fetch(`${BASE_URL}/discover/tv?${params}`, {
+      headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+      next: { revalidate: 43200 }, // 12 horas
+    });
+    if (!res.ok) throw new Error("Erro ao buscar próximas estreias");
+    return res.json();
+  },
 };

@@ -30,7 +30,7 @@ export default function CriarContaPage() {
 
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { data: { username } },
@@ -40,6 +40,12 @@ export default function CriarContaPage() {
         setError(error.message === "User already registered"
           ? "Este e-mail já está cadastrado."
           : error.message || "Erro ao criar conta. Tente novamente.");
+        return;
+      }
+
+      // Se a verificação de email está desabilitada, a sessão já vem ativa
+      if (data.session) {
+        router.push("/login?cadastro=ok");
         return;
       }
 

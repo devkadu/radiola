@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 import { favoritesService } from "@/services/favorites";
@@ -22,6 +21,14 @@ const REACTIONS = [
   { key: "mediano",       emoji: "😐", color: "#3a3f4a" },
   { key: "decepcionante", emoji: "😞", color: "#2a2d35" },
 ];
+
+interface RecentComment {
+  id: string;
+  text: string;
+  likes: number | null;
+  episode_id: string;
+  created_at: string;
+}
 
 async function compressImage(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
@@ -46,6 +53,57 @@ function memberSince(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 }
 
+function formatEpId(epId: string, names: Record<number, string> = {}) {
+  const m = epId.match(/^(\d+)-s(\d+)-e(\d+)$/);
+  if (!m) return epId;
+  const name = names[parseInt(m[1])] ?? `#${m[1]}`;
+  return `${name} · T${m[2].padStart(2, "0")} E${m[3].padStart(2, "0")}`;
+}
+
+function relativeTime(date: string) {
+  const diff = (Date.now() - new Date(date).getTime()) / 1000;
+  if (diff < 60) return "agora";
+  if (diff < 3600) return `${Math.floor(diff / 60)}min`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  return `${Math.floor(diff / 86400)}d`;
+}
+
+const BadgePrivate = () => (
+  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-900 tracking-wide uppercase">só eu vejo</span>
+);
+
+const BadgePublic = () => (
+  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-green-950 text-green-400 border border-green-900 tracking-wide uppercase">visível</span>
+);
+
+interface ToggleItemProps {
+  label: string;
+  desc: string;
+  value: boolean;
+  onToggle: () => void;
+}
+
+function ToggleItem({ label, desc, value, onToggle }: ToggleItemProps) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-3 border-b border-[var(--border)] last:border-0">
+      <div>
+        <p className="text-sm font-medium text-[var(--text-primary)]">{label}</p>
+        <p className="text-xs text-[var(--text-muted)] mt-0.5">{desc}</p>
+      </div>
+      <button
+        onClick={onToggle}
+        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 transition-colors ${
+          value ? "bg-[var(--yellow)] border-[var(--yellow)]" : "bg-[var(--bg-elevated)] border-[var(--border)]"
+        }`}
+      >
+        <span className={`inline-block h-3 w-3 mt-0.5 rounded-full bg-white shadow transition-transform ${
+          value ? "translate-x-4" : "translate-x-0.5"
+        }`} />
+      </button>
+    </div>
+  );
+}
+
 export const ProfileClient = ({ user }: Props) => {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -54,11 +112,25 @@ export const ProfileClient = ({ user }: Props) => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user.user_metadata?.avatar_url ?? null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notifyReplies, setNotifyReplies] = useState<boolean>(user.user_metadata?.notify_replies !== false);
+  const [notifyWeekly, setNotifyWeekly] = useState<boolean>(user.user_metadata?.notify_weekly === true);
+  const [notifyPremiere, setNotifyPremiere] = useState<boolean>(user.user_metadata?.notify_premiere !== false);
+  const [isPublic, setIsPublic] = useState<boolean>(user.user_metadata?.profile_public !== false);
+  const [copied, setCopied] = useState(false);
   const [favorites, setFavorites] = useState<Awaited<ReturnType<typeof favoritesService.getFavorites>>>([]);
   const [commentCount, setCommentCount] = useState(0);
   const [totalLikes, setTotalLikes] = useState(0);
   const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({});
   const [topComment, setTopComment] = useState<any>(null);
+  const [recentComments, setRecentComments] = useState<RecentComment[]>([]);
+  const [seriesNames, setSeriesNames] = useState<Record<number, string>>({});
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+
+  const updateMeta = async (updates: Record<string, boolean>) => {
+    const supabase = createClient();
+    await supabase.auth.updateUser({ data: updates });
+  };
 
   useEffect(() => {
     const supabase = createClient();
@@ -76,11 +148,36 @@ export const ProfileClient = ({ user }: Props) => {
         setTopComment(best);
       });
 
+    supabase.from("follows").select("id", { count: "exact", head: true }).eq("following_id", user.id)
+      .then(({ count }) => setFollowerCount(count ?? 0));
+
+    supabase.from("follows").select("id", { count: "exact", head: true }).eq("follower_id", user.id)
+      .then(({ count }) => setFollowingCount(count ?? 0));
+
     supabase.from("episode_reactions").select("reaction_key").eq("user_id", user.id)
       .then(({ data }) => {
         const counts: Record<string, number> = {};
         for (const r of data ?? []) counts[r.reaction_key] = (counts[r.reaction_key] ?? 0) + 1;
         setReactionCounts(counts);
+      });
+
+    supabase.from("comments").select("id, text, likes, episode_id, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5)
+      .then(async ({ data }) => {
+        const rows = data ?? [];
+        setRecentComments(rows);
+        const ids = [...new Set(rows.map(c => {
+          const m = c.episode_id.match(/^(\d+)-s/);
+          return m ? parseInt(m[1]) : null;
+        }).filter(Boolean))] as number[];
+        if (ids.length) {
+          const { data: series } = await supabase.from("series").select("id, name").in("id", ids);
+          const map: Record<number, string> = {};
+          for (const s of series ?? []) map[s.id] = s.name;
+          setSeriesNames(map);
+        }
       });
   }, [user.id]);
 
@@ -106,6 +203,42 @@ export const ProfileClient = ({ user }: Props) => {
     finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
   };
 
+  const handleShare = async () => {
+    const url = window.location.origin + "/u/" + username;
+    const shareData = { title: "Segunda Temporada", text: `${username} está na Segunda Temporada — debate séries sem spoilers!`, url };
+    if (navigator.share) {
+      await navigator.share(shareData).catch(() => {});
+    } else {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleToggleNotify = async () => {
+    const next = !notifyReplies;
+    setNotifyReplies(next);
+    await updateMeta({ notify_replies: next });
+  };
+
+  const handleToggleWeekly = async () => {
+    const next = !notifyWeekly;
+    setNotifyWeekly(next);
+    await updateMeta({ notify_weekly: next });
+  };
+
+  const handleTogglePremiere = async () => {
+    const next = !notifyPremiere;
+    setNotifyPremiere(next);
+    await updateMeta({ notify_premiere: next });
+  };
+
+  const handleTogglePublic = async () => {
+    const next = !isPublic;
+    setIsPublic(next);
+    await updateMeta({ profile_public: next });
+  };
+
   const handleSignOut = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -122,9 +255,12 @@ export const ProfileClient = ({ user }: Props) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">Meu perfil</h1>
-        <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--yellow-muted)] border border-[var(--yellow)] text-[var(--yellow)] text-sm font-semibold hover:bg-[var(--yellow)] hover:text-black transition-colors">
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--yellow-muted)] border border-[var(--yellow)] text-[var(--yellow)] text-sm font-semibold hover:bg-[var(--yellow)] hover:text-black transition-colors"
+        >
           <FaShareNodes size={13} />
-          Compartilhar
+          {copied ? "Copiado!" : "Compartilhar"}
         </button>
       </div>
 
@@ -135,7 +271,7 @@ export const ProfileClient = ({ user }: Props) => {
           <button onClick={() => fileRef.current?.click()} disabled={uploading} className="relative shrink-0 group" aria-label="Alterar foto">
             <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-[var(--yellow)] relative bg-[var(--bg-elevated)]">
               {avatarUrl
-                ? <Image src={avatarUrl} alt={username} fill className="object-cover" sizes="64px" />
+                ? <img src={avatarUrl} alt={username} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 : <div className="w-full h-full flex items-center justify-center bg-[var(--yellow)] text-black font-bold text-lg">{initials}</div>
               }
               {uploading && (
@@ -154,9 +290,15 @@ export const ProfileClient = ({ user }: Props) => {
           {/* Info */}
           <div className="flex-1 min-w-0">
             <p className="font-bold text-[var(--text-primary)] text-base truncate">{username}</p>
-            <p className="text-sm text-[var(--text-muted)] truncate">{user.email}</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="text-sm text-[var(--text-muted)] truncate">{user.email}</p>
+              <BadgePrivate />
+            </div>
             <p className="text-xs text-[var(--yellow)] mt-0.5">
               Membro desde {memberSince(user.created_at)}
+            </p>
+            <p className="text-xs text-[var(--yellow)] mt-0.5">
+              segundatemporada.com.br/u/{username}
             </p>
             {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
           </div>
@@ -176,11 +318,40 @@ export const ProfileClient = ({ user }: Props) => {
         </div>
       </div>
 
+      {/* Privacidade e notificações */}
+      <div id="notificacoes" className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">Privacidade e notificações</p>
+        <ToggleItem
+          label="Perfil público"
+          desc="Outros usuários podem ver seus comentários e séries favoritas"
+          value={isPublic}
+          onToggle={handleTogglePublic}
+        />
+        <ToggleItem
+          label="Notificações de respostas"
+          desc="Receber email quando alguém responder seu comentário"
+          value={notifyReplies}
+          onToggle={handleToggleNotify}
+        />
+        <ToggleItem
+          label="Resumo semanal"
+          desc="Email semanal com debates das suas séries favoritas"
+          value={notifyWeekly}
+          onToggle={handleToggleWeekly}
+        />
+        <ToggleItem
+          label="Notificações de estreias"
+          desc="Avisar quando uma série que você acompanha estrear"
+          value={notifyPremiere}
+          onToggle={handleTogglePremiere}
+        />
+      </div>
+
       {/* Personalidade de espectador */}
       {totalReactions > 0 && (
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">
-            Sua personalidade de espectador
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4 flex items-center gap-2">
+            Sua personalidade de espectador <BadgePublic />
           </p>
           <div className="flex items-end justify-around gap-1 h-24">
             {REACTIONS.map((r) => {
@@ -201,11 +372,12 @@ export const ProfileClient = ({ user }: Props) => {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         {[
           { label: "comentários", value: commentCount },
           { label: "séries", value: favorites.length },
           { label: "curtidas recebidas", value: totalLikes },
+          { label: "seguidores", value: followerCount },
         ].map((stat) => (
           <div key={stat.label} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 text-center">
             <p className="text-2xl font-bold text-[var(--text-primary)]">{stat.value}</p>
@@ -214,34 +386,18 @@ export const ProfileClient = ({ user }: Props) => {
         ))}
       </div>
 
-      {/* Comentário mais curtido */}
-      {topComment && topComment.likes > 0 && (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-6">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">
-            Comentário mais curtido
-          </p>
-          <p className="text-xs font-semibold text-[var(--yellow)] mb-2 uppercase tracking-wide">
-            {topComment.episode_id?.replace(/-s(\d+)-e(\d+)$/, " · T$1 E$2")}
-          </p>
-          <p className="text-sm text-[var(--text-primary)] leading-relaxed mb-3">
-            &ldquo;{topComment.text}&rdquo;
-          </p>
-          <p className="text-xs text-[var(--yellow)]">♥ {topComment.likes} curtidas</p>
-        </div>
-      )}
-
       {/* Séries favoritas */}
       {favorites.length > 0 && (
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">
-            Séries favoritas
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+            Séries favoritas <BadgePublic />
           </p>
           <div className="grid grid-cols-3 gap-3">
             {favorites.map((s) => (
               <Link key={s.series_id} href={`/series/${s.series_slug}`} className="group flex flex-col gap-1.5">
                 <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-[var(--bg-elevated)]">
                   {s.poster_path
-                    ? <Image src={`https://image.tmdb.org/t/p/w300${s.poster_path}`} alt={s.series_name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" sizes="33vw" />
+                    ? <img src={`https://image.tmdb.org/t/p/w300${s.poster_path}`} alt={s.series_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     : <div className="w-full h-full flex items-center justify-center text-2xl">📺</div>
                   }
                 </div>
@@ -251,6 +407,44 @@ export const ProfileClient = ({ user }: Props) => {
           </div>
         </div>
       )}
+
+      {/* Comentário mais curtido */}
+      {topComment && topComment.likes > 0 && (
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+            Comentário mais curtido <BadgePublic />
+          </p>
+          <p className="text-xs font-semibold text-[var(--yellow)] mb-2 uppercase tracking-wide">
+            {formatEpId(topComment.episode_id, seriesNames)}
+          </p>
+          <p className="text-sm text-[var(--text-primary)] leading-relaxed mb-3">
+            &ldquo;{topComment.text}&rdquo;
+          </p>
+          <p className="text-xs text-[var(--yellow)]">♥ {topComment.likes} curtidas</p>
+        </div>
+      )}
+
+      {/* Últimos comentários */}
+      {recentComments.length > 0 && (
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+            Últimos comentários <BadgePublic />
+          </p>
+          <div className="flex flex-col">
+            {recentComments.map((c, i) => (
+              <div key={c.id} className={`py-3 ${i < recentComments.length - 1 ? "border-b border-[var(--border)]" : ""}`}>
+                <p className="text-xs font-semibold text-[var(--yellow)] mb-1">{formatEpId(c.episode_id, seriesNames)}</p>
+                <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">&ldquo;{c.text}&rdquo;</p>
+                <div className="flex gap-3 mt-1.5 text-[10px] text-[var(--text-muted)]">
+                  <span>♥ {c.likes ?? 0}</span>
+                  <span>{relativeTime(c.created_at)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
     </main>
   );
 };
