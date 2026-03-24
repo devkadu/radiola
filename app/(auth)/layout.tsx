@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 const perks = [
-  { emoji: "💬", text: "Comente cada episódio sem spoilers" },
+  { emoji: "💬", text: "Comente cada episódio da sua série" },
   { emoji: "🔥", text: "Veja o que está em alta no mundo todo" },
   { emoji: "📺", text: "Acompanhe todas as suas séries em um lugar" },
   { emoji: "👥", text: "Encontre quem assiste o que você assiste" },
@@ -39,7 +39,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               O mundo das séries<br />te espera.
             </h2>
             <p className="text-base text-black/60 mt-3 leading-relaxed">
-              Entre para a comunidade que debate cada episódio no seu ritmo, sem spoilers.
+              Aqui sua série continua!
             </p>
           </div>
 

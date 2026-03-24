@@ -125,7 +125,6 @@ export const ProfileClient = ({ user }: Props) => {
   const [recentComments, setRecentComments] = useState<RecentComment[]>([]);
   const [seriesNames, setSeriesNames] = useState<Record<number, string>>({});
   const [followerCount, setFollowerCount] = useState(0);
-  const [followingCount, setFollowingCount] = useState(0);
 
   const updateMeta = async (updates: Record<string, boolean>) => {
     const supabase = createClient();
@@ -151,8 +150,6 @@ export const ProfileClient = ({ user }: Props) => {
     supabase.from("follows").select("id", { count: "exact", head: true }).eq("following_id", user.id)
       .then(({ count }) => setFollowerCount(count ?? 0));
 
-    supabase.from("follows").select("id", { count: "exact", head: true }).eq("follower_id", user.id)
-      .then(({ count }) => setFollowingCount(count ?? 0));
 
     supabase.from("episode_reactions").select("reaction_key").eq("user_id", user.id)
       .then(({ data }) => {
@@ -205,7 +202,7 @@ export const ProfileClient = ({ user }: Props) => {
 
   const handleShare = async () => {
     const url = window.location.origin + "/u/" + username;
-    const shareData = { title: "Segunda Temporada", text: `${username} está na Segunda Temporada — debate séries sem spoilers!`, url };
+    const shareData = { title: "Segunda Temporada", text: `${username} está na Segunda Temporada — Aqui sua série continua!`, url };
     if (navigator.share) {
       await navigator.share(shareData).catch(() => {});
     } else {

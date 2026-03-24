@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     default: "Segunda Temporada",
     template: "%s | Segunda Temporada",
   },
-  description: "Debate cada episódio da sua série favorita no seu ritmo, sem spoilers.",
+  description: "Aqui sua série continua!",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     shortcut: "/icon.svg",
@@ -39,6 +39,15 @@ export const metadata: Metadata = {
     siteName: "Segunda Temporada",
     locale: "pt_BR",
     type: "website",
+    title: "Segunda Temporada",
+    description: "Aqui sua série continua!",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Segunda Temporada" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Segunda Temporada",
+    description: "Aqui sua série continua!",
+    images: ["/opengraph-image"],
   },
   robots: {
     index: true,

@@ -22,23 +22,10 @@ export function CommentCTA() {
 }
 
 export function CollapsibleSinopse({ overview }: { overview: string }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <div className="mt-0.5">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1"
-      >
-        <span>{open ? "↑" : "↓"}</span>
-        <span>sinopse</span>
-      </button>
-      {open && (
-        <p className="text-xs text-[var(--text-muted)] leading-relaxed mt-1">
-          {overview}
-        </p>
-      )}
-    </div>
+    <p className="text-xs text-[var(--text-muted)] leading-relaxed mt-1">
+      {overview}
+    </p>
   );
 }
 

@@ -1,12 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = "Segunda Temporada <notificacoes@mail.segundatemporada.com.br>";
 const SITE_URL = "https://segundatemporada.com.br";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function emailHtml(replierUsername: string, episodeTitle: string, episodeFullUrl: string, profileUrl: string) {
+  const safeUsername = escapeHtml(replierUsername);
+  const safeTitle = escapeHtml(episodeTitle);
+  // URLs: apenas caminhos internos chegam aqui (validados antes)
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -38,11 +52,11 @@ function emailHtml(replierUsername: string, episodeTitle: string, episodeFullUrl
         <tr><td style="background:#1a1916;border:1px solid #2a2820;border-radius:16px;padding:32px">
           <p style="margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#666">Nova resposta</p>
           <h1 style="margin:0 0 16px;font-size:22px;font-weight:800;color:#ffffff;line-height:1.3">
-            ${replierUsername} respondeu<br>seu comentário
+            ${safeUsername} respondeu<br>seu comentário
           </h1>
           <p style="margin:0 0 28px;font-size:14px;color:#999;line-height:1.7">
             Alguém interagiu com você em<br>
-            <strong style="color:#fff">${episodeTitle}</strong>
+            <strong style="color:#fff">${safeTitle}</strong>
           </p>
           <table cellpadding="0" cellspacing="0" border="0">
             <tr>
@@ -84,14 +98,47 @@ function emailHtml(replierUsername: string, episodeTitle: string, episodeFullUrl
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Autenticar o usuário que está fazendo a requisição
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: (cookiesToSet) => {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "não autorizado" }, { status: 401 });
+    }
+
+    // 2. Validar body
     const body = await request.json();
-    const { type, parentCommentId, replierUsername, episodeTitle, episodeUrl } = body;
+    const { type, parentCommentId, episodeTitle, episodeUrl } = body;
 
     if (type !== "reply") {
       return NextResponse.json({ error: "tipo inválido" }, { status: 400 });
     }
+    if (typeof parentCommentId !== "string" || !parentCommentId) {
+      return NextResponse.json({ error: "parentCommentId inválido" }, { status: 400 });
+    }
+    // episodeUrl deve ser caminho relativo
+    if (episodeUrl && (typeof episodeUrl !== "string" || !episodeUrl.startsWith("/"))) {
+      return NextResponse.json({ error: "episodeUrl inválido" }, { status: 400 });
+    }
 
-    // Busca o comentário pai para saber o dono
+    // 3. Username vem da sessão autenticada, não do body
+    const replierUsername = user.user_metadata?.username || user.email?.split("@")[0] || "alguém";
+
+    // 4. Busca o comentário pai
     const { data: parent } = await supabaseAdmin
       .from("comments")
       .select("user_id, username")
@@ -103,11 +150,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Não notifica quem respondeu a si mesmo
-    if (replierUsername === parent.username) {
+    if (parent.user_id === user.id) {
       return NextResponse.json({ ok: false, reason: "auto-resposta" });
     }
 
-    // Busca o email e preferências do dono do comentário pai via admin
+    // 5. Busca email e preferências do dono do comentário pai
     const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(parent.user_id);
     const targetUser = authUser?.user;
     const email = targetUser?.email;
@@ -116,7 +163,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, reason: "sem email" });
     }
 
-    // Respeita preferência de notificações (padrão: ativado)
     if (targetUser?.user_metadata?.notify_replies === false) {
       return NextResponse.json({ ok: false, reason: "notificações desativadas" });
     }
@@ -127,7 +173,7 @@ export async function POST(request: NextRequest) {
     await resend.emails.send({
       from: FROM,
       to: email,
-      subject: `${replierUsername} respondeu seu comentário`,
+      subject: `${escapeHtml(replierUsername)} respondeu seu comentário`,
       html: emailHtml(replierUsername, episodeTitle ?? "um episódio", episodeFullUrl, profileUrl),
     });
 

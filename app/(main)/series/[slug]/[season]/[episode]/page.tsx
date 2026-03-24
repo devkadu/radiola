@@ -10,6 +10,7 @@ import { episodeId } from "@/services/comments";
 import { CommentCTA, CollapsibleSinopse } from "./_components";
 import { EpisodeCommentsSection } from "./_section";
 import { EpisodeVideoButton } from "./_video";
+import { WatchedGate } from "@/components/WatchedGate/WatchedGate";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -161,9 +162,6 @@ export default async function EpisodePage({ params }: Props) {
 
           {/* Badges row */}
           <div className="flex flex-wrap gap-1.5 mt-0.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[#2a2516] border border-[#4a3e1a] text-[var(--yellow)]">
-              Spoiler-free
-            </span>
             {ep.vote_average > 0 && (
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[#1f2d1a] border border-[#2d4a1e] text-green-400">
                 {ep.vote_average.toFixed(1)} TMDB
@@ -183,26 +181,28 @@ export default async function EpisodePage({ params }: Props) {
           {ep.overview && <CollapsibleSinopse overview={ep.overview} />}
         </div>
 
-        {/* Reactions */}
-        <EpisodeReactions episodeId={computedEpisodeId} />
-
-        {/* Comments + Drawer */}
-        <EpisodeCommentsSection
-          seriesId={seriesId}
-          seasonNumber={seasonNumber}
-          episodeNumber={episodeNumber}
-          placeholder={placeholder}
+        {/* Reactions + Comments — bloqueados até confirmar que assistiu */}
+        <WatchedGate
+          episodeId={computedEpisodeId}
           episodeTitle={`"${ep.name}" · ${series.name} ${seasonLabel}${episodeLabel}`}
-          episodeUrl={`/series/${slug}/${seasonParam}/${episodeParam}`}
-        />
+        >
+          <EpisodeReactions episodeId={computedEpisodeId} />
+          <EpisodeCommentsSection
+            seriesId={seriesId}
+            seasonNumber={seasonNumber}
+            episodeNumber={episodeNumber}
+            placeholder={placeholder}
+            episodeTitle={`"${ep.name}" · ${series.name} ${seasonLabel}${episodeLabel}`}
+            episodeUrl={`/series/${slug}/${seasonParam}/${episodeParam}`}
+          />
+          {/* Botão de comentar — só aparece quando os comentários estão liberados */}
+          <div className="fixed bottom-20 lg:bottom-6 left-0 right-0 px-4 z-30 pointer-events-none">
+            <div className="max-w-[1296px] mx-auto flex justify-end pointer-events-auto">
+              <CommentCTA />
+            </div>
+          </div>
+        </WatchedGate>
 
-      </div>
-
-      {/* Fixed bottom CTA — above bottom nav on mobile, bottom-right on desktop */}
-      <div className="fixed bottom-20 lg:bottom-6 left-0 right-0 px-4 z-30 pointer-events-none">
-        <div className="max-w-[1296px] mx-auto flex justify-end pointer-events-auto">
-          <CommentCTA />
-        </div>
       </div>
     </main>
   );

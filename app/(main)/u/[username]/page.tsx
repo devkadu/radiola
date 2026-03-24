@@ -44,10 +44,17 @@ function memberSince(dateStr: string) {
 export default async function PublicProfilePage({ params }: Props) {
   const { username } = await params;
 
-  const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
-  const target = users.find(u =>
-    (u.user_metadata?.username || u.email?.split("@")[0]) === username
-  );
+  // Busca user_id pelo username na tabela de comentários — evita carregar todos os usuários
+  const { data: sample } = await supabaseAdmin
+    .from("comments")
+    .select("user_id")
+    .eq("username", username)
+    .limit(1)
+    .maybeSingle();
+
+  const { data: { user: target } } = sample
+    ? await supabaseAdmin.auth.admin.getUserById(sample.user_id)
+    : { data: { user: null } };
 
   if (!target) {
     return (
