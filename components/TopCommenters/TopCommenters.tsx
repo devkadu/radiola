@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface Commenter {
   rank: number;
@@ -68,9 +69,10 @@ export const TopCommenters = () => {
       {!loading && commenters.length > 0 && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
           {commenters.map((c) => (
-            <div
+            <Link
               key={c.user_id}
-              className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col items-center gap-2 hover:border-[var(--text-muted)] transition-colors"
+              href={`/u/${c.username}`}
+              className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col items-center gap-2 hover:border-[var(--yellow)] transition-colors"
             >
               <p className="text-xs text-[var(--text-muted)] self-start">
                 {medals[c.rank] ?? `${c.rank}º`}
@@ -85,7 +87,7 @@ export const TopCommenters = () => {
                   em alta
                 </span>
               )}
-            </div>
+            </Link>
           ))}
         </div>
       )}
