@@ -26,5 +26,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     series: [...cached.series.slice(0, 3), ...tmdbSeries].slice(0, 5),
     episodes: cached.episodes.slice(0, 5),
+  }, {
+    headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
   });
 }

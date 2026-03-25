@@ -46,6 +46,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+export const revalidate = 3600;
+
 export default async function SeriesPage({ params }: Props) {
   const { slug } = await params;
   const id = slug.split("-").pop()!;

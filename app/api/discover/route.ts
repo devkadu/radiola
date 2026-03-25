@@ -10,7 +10,9 @@ export async function GET(req: NextRequest) {
 
   try {
     const data = await tmdbService.discoverSeries({ page, sortBy, genreId, providerId });
-    return NextResponse.json(data);
+    return NextResponse.json(data, {
+      headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
+    });
   } catch {
     return NextResponse.json({ results: [], total_pages: 0 }, { status: 500 });
   }

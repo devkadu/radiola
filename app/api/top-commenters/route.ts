@@ -34,5 +34,7 @@ export async function GET() {
       comments: v.count,
     }));
 
-  return NextResponse.json(top);
+  return NextResponse.json(top, {
+    headers: { "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600" },
+  });
 }
