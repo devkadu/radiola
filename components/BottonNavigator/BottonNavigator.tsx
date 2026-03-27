@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { FaHouse, FaMagnifyingGlass, FaTv, FaCircleUser } from "react-icons/fa6";
+import { FaHouse, FaMagnifyingGlass, FaTv, FaCircleUser, FaLightbulb } from "react-icons/fa6";
 import { useSearchOverlay } from "@/context/SearchContext";
 
 export const BottonNavigator = () => {
@@ -37,6 +37,14 @@ export const BottonNavigator = () => {
           {pathname === "/perfil" && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--yellow)]" />}
         </div>
         <span className={`text-xs ${pathname === "/perfil" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"}`}>Perfil</span>
+      </Link>
+
+      <Link href="/sugestoes" className="flex flex-col items-center gap-1">
+        <div className="relative">
+          <FaLightbulb size={20} className={pathname === "/sugestoes" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"} />
+          {pathname === "/sugestoes" && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--yellow)]" />}
+        </div>
+        <span className={`text-xs ${pathname === "/sugestoes" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"}`}>Sugestões</span>
       </Link>
     </nav>
   );
