@@ -8,6 +8,7 @@ export const viewport: Viewport = {
 };
 import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
+import { Providers } from "./providers";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
@@ -67,7 +68,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${plusJakartaSans.variable} ${outfit.variable} antialiased`}
         suppressHydrationWarning
       >
-        <AuthProvider>{children}</AuthProvider>
+        <Providers>
+          <AuthProvider>{children}</AuthProvider>
+        </Providers>
         <Analytics />
       </body>
     </html>

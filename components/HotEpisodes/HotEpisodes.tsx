@@ -1,9 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { favoritesService } from "@/services/favorites";
-import { createClient } from "@/lib/supabase-browser";
 
 interface HotEpisode {
   rank: number;
@@ -93,41 +93,23 @@ export const HotEpisodes = () => {
   const [activeTab, setActiveTab] = useState(0);
   const { user } = useAuth();
 
-  const [hotEpisodes, setHotEpisodes] = useState<HotEpisode[]>([]);
-  const [hotLoading, setHotLoading] = useState(true);
+  const { data: hotEpisodes = [], isLoading: hotLoading } = useQuery<HotEpisode[]>({
+    queryKey: ["hot-episodes"],
+    queryFn: () => fetch("/api/hot-episodes").then((r) => r.json()),
+    staleTime: 2 * 60 * 1000,
+  });
 
-  const [myEpisodes, setMyEpisodes] = useState<HotEpisode[]>([]);
-  const [myLoading, setMyLoading] = useState(false);
-  const [myFetched, setMyFetched] = useState(false);
-
-  // Fetch global hot episodes on mount
-  useEffect(() => {
-    fetch("/api/hot-episodes")
-      .then((r) => r.json())
-      .then((data) => setHotEpisodes(data ?? []))
-      .catch(() => setHotEpisodes([]))
-      .finally(() => setHotLoading(false));
-  }, []);
-
-  // Fetch "my series" episodes when tab is selected and user is logged in
-  useEffect(() => {
-    if (activeTab !== 1 || !user || myFetched) return;
-
-    setMyLoading(true);
-    favoritesService.getFavorites(user.id)
-      .then(async (favorites) => {
-        if (!favorites.length) return [];
-        const ids = favorites.map((f: any) => f.series_id).join(",");
-        const res = await fetch(`/api/my-series-episodes?ids=${ids}`);
-        return res.json();
-      })
-      .then((data) => setMyEpisodes(data ?? []))
-      .catch(() => setMyEpisodes([]))
-      .finally(() => {
-        setMyLoading(false);
-        setMyFetched(true);
-      });
-  }, [activeTab, user, myFetched]);
+  const { data: myEpisodes = [], isLoading: myLoading } = useQuery<HotEpisode[]>({
+    queryKey: ["my-series-episodes", user?.id],
+    queryFn: async () => {
+      const favorites = await favoritesService.getFavorites(user!.id);
+      if (!favorites.length) return [];
+      const ids = favorites.map((f: any) => f.series_id).join(",");
+      return fetch(`/api/my-series-episodes?ids=${ids}`).then((r) => r.json());
+    },
+    enabled: activeTab === 1 && !!user,
+    staleTime: 2 * 60 * 1000,
+  });
 
   return (
     <section className="px-4 lg:px-0 pt-4 pb-6">

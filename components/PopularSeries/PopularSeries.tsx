@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { GENRES } from "@/lib/genres";
@@ -23,20 +24,17 @@ function SeriesSkeleton() {
 
 export const PopularSeries = () => {
   const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
-  const [series, setSeries] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLoading(true);
-    const url = selectedGenre
-      ? `/api/popular-series?genre=${selectedGenre}`
-      : "/api/popular-series";
-    fetch(url)
-      .then((r) => r.json())
-      .then((data) => setSeries(data ?? []))
-      .catch(() => setSeries([]))
-      .finally(() => setLoading(false));
-  }, [selectedGenre]);
+  const { data: series = [], isLoading: loading } = useQuery<any[]>({
+    queryKey: ["popular-series", selectedGenre],
+    queryFn: () => {
+      const url = selectedGenre
+        ? `/api/popular-series?genre=${selectedGenre}`
+        : "/api/popular-series";
+      return fetch(url).then((r) => r.json());
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   return (
     <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 
 interface Commenter {
@@ -31,16 +31,11 @@ function Avatar({ username, avatarUrl }: { username: string; avatarUrl: string |
 }
 
 export const TopCommenters = () => {
-  const [commenters, setCommenters] = useState<Commenter[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/top-commenters")
-      .then((r) => r.json())
-      .then(setCommenters)
-      .catch(() => setCommenters([]))
-      .finally(() => setLoading(false));
-  }, []);
+  const { data: commenters = [], isLoading: loading } = useQuery<Commenter[]>({
+    queryKey: ["top-commenters"],
+    queryFn: () => fetch("/api/top-commenters").then((r) => r.json()),
+    staleTime: 5 * 60 * 1000,
+  });
 
   return (
     <section className="px-4 lg:px-0 py-6 pb-28 lg:pb-10">
