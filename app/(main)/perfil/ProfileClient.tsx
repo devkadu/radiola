@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 import { favoritesService } from "@/services/favorites";
 import { User } from "@supabase/supabase-js";
-import { FaPencil, FaShareNodes, FaEllipsisVertical } from "react-icons/fa6";
+import { FaPencil, FaShareNodes, FaArrowLeft } from "react-icons/fa6";
 
 interface Props { user: User; }
 
@@ -117,7 +117,7 @@ export const ProfileClient = ({ user }: Props) => {
   const [notifyPremiere, setNotifyPremiere] = useState<boolean>(user.user_metadata?.notify_premiere !== false);
   const [isPublic, setIsPublic] = useState<boolean>(user.user_metadata?.profile_public !== false);
   const [copied, setCopied] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
   const [favorites, setFavorites] = useState<Awaited<ReturnType<typeof favoritesService.getFavorites>>>([]);
   const [commentCount, setCommentCount] = useState(0);
   const [totalLikes, setTotalLikes] = useState(0);
@@ -150,7 +150,6 @@ export const ProfileClient = ({ user }: Props) => {
 
     supabase.from("follows").select("id", { count: "exact", head: true }).eq("following_id", user.id)
       .then(({ count }) => setFollowerCount(count ?? 0));
-
 
     supabase.from("episode_reactions").select("reaction_key").eq("user_id", user.id)
       .then(({ data }) => {
@@ -247,6 +246,100 @@ export const ProfileClient = ({ user }: Props) => {
   const totalReactions = Object.values(reactionCounts).reduce((a, b) => a + b, 0);
   const maxReactionCount = Math.max(...Object.values(reactionCounts), 1);
 
+  // ── Tela de edição ──────────────────────────────────────────────────────────
+  if (editingProfile) {
+    return (
+      <main className="px-4 py-6 lg:py-10 max-w-lg pb-28 animate-in slide-in-from-bottom-4 duration-200">
+        <div className="flex items-center gap-3 mb-6">
+          <button
+            onClick={() => setEditingProfile(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-full border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+          >
+            <FaArrowLeft size={13} />
+          </button>
+          <h1 className="text-xl font-bold text-[var(--text-primary)]">Editar perfil</h1>
+        </div>
+
+        {/* Foto */}
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">Foto de perfil</p>
+          <div className="flex items-center gap-4">
+            <button onClick={() => fileRef.current?.click()} disabled={uploading} className="relative shrink-0" aria-label="Alterar foto">
+              <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-[var(--yellow)] relative bg-[var(--bg-elevated)]">
+                {avatarUrl
+                  ? <img src={avatarUrl} alt={username} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  : <div className="w-full h-full flex items-center justify-center bg-[var(--yellow)] text-black font-bold text-lg">{initials}</div>
+                }
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[var(--yellow)] flex items-center justify-center shadow-sm">
+                <FaPencil size={9} className="text-black" />
+              </div>
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+            <div>
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="px-4 py-1.5 rounded-lg border border-[var(--border)] text-sm text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors disabled:opacity-50"
+              >
+                {uploading ? "Enviando…" : "Alterar foto"}
+              </button>
+              {error && <p className="text-xs text-red-400 mt-2">{error}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Privacidade */}
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Privacidade</p>
+          <ToggleItem
+            label="Perfil público"
+            desc="Outros usuários podem ver seus comentários e séries favoritas"
+            value={isPublic}
+            onToggle={handleTogglePublic}
+          />
+        </div>
+
+        {/* Notificações */}
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Notificações</p>
+          <ToggleItem
+            label="Respostas aos comentários"
+            desc="Receber email quando alguém responder seu comentário"
+            value={notifyReplies}
+            onToggle={handleToggleNotify}
+          />
+          <ToggleItem
+            label="Resumo semanal"
+            desc="Email semanal com debates das suas séries favoritas"
+            value={notifyWeekly}
+            onToggle={handleToggleWeekly}
+          />
+          <ToggleItem
+            label="Estreias"
+            desc="Avisar quando uma série que você acompanha estrear"
+            value={notifyPremiere}
+            onToggle={handleTogglePremiere}
+          />
+        </div>
+
+        {/* Sair */}
+        <button
+          onClick={handleSignOut}
+          className="w-full py-3 rounded-2xl border border-red-900/40 text-red-400 hover:bg-red-950/30 transition-colors text-sm font-medium"
+        >
+          Sair da conta
+        </button>
+      </main>
+    );
+  }
+
+  // ── Tela principal do perfil ─────────────────────────────────────────────────
   return (
     <main className="px-4 py-6 lg:py-10 max-w-lg pb-28">
 
@@ -264,41 +357,20 @@ export const ProfileClient = ({ user }: Props) => {
 
       {/* User card */}
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
-        <div className="flex items-start gap-4 mb-5 relative">
+        <div className="flex items-start gap-4 mb-5">
           {/* Avatar */}
-          <button onClick={() => fileRef.current?.click()} disabled={uploading} className="relative shrink-0 group" aria-label="Alterar foto">
+          <div className="relative shrink-0">
             <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-[var(--yellow)] relative bg-[var(--bg-elevated)]">
               {avatarUrl
                 ? <img src={avatarUrl} alt={username} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 : <div className="w-full h-full flex items-center justify-center bg-[var(--yellow)] text-black font-bold text-lg">{initials}</div>
               }
-              {uploading && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                </div>
-              )}
             </div>
-            {/* Edit badge */}
-            <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[var(--yellow)] flex items-center justify-center shadow-sm">
-              <FaPencil size={9} className="text-black" />
-            </div>
-          </button>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+          </div>
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <p className="font-bold text-[var(--text-primary)] text-base truncate">{username}</p>
-              <button
-                onClick={() => setSettingsOpen((v) => !v)}
-                className={`shrink-0 w-7 h-7 flex items-center justify-center rounded-full transition-colors ${
-                  settingsOpen ? "bg-[var(--bg-elevated)] text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                }`}
-                aria-label="Configurações"
-              >
-                <FaEllipsisVertical size={14} />
-              </button>
-            </div>
+            <p className="font-bold text-[var(--text-primary)] text-base truncate">{username}</p>
             <div className="flex items-center gap-1.5 mt-0.5">
               <p className="text-sm text-[var(--text-muted)] truncate">{user.email}</p>
               <BadgePrivate />
@@ -309,53 +381,16 @@ export const ProfileClient = ({ user }: Props) => {
             <p className="text-xs text-[var(--yellow)] mt-0.5">
               segundatemporada.com.br/u/{username}
             </p>
-            {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => fileRef.current?.click()}
-            className="px-4 py-1.5 rounded-lg border border-[var(--border)] text-sm text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
-          >
-            Editar perfil
-          </button>
-          <button onClick={handleSignOut} className="text-sm text-red-400 hover:text-red-300 transition-colors font-medium">
-            Sair
-          </button>
-        </div>
-
-        {/* Configurações colapsáveis */}
-        {settingsOpen && (
-          <div className="mt-4 pt-4 border-t border-[var(--border)]">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Privacidade e notificações</p>
-            <ToggleItem
-              label="Perfil público"
-              desc="Outros usuários podem ver seus comentários e séries favoritas"
-              value={isPublic}
-              onToggle={handleTogglePublic}
-            />
-            <ToggleItem
-              label="Notificações de respostas"
-              desc="Receber email quando alguém responder seu comentário"
-              value={notifyReplies}
-              onToggle={handleToggleNotify}
-            />
-            <ToggleItem
-              label="Resumo semanal"
-              desc="Email semanal com debates das suas séries favoritas"
-              value={notifyWeekly}
-              onToggle={handleToggleWeekly}
-            />
-            <ToggleItem
-              label="Notificações de estreias"
-              desc="Avisar quando uma série que você acompanha estrear"
-              value={notifyPremiere}
-              onToggle={handleTogglePremiere}
-            />
-          </div>
-        )}
+        <button
+          onClick={() => setEditingProfile(true)}
+          className="w-full py-2 rounded-xl border border-[var(--border)] text-sm text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
+        >
+          Editar perfil
+        </button>
       </div>
 
       {/* Personalidade de espectador */}
