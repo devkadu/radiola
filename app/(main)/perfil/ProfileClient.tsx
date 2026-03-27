@@ -265,7 +265,7 @@ export const ProfileClient = ({ user }: Props) => {
           <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">Foto de perfil</p>
           <div className="flex items-center gap-4">
             <button onClick={() => fileRef.current?.click()} disabled={uploading} className="relative shrink-0" aria-label="Alterar foto">
-              <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-[var(--yellow)] relative bg-[var(--bg-elevated)]">
+              <div className="w-16 h-16 rounded-full overflow-hidden relative bg-[var(--bg-elevated)]">
                 {avatarUrl
                   ? <img src={avatarUrl} alt={username} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                   : <div className="w-full h-full flex items-center justify-center bg-[var(--yellow)] text-black font-bold text-lg">{initials}</div>
@@ -360,7 +360,7 @@ export const ProfileClient = ({ user }: Props) => {
         <div className="flex items-start gap-4 mb-5">
           {/* Avatar */}
           <div className="relative shrink-0">
-            <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-[var(--yellow)] relative bg-[var(--bg-elevated)]">
+            <div className="w-16 h-16 rounded-full overflow-hidden relative bg-[var(--bg-elevated)]">
               {avatarUrl
                 ? <img src={avatarUrl} alt={username} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 : <div className="w-full h-full flex items-center justify-center bg-[var(--yellow)] text-black font-bold text-lg">{initials}</div>

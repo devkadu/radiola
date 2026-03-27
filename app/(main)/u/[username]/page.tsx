@@ -128,6 +128,16 @@ export default async function PublicProfilePage({ params }: Props) {
   return (
     <main className="px-4 py-6 lg:py-10 max-w-lg pb-28">
 
+      {/* Voltar ao meu perfil */}
+      {currentUser && currentUser.id !== uid && (
+        <Link
+          href="/perfil"
+          className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mb-5"
+        >
+          ← Meu perfil
+        </Link>
+      )}
+
       {/* Hero */}
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl overflow-hidden mb-4">
         <div className="p-5">
