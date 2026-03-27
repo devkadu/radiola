@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaTableCells, FaTv, FaStar, FaUser, FaMagnifyingGlass, FaArrowRightFromBracket } from "react-icons/fa6";
+import { FaTableCells, FaTv, FaStar, FaUser, FaMagnifyingGlass, FaArrowRightFromBracket, FaLightbulb } from "react-icons/fa6";
 import { createClient } from "@/lib/supabase-browser";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -14,6 +14,7 @@ const menuItems = [
   { href: "/series", label: "Séries", icon: FaTv },
   { href: "/debates", label: "Em debate", icon: FaStar },
   { href: "/perfil", label: "Meu perfil", icon: FaUser },
+  { href: "/sugestoes", label: "Sugestões", icon: FaLightbulb },
 ];
 
 interface Favorite {
