@@ -68,7 +68,7 @@ export default function SugestoesPage() {
         <h1 className="text-xl font-bold text-[var(--text-primary)]">Sugestões</h1>
       </div>
 
-      <p className="text-sm text-[var(--text-muted)] mb-6 leading-relaxed">
+      <p className="text-sm text-[var(--text-secondary)] mb-6 leading-relaxed">
         Tem uma ideia para melhorar o site? Conta pra gente. Todas as sugestões chegam diretamente na nossa caixa de entrada.
       </p>
 
