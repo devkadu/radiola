@@ -19,17 +19,25 @@ export async function GET() {
 
   if (!topIds?.length) return NextResponse.json([]);
 
+  console.log("[hot-episodes] topIds:", JSON.stringify(topIds));
+
   const results = await Promise.all(
     topIds.map(async (row: any, idx: number) => {
       const parsed = parseEpisodeId(row.episode_id);
-      if (!parsed) return null;
+      if (!parsed) {
+        console.warn("[hot-episodes] parse falhou:", row.episode_id);
+        return null;
+      }
 
       const [ep, series] = await Promise.all([
-        tmdbService.getEpisodeDetails(parsed.seriesId, parsed.season, parsed.episode).catch(() => null),
-        tmdbService.getSeriesDetails(parsed.seriesId).catch(() => null),
+        tmdbService.getEpisodeDetails(parsed.seriesId, parsed.season, parsed.episode).catch((e) => { console.error("[hot-episodes] ep error:", e.message); return null; }),
+        tmdbService.getSeriesDetails(parsed.seriesId).catch((e) => { console.error("[hot-episodes] series error:", e.message); return null; }),
       ]);
 
-      if (!ep || !series) return null;
+      if (!ep || !series) {
+        console.warn("[hot-episodes] sem dados tmdb para:", row.episode_id, { ep: !!ep, series: !!series });
+        return null;
+      }
 
       const seasonLabel = `T${String(parsed.season).padStart(2, "0")}`;
       const episodeLabel = `E${String(parsed.episode).padStart(2, "0")}`;
