@@ -24,8 +24,8 @@ function emailHtml(replierUsername: string, episodeTitle: string, episodeFullUrl
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#0F0E0C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0F0E0C">
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0a0a0a">
     <tr><td align="center" style="padding:40px 16px">
       <table width="480" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;width:100%">
 
@@ -33,16 +33,16 @@ function emailHtml(replierUsername: string, episodeTitle: string, episodeFullUrl
         <tr><td style="padding-bottom:28px">
           <table cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td style="width:44px;height:44px;background:#F5C518;border-radius:10px;text-align:center;vertical-align:middle">
+              <td style="width:44px;height:44px;background:#c8f565;border-radius:10px;text-align:center;vertical-align:middle">
                 <svg width="22" height="22" viewBox="0 0 30 30" fill="none" style="display:block;margin:11px auto 0">
-                  <path d="M8 7l10 8-10 8V7z" fill="#0F0E0C"/>
-                  <path d="M18 7l10 8-10 8V7z" fill="rgba(15,14,12,0.4)"/>
+                  <path d="M8 7l10 8-10 8V7z" fill="#0a0a0a"/>
+                  <path d="M18 7l10 8-10 8V7z" fill="rgba(10,10,10,0.4)"/>
                 </svg>
               </td>
               <td style="width:10px"></td>
               <td style="vertical-align:middle">
-                <div style="font-size:15px;font-weight:800;color:#F5C518;letter-spacing:-0.3px;line-height:1.2">Segunda</div>
-                <div style="font-size:15px;font-weight:800;color:#F5C518;letter-spacing:-0.3px;line-height:1.2">Temporada</div>
+                <div style="font-size:15px;font-weight:800;color:#c8f565;letter-spacing:-0.3px;line-height:1.2">Segunda</div>
+                <div style="font-size:15px;font-weight:800;color:#c8f565;letter-spacing:-0.3px;line-height:1.2">Temporada</div>
               </td>
             </tr>
           </table>
@@ -60,7 +60,7 @@ function emailHtml(replierUsername: string, episodeTitle: string, episodeFullUrl
           </p>
           <table cellpadding="0" cellspacing="0" border="0">
             <tr>
-              <td style="background:#F5C518;border-radius:10px">
+              <td style="background:#c8f565;border-radius:10px">
                 <a href="${episodeFullUrl}"
                   style="display:block;color:#000;font-weight:700;font-size:14px;
                          padding:14px 28px;text-decoration:none;letter-spacing:0.2px">

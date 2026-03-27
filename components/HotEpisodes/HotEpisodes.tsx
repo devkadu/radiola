@@ -15,7 +15,51 @@ interface HotEpisode {
   href: string;
 }
 
-const tabs = ["Episódios quentes", "Nas suas séries"];
+const tabs = ["Comunidade", "Nas suas séries"];
+
+function EpisodeCard({ ep, last, first }: { ep: HotEpisode; last: boolean; first: boolean }) {
+  return (
+    <Link
+      href={ep.href}
+      className={`block px-4 py-4 transition-colors ${first ? "bg-emerald-950/40 hover:bg-emerald-950/60" : "hover:bg-[var(--bg-elevated)]"} ${!last ? "border-b border-[var(--border)]" : ""}`}
+    >
+      <div className="flex gap-4 items-start">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--yellow)] truncate">
+              {ep.series}
+            </p>
+            {first && (
+              <span className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-emerald-400 border border-emerald-400/30 bg-emerald-400/10 px-1.5 py-0.5 rounded-full">
+                + comentado
+              </span>
+            )}
+          </div>
+          <p className="text-base font-bold text-[var(--text-primary)] leading-snug mb-1.5">
+            {ep.episode}
+          </p>
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-[var(--text-muted)]">{ep.code}</span>
+            <span className="text-[var(--text-muted)] text-xs">·</span>
+            <span className="flex items-center gap-1 text-xs text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+              ativo agora
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5 shrink-0 self-center">
+          <div className="text-right">
+            <p className="text-xl font-bold text-[var(--yellow)] leading-none">{ep.comments}</p>
+            <p className="text-[9px] uppercase tracking-widest text-[var(--text-muted)] mt-0.5">
+              comentários
+            </p>
+          </div>
+          <span className="text-[var(--text-muted)] text-sm">→</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 function EpisodeList({ episodes, loading, emptyMsg }: {
   episodes: HotEpisode[];
@@ -24,9 +68,9 @@ function EpisodeList({ episodes, loading, emptyMsg }: {
 }) {
   if (loading) {
     return (
-      <div className="flex flex-col gap-3">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-24 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] animate-pulse" />
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
+        {[1, 2, 3, 4].map((i, idx) => (
+          <div key={i} className={`h-[84px] animate-pulse bg-[var(--bg-elevated)] ${idx < 3 ? "border-b border-[var(--border)]" : ""}`} />
         ))}
       </div>
     );
@@ -39,52 +83,10 @@ function EpisodeList({ episodes, loading, emptyMsg }: {
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {episodes.map((ep, idx) => {
-        const isFirst = idx === 0;
-        return (
-          <Link
-            key={ep.epId ?? ep.rank}
-            href={ep.href}
-            className={`block rounded-xl px-5 py-3 border transition-colors ${
-              isFirst
-                ? "bg-[var(--yellow)] border-[var(--yellow)]"
-                : "bg-[var(--bg-surface)] border-[var(--border)] hover:border-[var(--text-muted)]"
-            }`}
-          >
-            <div className="flex items-center gap-4">
-              <span className={`text-2xl font-bold w-6 shrink-0 leading-none ${isFirst ? "text-black/30" : "text-[var(--text-muted)]"}`}>
-                {ep.rank}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className={`text-[11px] font-semibold uppercase tracking-widest mb-0.5 ${isFirst ? "text-black/60" : "text-[var(--yellow)]"}`}>
-                  {ep.series}
-                </p>
-                <p className={`text-lg font-bold leading-tight ${isFirst ? "text-black" : "text-[var(--text-primary)]"}`}>
-                  {ep.episode}
-                </p>
-                <p className={`text-xs mt-0.5 ${isFirst ? "text-black/60" : "text-[var(--text-muted)]"}`}>
-                  {ep.code}
-                </p>
-              </div>
-              <div className="text-right shrink-0">
-                <p className={`text-2xl font-bold ${isFirst ? "text-black" : "text-[var(--text-primary)]"}`}>
-                  {ep.comments}
-                </p>
-                <p className={`text-[10px] uppercase tracking-widest ${isFirst ? "text-black/50" : "text-[var(--text-muted)]"}`}>
-                  comentários
-                </p>
-              </div>
-            </div>
-            <div className={`flex items-center justify-between mt-2 pt-2 border-t ${isFirst ? "border-black/20" : "border-[var(--border)]"}`}>
-              <span className={`text-xs ${isFirst ? "text-black/70" : "text-[var(--text-muted)]"}`}>
-                Entrar na discussão agora
-              </span>
-              <span className={`text-base ${isFirst ? "text-black/60" : "text-[var(--text-muted)]"}`}>→</span>
-            </div>
-          </Link>
-        );
-      })}
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
+      {episodes.map((ep, idx) => (
+        <EpisodeCard key={ep.epId ?? ep.rank} ep={ep} first={idx === 0} last={idx === episodes.length - 1} />
+      ))}
     </div>
   );
 }
@@ -113,19 +115,27 @@ export const HotEpisodes = () => {
 
   return (
     <section className="px-4 lg:px-0 pt-4 pb-6">
-      {/* Tabs */}
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
+      {/* Heading */}
+      <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">
+        Em Alta
+      </p>
+
+      {/* Tabs — underline style */}
+      <div className="flex gap-6 mb-4 border-b border-[var(--border)]">
         {tabs.map((tab, i) => (
           <button
             key={tab}
             onClick={() => setActiveTab(i)}
-            className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors border ${
+            className={`pb-2.5 text-sm font-semibold transition-colors relative ${
               activeTab === i
-                ? "bg-[var(--text-primary)] text-[var(--bg)] border-[var(--text-primary)]"
-                : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-muted)]"
+                ? "text-[var(--text-primary)]"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             {tab}
+            {activeTab === i && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--yellow)] rounded-full" />
+            )}
           </button>
         ))}
       </div>

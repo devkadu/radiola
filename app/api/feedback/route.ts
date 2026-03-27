@@ -47,13 +47,13 @@ export async function POST(request: NextRequest) {
       html: `<!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#0F0E0C;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0F0E0C">
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0a0a0a">
     <tr><td align="center" style="padding:40px 16px">
       <table width="480" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;width:100%">
 
         <tr><td style="padding-bottom:24px">
-          <div style="font-size:15px;font-weight:800;color:#F5C518;letter-spacing:-0.3px">Segunda Temporada</div>
+          <div style="font-size:15px;font-weight:800;color:#c8f565;letter-spacing:-0.3px">Segunda Temporada</div>
         </td></tr>
 
         <tr><td style="background:#1a1916;border:1px solid #2a2820;border-radius:16px;padding:32px">

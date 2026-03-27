@@ -26,7 +26,7 @@ html, body {
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(245, 197, 24, 0.3);
+  background: rgba(200, 245, 101, 0.3);
 }
 * {
   scrollbar-width: thin;
@@ -35,21 +35,21 @@ html, body {
 
 :root {
   /* Fundos */
-  --bg:             #0F0E0C;
-  --bg-surface:     #161410;
-  --bg-elevated:    #1e1b15;
+  --bg:             #0a0a0a;
+  --bg-surface:     #141414;
+  --bg-elevated:    #1e1e1e;
 
   /* Bordas */
-  --border:         rgba(232,168,48,0.12);
+  --border:         rgba(200,245,101,0.10);
 
-  /* Amber (antes: amarelo) */
-  --yellow:         #E8A830;
-  --yellow-dim:     #C07820;
-  --yellow-muted:   rgba(232,168,48,0.12);
+  /* Lima (acento) */
+  --yellow:         #c8f565;
+  --yellow-dim:     #9abf45;
+  --yellow-muted:   rgba(200,245,101,0.10);
 
   /* Texto */
-  --text-primary:   #F5F0E8;
-  --text-secondary: rgba(245,240,232,0.55);
+  --text-primary:   #f5f0e8;
+  --text-secondary: #888888;
   --text-muted:     rgba(245,240,232,0.3);
 
   /* Utilitários */

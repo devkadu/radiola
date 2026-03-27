@@ -53,8 +53,8 @@ export const Sidebar = () => {
         <Link href="/" className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[var(--yellow)] rounded-[10px] flex items-center justify-center shrink-0">
             <svg width="22" height="22" viewBox="0 0 30 30" fill="none">
-              <path d="M8 7l10 8-10 8V7z" fill="#0F0E0C"/>
-              <path d="M18 7l10 8-10 8V7z" fill="rgba(15,14,12,0.4)"/>
+              <path d="M8 7l10 8-10 8V7z" fill="#0a0a0a"/>
+              <path d="M18 7l10 8-10 8V7z" fill="rgba(10,10,10,0.4)"/>
             </svg>
           </div>
           <div className="flex flex-col leading-tight" style={{ fontFamily: "var(--font-display)" }}>

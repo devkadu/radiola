@@ -7,10 +7,10 @@ import {
 import { EpisodeReactions } from "@/components/EpisodeReactions/EpisodeReactions";
 import { BackTopBar } from "@/components/BackTopBar/BackTopBar";
 import { episodeId } from "@/services/comments";
-import { CommentCTA, CollapsibleSinopse } from "./_components";
+import { CollapsibleSinopse } from "./_components";
 import { EpisodeCommentsSection } from "./_section";
 import { EpisodeVideoButton } from "./_video";
-import { WatchedGate } from "@/components/WatchedGate/WatchedGate";
+import { WatchedBadge } from "./_watched";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -104,7 +104,7 @@ export default async function EpisodePage({ params }: Props) {
   const placeholder = `Sem medo — aqui só quem chegou até o ${seasonLabel}·${episodeLabel}...`;
 
   return (
-    <main className="min-h-screen pb-32 text-white">
+    <main className="min-h-screen pb-[200px] lg:pb-16 text-white">
 
       {/* Hero image — full width, 16:9 */}
       <div className="relative w-full aspect-video lg:aspect-auto lg:h-[320px] bg-[var(--bg-elevated)]">
@@ -136,7 +136,7 @@ export default async function EpisodePage({ params }: Props) {
         </div>
       </div>
 
-      <div className="px-4 pt-4 flex flex-col gap-5">
+      <div className="px-4 pt-4 flex flex-col gap-4">
 
         {/* Episode info */}
         <div className="flex flex-col gap-1.5">
@@ -175,33 +175,32 @@ export default async function EpisodePage({ params }: Props) {
                 {g.name}
               </span>
             ))}
+            <WatchedBadge episodeId={computedEpisodeId} />
           </div>
 
           {/* Collapsible sinopse */}
           {ep.overview && <CollapsibleSinopse overview={ep.overview} />}
         </div>
 
-        {/* Reactions + Comments — bloqueados até confirmar que assistiu */}
-        <WatchedGate
-          episodeId={computedEpisodeId}
+        {/* Reactions */}
+        <EpisodeReactions episodeId={computedEpisodeId} />
+
+        {/* Comentários + Ficha Técnica */}
+        <EpisodeCommentsSection
+          seriesId={seriesId}
+          seasonNumber={seasonNumber}
+          episodeNumber={episodeNumber}
+          placeholder={placeholder}
           episodeTitle={`"${ep.name}" · ${series.name} ${seasonLabel}${episodeLabel}`}
-        >
-          <EpisodeReactions episodeId={computedEpisodeId} />
-          <EpisodeCommentsSection
-            seriesId={seriesId}
-            seasonNumber={seasonNumber}
-            episodeNumber={episodeNumber}
-            placeholder={placeholder}
-            episodeTitle={`"${ep.name}" · ${series.name} ${seasonLabel}${episodeLabel}`}
-            episodeUrl={`/series/${slug}/${seasonParam}/${episodeParam}`}
-          />
-          {/* Botão de comentar — só aparece quando os comentários estão liberados */}
-          <div className="fixed bottom-20 lg:bottom-6 left-0 right-0 px-4 z-30 pointer-events-none">
-            <div className="max-w-[1296px] mx-auto flex justify-end pointer-events-auto">
-              <CommentCTA />
-            </div>
-          </div>
-        </WatchedGate>
+          episodeUrl={`/series/${slug}/${seasonParam}/${episodeParam}`}
+          fichaTecnica={{
+            airDate: ep.air_date ?? null,
+            runtime: ep.runtime ?? null,
+            productionCode: ep.production_code ?? null,
+            crew: ep.crew ?? [],
+            guestStars: ep.guest_stars ?? [],
+          }}
+        />
 
       </div>
     </main>

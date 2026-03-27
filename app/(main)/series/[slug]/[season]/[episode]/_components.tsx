@@ -6,6 +6,137 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { commentsService, episodeId } from "@/services/comments";
 
+interface InlineCommentInputProps {
+  episodeId: string;
+  placeholder?: string;
+  onCommentAdded?: () => void;
+}
+
+export function InlineCommentInput({ episodeId: epId, placeholder, onCommentAdded }: InlineCommentInputProps) {
+  const { user } = useAuth();
+  const [expanded, setExpanded] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [text, setText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const promptRef = useRef<HTMLDivElement>(null);
+
+  const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "";
+  const avatarUrl = user?.user_metadata?.avatar_url ?? null;
+
+  useEffect(() => {
+    if (!showLoginPrompt) return;
+    const handler = (e: MouseEvent) => {
+      if (promptRef.current && !promptRef.current.contains(e.target as Node)) {
+        setShowLoginPrompt(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showLoginPrompt]);
+
+  const handleClick = () => {
+    if (!user) { setShowLoginPrompt(true); return; }
+    setExpanded(true);
+    setTimeout(() => textareaRef.current?.focus(), 50);
+  };
+
+  const handleCancel = () => {
+    setExpanded(false);
+    setText("");
+    setError(null);
+  };
+
+  const handleSubmit = async () => {
+    if (!text.trim() || !user || submitting) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await commentsService.addComment(epId, user.id, username, avatarUrl, text.trim());
+      onCommentAdded?.();
+      handleCancel();
+    } catch (e: any) {
+      setError(e?.message ?? "Erro ao publicar comentário.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="relative">
+      {!expanded ? (
+        <div
+          onClick={handleClick}
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] hover:border-[var(--yellow)] transition-colors cursor-text"
+        >
+          {user ? (
+            <div
+              className="w-6 h-6 rounded-full shrink-0 overflow-hidden relative flex items-center justify-center text-[10px] font-bold text-white"
+              style={{ backgroundColor: avatarUrl ? undefined : "#4f46e5" }}
+            >
+              {avatarUrl
+                ? <Image src={avatarUrl} alt={username} fill className="object-cover" sizes="24px" />
+                : username.slice(0, 2).toUpperCase()}
+            </div>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[var(--text-muted)] shrink-0">
+              <circle cx="8" cy="5.5" r="2.5" stroke="currentColor" strokeWidth="1.3"/>
+              <path d="M2.5 13c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            </svg>
+          )}
+          <span className="text-sm text-[var(--text-muted)] select-none">
+            {placeholder ?? "Adicionar um comentário..."}
+          </span>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={placeholder ?? "Adicionar um comentário..."}
+            rows={3}
+            className="w-full bg-[var(--bg-elevated)] border border-[var(--yellow)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] px-4 py-3 outline-none resize-none transition-colors"
+          />
+          {error && <p className="text-xs text-red-400">{error}</p>}
+          <div className="flex gap-2 justify-end">
+            <button
+              onClick={handleCancel}
+              className="px-4 py-1.5 rounded-full text-sm font-medium border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!text.trim() || submitting}
+              className="px-4 py-1.5 rounded-full text-sm font-bold bg-[var(--yellow)] text-black disabled:opacity-30 hover:bg-[var(--yellow-dim)] transition-colors"
+            >
+              {submitting ? "Publicando..." : "Publicar"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showLoginPrompt && (
+        <div ref={promptRef} className="absolute left-0 right-0 top-full mt-2 z-50">
+          <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-4 shadow-lg">
+            <p className="text-sm text-[var(--text-primary)] mb-3">Entre para comentar este episódio.</p>
+            <div className="flex gap-2">
+              <Link href="/login" className="flex-1 text-center text-sm py-2 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] transition-colors" onClick={() => setShowLoginPrompt(false)}>
+                Logar
+              </Link>
+              <Link href="/criar-conta" className="flex-1 text-center text-sm py-2 rounded-lg bg-[var(--yellow)] text-black font-semibold hover:bg-[var(--yellow-dim)] transition-colors" onClick={() => setShowLoginPrompt(false)}>
+                Criar conta
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function CommentCTA() {
   const open = () => {
     window.dispatchEvent(new CustomEvent("open-comment-drawer"));

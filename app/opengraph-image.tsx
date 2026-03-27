@@ -10,7 +10,7 @@ export default function OgImage() {
     (
       <div
         style={{
-          background: "#0F0E0C",
+          background: "#0a0a0a",
           width: "100%",
           height: "100%",
           display: "flex",
@@ -26,7 +26,7 @@ export default function OgImage() {
             style={{
               width: 80,
               height: 80,
-              background: "#F5C518",
+              background: "#c8f565",
               borderRadius: 18,
               display: "flex",
               alignItems: "center",
@@ -34,8 +34,8 @@ export default function OgImage() {
             }}
           >
             <svg width="44" height="44" viewBox="0 0 30 30" fill="none">
-              <path d="M8 7l10 8-10 8V7z" fill="#0F0E0C" />
-              <path d="M18 7l10 8-10 8V7z" fill="rgba(15,14,12,0.4)" />
+              <path d="M8 7l10 8-10 8V7z" fill="#0a0a0a" />
+              <path d="M18 7l10 8-10 8V7z" fill="rgba(10,10,10,0.4)" />
             </svg>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
@@ -54,7 +54,7 @@ export default function OgImage() {
         </p>
 
         {/* URL */}
-        <p style={{ fontSize: 18, color: "#F5C518", marginTop: 24, opacity: 0.7 }}>
+        <p style={{ fontSize: 18, color: "#c8f565", marginTop: 24, opacity: 0.7 }}>
           segundatemporada.com.br
         </p>
       </div>

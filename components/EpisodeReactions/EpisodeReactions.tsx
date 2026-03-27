@@ -204,7 +204,6 @@ export const EpisodeReactions = ({ episodeId }: Props) => {
     setSubmitting(true);
     setDrawerError(null);
 
-    const supabase = createClient();
     const prev = { counts: { ...counts }, reaction: userReaction };
 
     // Optimistic update
@@ -295,22 +294,22 @@ export const EpisodeReactions = ({ episodeId }: Props) => {
           </div>
 
           {/* Reaction buttons */}
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+          <div className="grid grid-cols-6 gap-1.5">
             {REACTIONS.map((r) => {
               const isActive = userReaction === r.key;
               return (
                 <button
                   key={r.key}
                   onClick={() => openDrawer(r.key)}
-                  className={`flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border transition-all ${
+                  className={`flex flex-col items-center gap-0.5 px-1 py-2 rounded-xl border transition-all ${
                     isActive
                       ? "bg-[var(--yellow-muted)] border-[var(--yellow)] text-[var(--yellow)]"
                       : "bg-[var(--bg-elevated)] border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--yellow)] hover:text-[var(--yellow)]"
                   }`}
                 >
-                  <span className="text-2xl leading-none">{r.emoji}</span>
-                  <span className="text-[10px] leading-tight text-center">{r.label}</span>
-                  <span className="text-xs font-bold">{counts[r.key] ?? 0}</span>
+                  <span className="text-xl leading-none">{r.emoji}</span>
+                  <span className="text-[8px] leading-tight text-center">{r.label}</span>
+                  <span className="text-[10px] font-bold">{counts[r.key] ?? 0}</span>
                 </button>
               );
             })}

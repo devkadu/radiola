@@ -80,8 +80,8 @@ export const Header = () => {
         <Link href="/" className="lg:hidden flex items-center gap-2.5 shrink-0">
           <div className="w-8 h-8 bg-[var(--yellow)] rounded-[8px] flex items-center justify-center shrink-0">
             <svg width="18" height="18" viewBox="0 0 30 30" fill="none">
-              <path d="M8 7l10 8-10 8V7z" fill="#0F0E0C"/>
-              <path d="M18 7l10 8-10 8V7z" fill="rgba(15,14,12,0.4)"/>
+              <path d="M8 7l10 8-10 8V7z" fill="#0a0a0a"/>
+              <path d="M18 7l10 8-10 8V7z" fill="rgba(10,10,10,0.4)"/>
             </svg>
           </div>
           <span className="text-sm font-extrabold tracking-tight text-[var(--text-primary)] leading-tight" style={{ fontFamily: "var(--font-display)" }}>

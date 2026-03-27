@@ -21,8 +21,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <Link href="/" className="flex items-center gap-3">
           <div className="w-9 h-9 bg-black/15 rounded-[9px] flex items-center justify-center shrink-0">
             <svg width="18" height="18" viewBox="0 0 30 30" fill="none">
-              <path d="M8 7l10 8-10 8V7z" fill="#0F0E0C"/>
-              <path d="M18 7l10 8-10 8V7z" fill="rgba(15,14,12,0.4)"/>
+              <path d="M8 7l10 8-10 8V7z" fill="#0a0a0a"/>
+              <path d="M18 7l10 8-10 8V7z" fill="rgba(10,10,10,0.4)"/>
             </svg>
           </div>
           <span className="text-base font-extrabold tracking-tight text-black" style={{ fontFamily: "var(--font-display)" }}>
@@ -63,8 +63,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <Link href="/" className="flex items-center gap-2.5">
             <div className="w-7 h-7 bg-[var(--yellow)] rounded-[7px] flex items-center justify-center shrink-0">
               <svg width="15" height="15" viewBox="0 0 30 30" fill="none">
-                <path d="M8 7l10 8-10 8V7z" fill="#0F0E0C"/>
-                <path d="M18 7l10 8-10 8V7z" fill="rgba(15,14,12,0.4)"/>
+                <path d="M8 7l10 8-10 8V7z" fill="#0a0a0a"/>
+                <path d="M18 7l10 8-10 8V7z" fill="rgba(10,10,10,0.4)"/>
               </svg>
             </div>
             <span className="text-base font-extrabold tracking-tight text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
