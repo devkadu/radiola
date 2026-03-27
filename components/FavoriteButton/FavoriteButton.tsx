@@ -17,6 +17,7 @@ interface Props {
   };
   compact?: boolean;
   variant?: "icon" | "list";
+  fullWidth?: boolean;
 }
 
 const AuthSheet = ({
@@ -131,7 +132,7 @@ const AuthSheet = ({
   </>
 );
 
-export const FavoriteButton = ({ series, compact, variant = "icon" }: Props) => {
+export const FavoriteButton = ({ series, compact, variant = "icon", fullWidth }: Props) => {
   const { user } = useAuth();
   const router = useRouter();
   const [favorited, setFavorited] = useState(false);
@@ -166,7 +167,7 @@ export const FavoriteButton = ({ series, compact, variant = "icon" }: Props) => 
     router.refresh();
   };
 
-  if (loading) return <div className={compact ? "w-7 h-7" : variant === "list" ? "h-10 w-40" : "w-10 h-10"} />;
+  if (loading) return <div className={compact ? "w-7 h-7" : variant === "list" ? fullWidth ? "h-11 w-full" : "h-10 w-40" : "w-10 h-10"} />;
 
   /* ── variant: list ── */
   if (variant === "list") {
@@ -175,7 +176,7 @@ export const FavoriteButton = ({ series, compact, variant = "icon" }: Props) => 
         <div className="relative">
           <button
             onClick={toggle}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${fullWidth ? "w-full justify-center" : ""} ${
               favorited
                 ? "bg-[var(--yellow-muted)] border border-[var(--yellow)] text-[var(--yellow)]"
                 : "bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--yellow)] hover:text-[var(--yellow)]"

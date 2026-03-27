@@ -168,12 +168,6 @@ export default async function SeriesPage({ params }: Props) {
               </div>
             )}
             <h1 className="text-2xl lg:text-3xl font-bold leading-none flex-1 min-w-0">{series.name}</h1>
-            <div className="shrink-0">
-              <FavoriteButton
-                series={{ id: series.id, name: series.name, slug, poster_path: series.poster_path ?? null }}
-                variant="list"
-              />
-            </div>
           </div>
 
           {/* Linha 2: chips — largura total */}
@@ -201,6 +195,15 @@ export default async function SeriesPage({ params }: Props) {
           </p>
         )}
 
+        {/* Adicionar à lista — full width no mobile */}
+        <div className="lg:hidden">
+          <FavoriteButton
+            series={{ id: series.id, name: series.name, slug, poster_path: series.poster_path ?? null }}
+            variant="list"
+            fullWidth
+          />
+        </div>
+
         {/* Watch providers */}
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-xs text-[var(--text-muted)] shrink-0">Assista em</span>
@@ -225,6 +228,13 @@ export default async function SeriesPage({ params }: Props) {
               Indisponível no Brasil
             </span>
           )}
+          {/* Adicionar à lista — alinhado à direita no desktop */}
+          <div className="hidden lg:block ml-auto">
+            <FavoriteButton
+              series={{ id: series.id, name: series.name, slug, poster_path: series.poster_path ?? null }}
+              variant="list"
+            />
+          </div>
         </div>
 
         {/* Elenco */}
