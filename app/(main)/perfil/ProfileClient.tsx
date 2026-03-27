@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase-browser";
 import { favoritesService } from "@/services/favorites";
 import { User } from "@supabase/supabase-js";
-import { FaPencil, FaShareNodes } from "react-icons/fa6";
+import { FaPencil, FaShareNodes, FaEllipsisVertical } from "react-icons/fa6";
 
 interface Props { user: User; }
 
@@ -117,6 +117,7 @@ export const ProfileClient = ({ user }: Props) => {
   const [notifyPremiere, setNotifyPremiere] = useState<boolean>(user.user_metadata?.notify_premiere !== false);
   const [isPublic, setIsPublic] = useState<boolean>(user.user_metadata?.profile_public !== false);
   const [copied, setCopied] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [favorites, setFavorites] = useState<Awaited<ReturnType<typeof favoritesService.getFavorites>>>([]);
   const [commentCount, setCommentCount] = useState(0);
   const [totalLikes, setTotalLikes] = useState(0);
@@ -263,7 +264,7 @@ export const ProfileClient = ({ user }: Props) => {
 
       {/* User card */}
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
-        <div className="flex items-start gap-4 mb-5">
+        <div className="flex items-start gap-4 mb-5 relative">
           {/* Avatar */}
           <button onClick={() => fileRef.current?.click()} disabled={uploading} className="relative shrink-0 group" aria-label="Alterar foto">
             <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-[var(--yellow)] relative bg-[var(--bg-elevated)]">
@@ -286,7 +287,18 @@ export const ProfileClient = ({ user }: Props) => {
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-[var(--text-primary)] text-base truncate">{username}</p>
+            <div className="flex items-start justify-between gap-2">
+              <p className="font-bold text-[var(--text-primary)] text-base truncate">{username}</p>
+              <button
+                onClick={() => setSettingsOpen((v) => !v)}
+                className={`shrink-0 w-7 h-7 flex items-center justify-center rounded-full transition-colors ${
+                  settingsOpen ? "bg-[var(--bg-elevated)] text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                }`}
+                aria-label="Configurações"
+              >
+                <FaEllipsisVertical size={14} />
+              </button>
+            </div>
             <div className="flex items-center gap-1.5 mt-0.5">
               <p className="text-sm text-[var(--text-muted)] truncate">{user.email}</p>
               <BadgePrivate />
@@ -313,35 +325,37 @@ export const ProfileClient = ({ user }: Props) => {
             Sair
           </button>
         </div>
-      </div>
 
-      {/* Privacidade e notificações */}
-      <div id="notificacoes" className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4">Privacidade e notificações</p>
-        <ToggleItem
-          label="Perfil público"
-          desc="Outros usuários podem ver seus comentários e séries favoritas"
-          value={isPublic}
-          onToggle={handleTogglePublic}
-        />
-        <ToggleItem
-          label="Notificações de respostas"
-          desc="Receber email quando alguém responder seu comentário"
-          value={notifyReplies}
-          onToggle={handleToggleNotify}
-        />
-        <ToggleItem
-          label="Resumo semanal"
-          desc="Email semanal com debates das suas séries favoritas"
-          value={notifyWeekly}
-          onToggle={handleToggleWeekly}
-        />
-        <ToggleItem
-          label="Notificações de estreias"
-          desc="Avisar quando uma série que você acompanha estrear"
-          value={notifyPremiere}
-          onToggle={handleTogglePremiere}
-        />
+        {/* Configurações colapsáveis */}
+        {settingsOpen && (
+          <div className="mt-4 pt-4 border-t border-[var(--border)]">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Privacidade e notificações</p>
+            <ToggleItem
+              label="Perfil público"
+              desc="Outros usuários podem ver seus comentários e séries favoritas"
+              value={isPublic}
+              onToggle={handleTogglePublic}
+            />
+            <ToggleItem
+              label="Notificações de respostas"
+              desc="Receber email quando alguém responder seu comentário"
+              value={notifyReplies}
+              onToggle={handleToggleNotify}
+            />
+            <ToggleItem
+              label="Resumo semanal"
+              desc="Email semanal com debates das suas séries favoritas"
+              value={notifyWeekly}
+              onToggle={handleToggleWeekly}
+            />
+            <ToggleItem
+              label="Notificações de estreias"
+              desc="Avisar quando uma série que você acompanha estrear"
+              value={notifyPremiere}
+              onToggle={handleTogglePremiere}
+            />
+          </div>
+        )}
       </div>
 
       {/* Personalidade de espectador */}
