@@ -79,7 +79,7 @@ export default function SugestoesPage() {
             onChange={(e) => setMessage(e.target.value.slice(0, 1000))}
             placeholder="Descreva sua ideia ou sugestão…"
             rows={6}
-            className="w-full bg-transparent px-5 pt-4 pb-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] resize-none outline-none"
+            className="w-full bg-transparent px-5 pt-4 pb-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] resize-none outline-none"
           />
           <div className="px-5 pb-3 flex justify-end">
             <span className={`text-xs ${remaining < 100 ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"}`}>
