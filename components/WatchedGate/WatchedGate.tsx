@@ -79,18 +79,22 @@ export function WatchedGate({ episodeId, episodeTitle, children }: Props) {
 
       {/* Body */}
       <div className="flex flex-col flex-1 justify-center items-center text-center px-8 py-10 gap-5">
-        <div className="w-16 h-16 rounded-2xl bg-[var(--yellow-muted)] flex items-center justify-center text-3xl">
-          🎬
+        <div className="w-16 h-16 rounded-2xl bg-[var(--yellow-muted)] flex items-center justify-center">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--yellow)]">Spoiler Lock</p>
           <h2 className="text-xl font-bold text-[var(--text-primary)] leading-snug">
             Você já assistiu este episódio?
           </h2>
           <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-            Os comentários aqui podem conter discussões sobre o que acontece em
+            Os comentários contêm spoilers de
           </p>
-          <p className="text-sm font-semibold text-[var(--yellow)]">{episodeTitle}</p>
+          <p className="text-sm font-semibold text-[var(--text-primary)]">{episodeTitle}</p>
         </div>
 
         <div className="flex flex-col gap-3 w-full mt-2">
@@ -98,7 +102,7 @@ export function WatchedGate({ episodeId, episodeTitle, children }: Props) {
             onClick={handleConfirm}
             className="w-full py-3.5 rounded-xl bg-[var(--yellow)] text-black font-bold text-sm hover:opacity-90 active:scale-[0.98] transition-all"
           >
-            Sim, já assisti ✓
+            Já assisti — liberar discussão
           </button>
           <button
             onClick={handleDecline}
@@ -110,7 +114,7 @@ export function WatchedGate({ episodeId, episodeTitle, children }: Props) {
 
         {user ? (
           <p className="text-xs text-[var(--text-muted)] mt-1">
-            Isso será salvo no seu perfil e não perguntaremos novamente.
+            Salvo no seu perfil — não perguntaremos novamente.
           </p>
         ) : (
           <p className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">
@@ -148,22 +152,26 @@ export function WatchedGate({ episodeId, episodeTitle, children }: Props) {
       {/* Placeholder quando modal fechado (usuário recusou) */}
       {!modalVisible && (
         <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-[var(--bg-elevated)] flex items-center justify-center text-2xl">
-            🔒
+          <div className="w-14 h-14 rounded-2xl bg-[var(--bg-elevated)] flex items-center justify-center">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
           </div>
           <div className="flex flex-col gap-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--yellow)]">Spoiler Lock</p>
             <p className="text-sm font-semibold text-[var(--text-primary)]">
-              Comentários bloqueados
+              Discussão bloqueada
             </p>
             <p className="text-xs text-[var(--text-muted)]">
-              Confirme que assistiu para ver as discussões
+              Confirme que assistiu para liberar os comentários
             </p>
           </div>
           <button
             onClick={handleReopen}
             className="px-5 py-2.5 rounded-full bg-[var(--yellow-muted)] border border-[var(--yellow)] text-[var(--yellow)] text-sm font-semibold hover:bg-[var(--yellow)] hover:text-black transition-colors"
           >
-            Já assisti este episódio
+            Já assisti — liberar
           </button>
         </div>
       )}
