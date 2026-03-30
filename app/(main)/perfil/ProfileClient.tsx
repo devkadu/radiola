@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase-browser";
 import { favoritesService } from "@/services/favorites";
 import { User } from "@supabase/supabase-js";
 import { FaPencil, FaShareNodes, FaArrowLeft } from "react-icons/fa6";
+import { CalendarTab } from "./CalendarTab";
+import { useQuery } from "@tanstack/react-query";
 
 interface Props { user: User; }
 
@@ -118,6 +120,13 @@ export const ProfileClient = ({ user }: Props) => {
   const [isPublic, setIsPublic] = useState<boolean>(user.user_metadata?.profile_public !== false);
   const [copied, setCopied] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
+  const [activeTab, setActiveTab] = useState<"perfil" | "calendario">("perfil");
+
+  const { data: seriesProgress = {} } = useQuery<Record<number, { watched: number; total: number }>>({
+    queryKey: ["series-progress"],
+    queryFn: () => fetch("/api/profile/series-progress").then((r) => r.json()),
+    staleTime: 5 * 60 * 1000,
+  });
   const [favorites, setFavorites] = useState<Awaited<ReturnType<typeof favoritesService.getFavorites>>>([]);
   const [commentCount, setCommentCount] = useState(0);
   const [totalLikes, setTotalLikes] = useState(0);
@@ -393,6 +402,30 @@ export const ProfileClient = ({ user }: Props) => {
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="flex border-b border-[var(--border)] mb-2">
+        {(["perfil", "calendario"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`pb-2.5 px-1 mr-5 text-sm font-semibold transition-colors relative ${
+              activeTab === tab
+                ? "text-[var(--text-primary)]"
+                : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+            }`}
+          >
+            {tab === "perfil" ? "Perfil" : "Calendário"}
+            {activeTab === tab && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--yellow)] rounded-full" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "calendario" && <CalendarTab />}
+
+      {activeTab === "perfil" && <>
+
       {/* Personalidade de espectador */}
       {totalReactions > 0 && (
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
@@ -439,17 +472,32 @@ export const ProfileClient = ({ user }: Props) => {
             Séries favoritas <BadgePublic />
           </p>
           <div className="grid grid-cols-3 gap-3">
-            {favorites.map((s) => (
-              <Link key={s.series_id} href={`/series/${s.series_slug}`} className="group flex flex-col gap-1.5">
-                <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-[var(--bg-elevated)]">
-                  {s.poster_path
-                    ? <img src={`https://image.tmdb.org/t/p/w300${s.poster_path}`} alt={s.series_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    : <div className="w-full h-full flex items-center justify-center text-2xl">📺</div>
-                  }
-                </div>
-                <p className="text-xs text-[var(--text-secondary)] truncate group-hover:text-[var(--yellow)] transition-colors">{s.series_name}</p>
-              </Link>
-            ))}
+            {favorites.map((s) => {
+              const prog = seriesProgress[s.series_id];
+              const pct = prog?.total ? Math.min(100, Math.round((prog.watched / prog.total) * 100)) : 0;
+              return (
+                <Link key={s.series_id} href={`/series/${s.series_slug}`} className="group flex flex-col gap-1.5">
+                  <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-[var(--bg-elevated)]">
+                    {s.poster_path
+                      ? <img src={`https://image.tmdb.org/t/p/w300${s.poster_path}`} alt={s.series_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      : <div className="w-full h-full flex items-center justify-center text-2xl">📺</div>
+                    }
+                  </div>
+                  <p className="text-xs text-[var(--text-secondary)] truncate group-hover:text-[var(--yellow)] transition-colors">{s.series_name}</p>
+                  {prog && prog.total > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex-1 h-1 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[var(--yellow)] transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-[9px] text-[var(--text-muted)] shrink-0">{pct}%</span>
+                    </div>
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
@@ -490,6 +538,8 @@ export const ProfileClient = ({ user }: Props) => {
           </div>
         </div>
       )}
+
+      </>}
 
     </main>
   );

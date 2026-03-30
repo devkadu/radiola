@@ -7,7 +7,7 @@ import {
 import { EpisodeReactions } from "@/components/EpisodeReactions/EpisodeReactions";
 import { BackTopBar } from "@/components/BackTopBar/BackTopBar";
 import { episodeId } from "@/services/comments";
-import { CollapsibleSinopse } from "./_components";
+import { CollapsibleSinopse, ShareEpisodeButton } from "./_components";
 import { EpisodeCommentsSection } from "./_section";
 import { EpisodeVideoButton } from "./_video";
 import { WatchedBadge } from "./_watched";
@@ -176,6 +176,7 @@ export default async function EpisodePage({ params }: Props) {
               </span>
             ))}
             <WatchedBadge episodeId={computedEpisodeId} />
+            <ShareEpisodeButton seriesName={series.name} episodeName={ep.name} />
           </div>
 
           {/* Collapsible sinopse */}
