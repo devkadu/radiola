@@ -23,7 +23,7 @@ function EpisodeCard({ ep, last, first }: { ep: HotEpisode; last: boolean; first
       href={ep.href}
       className={`block px-4 py-4 transition-colors ${first ? "bg-emerald-950/40 hover:bg-emerald-950/60" : "hover:bg-[var(--bg-elevated)]"} ${!last ? "border-b border-[var(--border)]" : ""}`}
     >
-      <div className="flex gap-4 items-start">
+      <div className="flex gap-4 items-stretch">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--yellow)] truncate">
@@ -47,14 +47,14 @@ function EpisodeCard({ ep, last, first }: { ep: HotEpisode; last: boolean; first
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2.5 shrink-0 self-center">
-          <div className="text-right">
+        <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex flex-col justify-between text-right h-full">
             <p className="text-xl font-bold text-[var(--yellow)] leading-none">{ep.comments}</p>
-            <p className="text-[9px] uppercase tracking-widest text-[var(--text-muted)] mt-0.5">
+            <p className="text-[9px] uppercase tracking-widest text-[var(--text-muted)]">
               comentários
             </p>
           </div>
-          <span className="text-[var(--text-muted)] text-sm">→</span>
+          <span className="text-[var(--text-muted)] text-sm self-end">→</span>
         </div>
       </div>
     </Link>
