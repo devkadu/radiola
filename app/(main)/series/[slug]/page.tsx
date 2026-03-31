@@ -19,6 +19,8 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const id = slug.split("-").pop()!;
@@ -37,6 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: series.name,
     description,
+    alternates: { canonical: `${siteUrl}/series/${slug}` },
     openGraph: {
       title: series.name,
       description,
@@ -83,8 +86,51 @@ export default async function SeriesPage({ params }: Props) {
 
   const releaseYear = series.first_air_date?.split("-")[0];
 
+  const seriesUrl = `${siteUrl}/series/${slug}`;
+  const seriesImage = series.poster_path
+    ? `https://image.tmdb.org/t/p/w780${series.poster_path}`
+    : null;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TVSeries",
+        "@id": seriesUrl,
+        name: series.name,
+        ...(series.overview && { description: series.overview }),
+        ...(seriesImage && { image: seriesImage }),
+        ...(series.first_air_date && { datePublished: series.first_air_date }),
+        ...(series.last_air_date && { dateModified: series.last_air_date }),
+        ...(series.number_of_seasons && { numberOfSeasons: series.number_of_seasons }),
+        ...(series.number_of_episodes && { numberOfEpisodes: series.number_of_episodes }),
+        ...(series.genres?.length && { genre: series.genres.map((g: any) => g.name) }),
+        url: seriesUrl,
+        inLanguage: "pt-BR",
+        ...(cast.length > 0 && {
+          actor: cast.map((m) => ({
+            "@type": "Person",
+            name: m.name,
+            url: `${siteUrl}/pessoa/${m.id}`,
+          })),
+        }),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Início", item: siteUrl },
+          { "@type": "ListItem", position: 2, name: series.name, item: seriesUrl },
+        ],
+      },
+    ],
+  };
+
   return (
     <main className="relative min-h-screen text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Hero: poster (esq) + backdrop (dir) no desktop */}
       <div className="relative w-full lg:flex lg:gap-3">

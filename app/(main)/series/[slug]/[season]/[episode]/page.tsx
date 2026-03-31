@@ -19,6 +19,8 @@ interface Props {
   params: Promise<{ slug: string; season: string; episode: string }>;
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, season: seasonParam, episode: episodeParam } = await params;
   const seriesId = idFromSeriesSlug(slug);
@@ -45,6 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: { canonical: `${siteUrl}/series/${slug}/${seasonParam}/${episodeParam}` },
     openGraph: {
       title,
       description,
@@ -103,8 +106,52 @@ export default async function EpisodePage({ params }: Props) {
 
   const placeholder = `Sem medo — aqui só quem chegou até o ${seasonLabel}·${episodeLabel}...`;
 
+  const episodeUrl = `${siteUrl}/series/${slug}/${seasonParam}/${episodeParam}`;
+  const seriesUrl = `${siteUrl}/series/${slug}`;
+  const seasonUrl = `${siteUrl}/series/${slug}/${seasonParam}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TVEpisode",
+        "@id": episodeUrl,
+        name: ep.name,
+        episodeNumber: episodeNumber,
+        ...(ep.overview && { description: ep.overview }),
+        ...(ep.air_date && { datePublished: ep.air_date }),
+        ...(ep.runtime && { duration: `PT${ep.runtime}M` }),
+        ...(ep.still_path && { image: `https://image.tmdb.org/t/p/w780${ep.still_path}` }),
+        url: episodeUrl,
+        partOfSeason: {
+          "@type": "TVSeason",
+          seasonNumber: seasonNumber,
+          url: seasonUrl,
+        },
+        partOfTVSeries: {
+          "@type": "TVSeries",
+          name: series.name,
+          url: seriesUrl,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Início", item: siteUrl },
+          { "@type": "ListItem", position: 2, name: series.name, item: seriesUrl },
+          { "@type": "ListItem", position: 3, name: `Temporada ${seasonNumber}`, item: seasonUrl },
+          { "@type": "ListItem", position: 4, name: ep.name, item: episodeUrl },
+        ],
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen pb-[200px] lg:pb-16 text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Hero image — full width, 16:9 */}
       <div className="relative w-full aspect-video lg:aspect-auto lg:h-[320px] bg-[var(--bg-elevated)]">

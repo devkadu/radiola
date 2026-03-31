@@ -7,11 +7,17 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const person = await tmdbService.getPersonDetails(id).catch(() => null);
   if (!person) return {};
-  return { title: person.name, description: person.biography?.slice(0, 160) };
+  return {
+    title: person.name,
+    description: person.biography?.slice(0, 160),
+    alternates: { canonical: `${siteUrl}/pessoa/${id}` },
+  };
 }
 
 function makeSlug(name: string, id: number) {
@@ -31,8 +37,24 @@ export default async function PessoaPage({ params }: Props) {
     .sort((a: TvCredit, b: TvCredit) => (b.vote_count ?? 0) - (a.vote_count ?? 0))
     .slice(0, 12);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: person.name,
+    url: `${siteUrl}/pessoa/${id}`,
+    ...(person.biography && { description: person.biography }),
+    ...(person.profile_path && { image: `https://image.tmdb.org/t/p/w185${person.profile_path}` }),
+    ...(person.birthday && { birthDate: person.birthday }),
+    ...(person.place_of_birth && { birthPlace: person.place_of_birth }),
+    ...(person.known_for_department && { jobTitle: person.known_for_department }),
+  };
+
   return (
     <main className="px-4 lg:px-0 py-6 flex flex-col gap-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header */}
       <div className="flex gap-5 items-start">
         <div className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden shrink-0 bg-[var(--bg-surface)] ring-2 ring-[var(--border)]">
