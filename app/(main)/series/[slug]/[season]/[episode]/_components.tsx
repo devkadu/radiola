@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { commentsService, episodeId } from "@/services/comments";
+import { LoginSheet } from "@/components/LoginSheet/LoginSheet";
 
 interface InlineCommentInputProps {
   episodeId: string;
@@ -20,21 +21,9 @@ export function InlineCommentInput({ episodeId: epId, placeholder, onCommentAdde
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const promptRef = useRef<HTMLDivElement>(null);
 
   const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "";
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
-
-  useEffect(() => {
-    if (!showLoginPrompt) return;
-    const handler = (e: MouseEvent) => {
-      if (promptRef.current && !promptRef.current.contains(e.target as Node)) {
-        setShowLoginPrompt(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [showLoginPrompt]);
 
   const handleClick = () => {
     if (!user) { setShowLoginPrompt(true); return; }
@@ -64,6 +53,12 @@ export function InlineCommentInput({ episodeId: epId, placeholder, onCommentAdde
   };
 
   return (
+    <>
+    <LoginSheet
+      show={showLoginPrompt}
+      onClose={() => setShowLoginPrompt(false)}
+      message="Entre para comentar este episódio."
+    />
     <div className="relative">
       {!expanded ? (
         <div
@@ -118,22 +113,8 @@ export function InlineCommentInput({ episodeId: epId, placeholder, onCommentAdde
         </div>
       )}
 
-      {showLoginPrompt && (
-        <div ref={promptRef} className="absolute left-0 right-0 top-full mt-2 z-50">
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-4 shadow-lg">
-            <p className="text-sm text-[var(--text-primary)] mb-3">Entre para comentar este episódio.</p>
-            <div className="flex gap-2">
-              <Link href="/login" className="flex-1 text-center text-sm py-2 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] transition-colors" onClick={() => setShowLoginPrompt(false)}>
-                Logar
-              </Link>
-              <Link href="/criar-conta" className="flex-1 text-center text-sm py-2 rounded-lg bg-[var(--yellow)] text-black font-semibold hover:bg-[var(--yellow-dim)] transition-colors" onClick={() => setShowLoginPrompt(false)}>
-                Criar conta
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
+    </>
   );
 }
 
