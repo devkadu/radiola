@@ -380,9 +380,9 @@ export const ProfileClient = ({ user }: Props) => {
             <p className="text-xs text-[var(--yellow)] mt-0.5">
               Membro desde {memberSince(user.created_at)}
             </p>
-            <p className="text-xs text-[var(--yellow)] mt-0.5">
+            <Link href={`/u/${username}`} className="text-xs text-[var(--yellow)] mt-0.5 hover:underline">
               segundatemporada.com.br/u/{username}
-            </p>
+            </Link>
           </div>
         </div>
 
