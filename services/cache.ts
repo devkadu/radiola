@@ -1,9 +1,9 @@
-import { supabase } from "@/lib/supabase";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import { seriesSlug, episodeSlug } from "@/lib/slugs";
 
 export const cacheService = {
   async cacheSeries(series: any) {
-    await supabase.from("series").upsert({
+    await supabaseAdmin.from("series").upsert({
       id: series.id,
       name: series.name,
       slug: seriesSlug(series.name, series.id),
@@ -23,20 +23,20 @@ export const cacheService = {
       slug: episodeSlug(ep.episode_number, ep.name),
     }));
 
-    await supabase.from("episodes").upsert(rows);
+    await supabaseAdmin.from("episodes").upsert(rows);
   },
 
   async search(query: string) {
     const tsquery = query.trim().split(/\s+/).join(" & ");
 
     const [seriesRes, episodesRes] = await Promise.all([
-      supabase
+      supabaseAdmin
         .from("series")
         .select("id, name, slug, poster_path")
         .textSearch("name", tsquery, { config: "portuguese" })
         .limit(5),
 
-      supabase
+      supabaseAdmin
         .from("episodes")
         .select("id, name, slug, season_number, episode_number, series_id, series(id, name, slug)")
         .textSearch("name", tsquery, { config: "portuguese" })
