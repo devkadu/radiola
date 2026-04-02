@@ -29,18 +29,8 @@ interface Props {
   seasons: Season[];
 }
 
-const REACTIONS = [
-  { key: "chocante",      emoji: "😱", weight: 9.5 },
-  { key: "incrivel",      emoji: "🔥", weight: 9.0 },
-  { key: "emocionante",   emoji: "💗", weight: 8.0 },
-  { key: "surpreso",      emoji: "😮", weight: 6.5 },
-  { key: "mediano",       emoji: "😐", weight: 5.0 },
-  { key: "decepcionante", emoji: "😞", weight: 2.0 },
-];
-
 type EpisodeStats = {
-  score: number;
-  topEmoji: string | null;
+  avg: number;
   total: number;
 };
 
@@ -85,16 +75,15 @@ export function SeasonTabs({ slug, seriesId, seasons }: Props) {
         const newStats: Record<string, EpisodeStats> = {};
         for (const id of ids) {
           const counts = byEp[id] ?? {};
-          const total = Object.values(counts).reduce((a, b) => a + b, 0);
+          // only star ratings (keys "1"–"5")
+          const starEntries = Object.entries(counts).filter(([k]) => {
+            const n = parseInt(k);
+            return !isNaN(n) && n >= 1 && n <= 5;
+          });
+          const total = starEntries.reduce((a, [, v]) => a + v, 0);
           if (total === 0) continue;
-
-          const score = REACTIONS.reduce((acc, r) => acc + r.weight * (counts[r.key] ?? 0), 0) / total;
-          const topKey = REACTIONS.reduce((best, r) =>
-            (counts[r.key] ?? 0) > (counts[best.key] ?? 0) ? r : best
-          , REACTIONS[0]).key;
-          const topEmoji = REACTIONS.find((r) => r.key === topKey && (counts[r.key] ?? 0) > 0)?.emoji ?? null;
-
-          newStats[id] = { score, topEmoji, total };
+          const avg = starEntries.reduce((a, [k, v]) => a + parseInt(k) * v, 0) / total;
+          newStats[id] = { avg, total };
         }
         setStats(newStats);
       });
@@ -186,14 +175,14 @@ export function SeasonTabs({ slug, seriesId, seasons }: Props) {
                         {ep.name}
                       </p>
                     </div>
-                    {/* Score + top emoji — only if has reactions */}
+                    {/* Star rating — only if has ratings */}
                     {epStats && epStats.total > 0 && (
-                      <div className="flex items-center gap-1 shrink-0 ml-2">
-                        {epStats.topEmoji && (
-                          <span className="text-sm leading-none">{epStats.topEmoji}</span>
-                        )}
+                      <div className="flex items-center gap-0.5 shrink-0 ml-2">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--yellow)" stroke="var(--yellow)" strokeWidth="1.5" strokeLinejoin="round">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
                         <span className="text-xs font-bold text-[var(--yellow)]">
-                          {epStats.score.toFixed(1)}
+                          {epStats.avg.toFixed(1)}
                         </span>
                       </div>
                     )}
