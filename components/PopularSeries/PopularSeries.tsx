@@ -38,10 +38,10 @@ export const PopularSeries = () => {
       </div>
 
       {/* Grid */}
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-6 lg:overflow-visible">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-8 lg:overflow-visible">
         {loading
           ? Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="shrink-0 w-[calc((100vw-3.5rem)/2.5)] lg:w-auto">
+              <div key={i} className="shrink-0 w-[calc((100vw-3.5rem)/3.5)] lg:w-auto">
                 <SeriesSkeleton />
               </div>
             ))
@@ -49,26 +49,26 @@ export const PopularSeries = () => {
               <Link
                 key={s.id}
                 href={`/series/${toSlug(s.name, s.id)}`}
-                className="shrink-0 w-[calc((100vw-3.5rem)/2.5)] lg:w-auto rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--yellow)] transition-colors"
+                className="shrink-0 w-[calc((100vw-3.5rem)/3.5)] lg:w-auto rounded-lg overflow-hidden bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--yellow)] transition-colors"
               >
                 <div className="relative w-full aspect-[2/3]">
                   {s.poster_path ? (
                     <Image
-                      src={`https://image.tmdb.org/t/p/w300${s.poster_path}`}
+                      src={`https://image.tmdb.org/t/p/w185${s.poster_path}`}
                       alt={s.name}
                       fill
                       className="object-cover"
-                      sizes="(min-width: 1024px) 25vw, 160px"
+                      sizes="(min-width: 1024px) 12vw, 110px"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[var(--bg-elevated)] text-3xl">
+                    <div className="w-full h-full flex items-center justify-center bg-[var(--bg-elevated)] text-2xl">
                       📺
                     </div>
                   )}
                 </div>
-                <div className="p-3">
-                  <p className="text-sm font-semibold text-[var(--text-primary)] leading-tight">{s.name}</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                <div className="p-2">
+                  <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight truncate">{s.name}</p>
+                  <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
                     {s.favorite_count} {s.favorite_count === 1 ? "pessoa" : "pessoas"}
                   </p>
                 </div>

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const Home = () => {
   return (
-    <main>
+    <main className="lg:px-8">
       <HotEpisodes />
 
       <section className="px-4 lg:px-0 pb-2">
