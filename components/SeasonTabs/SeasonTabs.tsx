@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { seasonSlug, episodeSlug } from "@/lib/slugs";
 import { createClient } from "@/lib/supabase-browser";
 
@@ -45,7 +46,12 @@ function formatDate(dateStr: string) {
 }
 
 export function SeasonTabs({ slug, seriesId, seasons }: Props) {
-  const [selected, setSelected] = useState(seasons[0]?.season_number ?? 1);
+  const searchParams = useSearchParams();
+  const seasonParam = Number(searchParams.get("season"));
+  const initialSeason = seasonParam && seasons.some(s => s.season_number === seasonParam)
+    ? seasonParam
+    : seasons[0]?.season_number ?? 1;
+  const [selected, setSelected] = useState(initialSeason);
   const [stats, setStats] = useState<Record<string, EpisodeStats>>({});
 
   const current = seasons.find((s) => s.season_number === selected);
