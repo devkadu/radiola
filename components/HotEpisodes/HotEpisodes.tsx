@@ -68,7 +68,7 @@ function EpisodeList({ episodes, loading, emptyMsg }: {
 }) {
   if (loading) {
     return (
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] overflow-hidden" style={{ minHeight: 336 }}>
         {[1, 2, 3, 4].map((i, idx) => (
           <div key={i} className={`h-[84px] animate-pulse bg-[var(--bg-elevated)] ${idx < 3 ? "border-b border-[var(--border)]" : ""}`} />
         ))}

@@ -155,21 +155,23 @@ export default async function SeriesPage({ params }: Props) {
         <div className="relative flex-1 aspect-video lg:aspect-auto lg:h-[420px] bg-[var(--bg-elevated)]">
           {series.backdrop_path ? (
             <Image
-              src={`https://image.tmdb.org/t/p/w1280${series.backdrop_path}`}
+              src={`https://image.tmdb.org/t/p/w780${series.backdrop_path}`}
               alt={series.name}
               fill
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 75vw"
               priority
+              fetchPriority="high"
             />
           ) : series.poster_path ? (
             <Image
-              src={`https://image.tmdb.org/t/p/w780${series.poster_path}`}
+              src={`https://image.tmdb.org/t/p/w500${series.poster_path}`}
               alt={series.name}
               fill
               className="object-cover object-top"
               sizes="(max-width: 1024px) 100vw, 75vw"
               priority
+              fetchPriority="high"
             />
           ) : null}
 
@@ -204,12 +206,14 @@ export default async function SeriesPage({ params }: Props) {
           {/* Linha 1: poster | título | botão */}
           <div className="flex items-center gap-3">
             {series.poster_path && (
-              <div className="lg:hidden relative w-20 h-28 rounded-xl overflow-hidden shrink-0 -mt-12 ring-2 ring-[var(--border)] shadow-xl">
+              <div className="lg:hidden w-20 h-28 rounded-xl overflow-hidden shrink-0 -mt-12 ring-2 ring-[var(--border)] shadow-xl">
                 <Image
-                  src={`https://image.tmdb.org/t/p/w300${series.poster_path}`}
+                  src={`https://image.tmdb.org/t/p/w185${series.poster_path}`}
                   alt={series.name}
-                  fill
-                  className="object-cover"
+                  width={80}
+                  height={112}
+                  className="object-cover w-full h-full"
+                  priority
                 />
               </div>
             )}

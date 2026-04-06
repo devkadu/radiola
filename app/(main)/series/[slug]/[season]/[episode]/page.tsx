@@ -167,6 +167,7 @@ export default async function EpisodePage({ params }: Props) {
               className="object-cover"
               sizes="(min-width: 1024px) 65vw, 100vw"
               priority
+              fetchPriority="high"
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-4xl text-[var(--text-muted)]">

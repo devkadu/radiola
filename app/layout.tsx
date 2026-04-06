@@ -16,12 +16,16 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-display",
   subsets: ["latin"],
   weight: ["700", "800"],
+  display: "swap",
+  preload: true,
 });
 
 const outfit = Outfit({
   variable: "--font-body",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -30,7 +34,7 @@ export const metadata: Metadata = {
     default: "Segunda Temporada",
     template: "%s | Segunda Temporada",
   },
-  description: "Aqui sua série continua!",
+  description: "Debate séries sem spoilers. Comentários organizados por episódio para quem leva séries a sério.",
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     shortcut: "/icon.svg",
@@ -41,13 +45,13 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     type: "website",
     title: "Segunda Temporada",
-    description: "Aqui sua série continua!",
+    description: "Debate séries sem spoilers. Comentários organizados por episódio para quem leva séries a sério.",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Segunda Temporada" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Segunda Temporada",
-    description: "Aqui sua série continua!",
+    description: "Debate séries sem spoilers. Comentários organizados por episódio para quem leva séries a sério.",
     images: ["/opengraph-image"],
   },
   robots: {
@@ -78,7 +82,7 @@ const jsonLd = {
       "@id": `${siteUrl}/#website`,
       url: siteUrl,
       name: "Segunda Temporada",
-      description: "Aqui sua série continua!",
+      description: "Debate séries sem spoilers. Comentários organizados por episódio para quem leva séries a sério.",
       inLanguage: "pt-BR",
       publisher: { "@id": `${siteUrl}/#organization` },
     },
