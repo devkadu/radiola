@@ -11,6 +11,7 @@ import { CollapsibleSinopse, ShareEpisodeButton } from "./_components";
 import { EpisodeCommentsSection } from "./_section";
 import { EpisodeVideoButton } from "./_video";
 import { WatchedBadge } from "./_watched";
+import { EpisodeRatingOverlay } from "./_rating-overlay";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -147,93 +148,106 @@ export default async function EpisodePage({ params }: Props) {
   };
 
   return (
-    <main className="min-h-screen pb-[200px] lg:pb-16 text-white">
+    <main className="pb-[200px] lg:pb-0 text-white lg:grid lg:grid-cols-[60fr_40fr] lg:h-full lg:overflow-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hero image — full width, 16:9 */}
-      <div className="relative w-full aspect-video lg:aspect-auto lg:h-[320px] bg-[var(--bg-elevated)]">
-        {ep.still_path ? (
-          <Image
-            src={`https://image.tmdb.org/t/p/w780${ep.still_path}`}
-            alt={ep.name}
-            fill
-            className="object-cover"
-            sizes="100vw"
-            priority
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-4xl text-[var(--text-muted)]">
-            📺
+      {/* LEFT column — hero + info + reactions */}
+      <div className="flex flex-col lg:overflow-y-auto">
+
+        {/* Hero image */}
+        <div className="relative w-full aspect-video lg:aspect-auto lg:h-[320px] bg-[var(--bg-elevated)]">
+          {ep.still_path ? (
+            <Image
+              src={`https://image.tmdb.org/t/p/w780${ep.still_path}`}
+              alt={ep.name}
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 65vw, 100vw"
+              priority
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-4xl text-[var(--text-muted)]">
+              📺
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
+
+          {youtubeVideo && (
+            <EpisodeVideoButton youtubeKey={youtubeVideo.key} title={ep.name} />
+          )}
+
+          <div className="absolute inset-x-0 top-0">
+            <BackTopBar href={`/series/${slug}`} title={ep.name} />
           </div>
-        )}
-        {/* Gradient overlay so BackTopBar is readable */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
 
-        {/* Play button — only if YouTube video available */}
-        {youtubeVideo && (
-          <EpisodeVideoButton youtubeKey={youtubeVideo.key} title={ep.name} />
-        )}
-
-        {/* Back top bar — overlaid on image */}
-        <div className="absolute inset-x-0 top-0">
-          <BackTopBar href={`/series/${slug}`} title={ep.name} />
+          <EpisodeRatingOverlay episodeId={computedEpisodeId} />
         </div>
-      </div>
-
-      <div className="px-4 pt-4 flex flex-col gap-4">
 
         {/* Episode info */}
-        <div className="flex flex-col gap-1.5">
-          {/* Series name · season */}
-          <Link
-            href={`/series/${slug}`}
-            className="text-xs font-bold uppercase tracking-wider text-[var(--yellow)] hover:opacity-80 transition-opacity"
-          >
-            {series.name} · {seasonLabel}
-          </Link>
+        <div className="px-4 pt-4 flex flex-col gap-4 lg:px-6 lg:py-6">
+          <div className="flex flex-col gap-1.5">
+            <Link
+              href={`/series/${slug}`}
+              className="text-xs font-bold uppercase tracking-wider text-[var(--yellow)] hover:opacity-80 transition-opacity"
+            >
+              {series.name} · {seasonLabel}
+            </Link>
 
-          {/* Episode title */}
-          <p className="text-xl font-bold leading-snug">
-            &ldquo;{ep.name}&rdquo;
-          </p>
+            <p className="text-xl font-bold leading-snug">
+              &ldquo;{ep.name}&rdquo;
+            </p>
 
-          {/* Meta: E01 · 45 min · date */}
-          <p className="text-xs text-[var(--text-muted)]">
-            {episodeLabel}
-            {runtimeLabel && ` · ${runtimeLabel}`}
-            {ep.air_date && ` · ${formatDate(ep.air_date)}`}
-          </p>
+            <p className="text-xs text-[var(--text-muted)]">
+              {episodeLabel}
+              {runtimeLabel && ` · ${runtimeLabel}`}
+              {ep.air_date && ` · ${formatDate(ep.air_date)}`}
+            </p>
 
-          {/* Badges row */}
-          <div className="flex flex-wrap gap-1.5 mt-0.5">
-            {ep.vote_average > 0 && (
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[#1f2d1a] border border-[#2d4a1e] text-green-400">
-                {ep.vote_average.toFixed(1)} TMDB
-              </span>
-            )}
-            {genres.slice(0, 2).map((g) => (
-              <span
-                key={g.id}
-                className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)]"
-              >
-                {g.name}
-              </span>
-            ))}
-            <WatchedBadge episodeId={computedEpisodeId} />
-            <ShareEpisodeButton seriesName={series.name} episodeName={ep.name} />
+            <div className="flex flex-wrap gap-1.5 mt-0.5">
+              {genres.slice(0, 2).map((g) => (
+                <span
+                  key={g.id}
+                  className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)]"
+                >
+                  {g.name}
+                </span>
+              ))}
+              <WatchedBadge episodeId={computedEpisodeId} />
+              <ShareEpisodeButton seriesName={series.name} episodeName={ep.name} />
+            </div>
+
+            {ep.overview && <CollapsibleSinopse overview={ep.overview} />}
           </div>
 
-          {/* Collapsible sinopse */}
-          {ep.overview && <CollapsibleSinopse overview={ep.overview} />}
+          <EpisodeReactions episodeId={computedEpisodeId} />
+
+          {/* Mobile only: comments */}
+          <div className="lg:hidden">
+            <EpisodeCommentsSection
+              seriesId={seriesId}
+              seasonNumber={seasonNumber}
+              episodeNumber={episodeNumber}
+              placeholder={placeholder}
+              episodeTitle={`"${ep.name}" · ${series.name} ${seasonLabel}${episodeLabel}`}
+              episodeUrl={`/series/${slug}/${seasonParam}/${episodeParam}`}
+              fichaTecnica={{
+                airDate: ep.air_date ?? null,
+                runtime: ep.runtime ?? null,
+                productionCode: ep.production_code ?? null,
+                crew: ep.crew ?? [],
+                guestStars: ep.guest_stars ?? [],
+              }}
+            />
+          </div>
         </div>
 
-        {/* Reactions */}
-        <EpisodeReactions episodeId={computedEpisodeId} />
+      </div>
 
-        {/* Comentários + Ficha Técnica */}
+      {/* RIGHT column — comments full height (desktop only) */}
+      <div className="hidden lg:flex flex-col border-l border-[var(--border)] overflow-y-auto">
         <EpisodeCommentsSection
           seriesId={seriesId}
           seasonNumber={seasonNumber}
@@ -249,8 +263,8 @@ export default async function EpisodePage({ params }: Props) {
             guestStars: ep.guest_stars ?? [],
           }}
         />
-
       </div>
+
     </main>
   );
 }

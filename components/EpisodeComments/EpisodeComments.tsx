@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { commentsService, Comment, episodeId } from "@/services/comments";
-import { FaTrash } from "react-icons/fa6";
+import { FaTrash, FaHeart } from "react-icons/fa6";
 
 interface Props {
   seriesId: string;
@@ -202,22 +202,23 @@ export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, episode
                 )}
               </div>
             </div>
-            <p className={`text-[var(--text-secondary)] leading-relaxed mb-2 ${isReply ? "text-xs" : "text-sm"}`}>{c.text}</p>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => handleLike(c.id)}
-                className={`text-xs transition-colors flex items-center gap-1 ${likes.liked ? "text-red-400" : "text-[var(--text-muted)] hover:text-red-400"}`}
-              >
-                ♥ {likes.count}
-              </button>
-              {!isReply && user && (
+            <p className={`text-[var(--text-secondary)] leading-relaxed ${isReply ? "text-xs" : "text-sm"}`}>{c.text}</p>
+            <div className="flex items-end justify-between mt-2">
+              {!isReply && user ? (
                 <button
                   onClick={() => setReplyingTo(replyingTo === c.id ? null : c.id)}
                   className="text-xs text-[var(--text-muted)] hover:text-[var(--yellow)] transition-colors"
                 >
                   ↩ Responder
                 </button>
-              )}
+              ) : <span />}
+              <button
+                onClick={() => handleLike(c.id)}
+                className={`flex flex-col items-center transition-colors ${likes.liked ? "text-red-400" : "text-[var(--text-muted)] hover:text-red-400"}`}
+              >
+                <FaHeart size={13} />
+                {likes.count > 0 && <span className="text-[10px] leading-none mt-0.5">{likes.count}</span>}
+              </button>
             </div>
 
             {/* Reply box */}

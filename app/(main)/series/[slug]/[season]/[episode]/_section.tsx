@@ -170,9 +170,9 @@ export function EpisodeCommentsSection({
   );
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       {/* Tabs */}
-      <div className="flex border-b border-[var(--border)]">
+      <div className="flex border-b border-[var(--border)] shrink-0">
         <button
           onClick={() => setActiveTab("comments")}
           className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors -mb-px ${
@@ -203,7 +203,7 @@ export function EpisodeCommentsSection({
       </div>
 
       {/* Content */}
-      <div className="pt-4">
+      <div className="pt-4 px-4 lg:px-4 flex-1">
         {activeTab === "ficha" ? fichaContent : commentsContent}
       </div>
     </div>
