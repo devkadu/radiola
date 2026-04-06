@@ -165,7 +165,7 @@ export const Header = () => {
           </div>
 
           {user ? (
-            <Link href="/perfil" className="hover:opacity-80 transition-opacity shrink-0">
+            <Link href="/perfil" className="hover:opacity-80 active:opacity-50 transition-opacity shrink-0">
               <Avatar avatarUrl={avatarUrl} initials={initials} />
             </Link>
           ) : (
@@ -186,7 +186,7 @@ export const Header = () => {
             <FaMagnifyingGlass size={18} />
           </button>
           {user ? (
-            <Link href="/perfil" className="hover:opacity-80 transition-opacity shrink-0">
+            <Link href="/perfil" className="hover:opacity-80 active:opacity-50 transition-opacity shrink-0">
               <Avatar avatarUrl={avatarUrl} initials={initials} />
             </Link>
           ) : (

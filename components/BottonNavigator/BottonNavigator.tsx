@@ -10,7 +10,7 @@ export const BottonNavigator = () => {
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg)] border-t border-[var(--border)] flex justify-around items-center py-3 z-40">
-      <Link href="/" className="flex flex-col items-center gap-1">
+      <Link href="/" className="flex flex-col items-center gap-1 active:opacity-50 transition-opacity">
         <div className="relative">
           <FaHouse size={20} className={pathname === "/" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"} />
           {pathname === "/" && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--yellow)]" />}
@@ -23,7 +23,7 @@ export const BottonNavigator = () => {
         <span className="text-xs text-[var(--text-muted)]">Buscar</span>
       </button>
 
-      <Link href="/series" className="flex flex-col items-center gap-1">
+      <Link href="/series" className="flex flex-col items-center gap-1 active:opacity-50 transition-opacity">
         <div className="relative">
           <FaTv size={20} className={pathname === "/series" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"} />
           {pathname === "/series" && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--yellow)]" />}
@@ -31,7 +31,7 @@ export const BottonNavigator = () => {
         <span className={`text-xs ${pathname === "/series" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"}`}>Séries</span>
       </Link>
 
-      <Link href="/perfil" className="flex flex-col items-center gap-1">
+      <Link href="/perfil" className="flex flex-col items-center gap-1 active:opacity-50 transition-opacity">
         <div className="relative">
           <FaCircleUser size={20} className={pathname === "/perfil" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"} />
           {pathname === "/perfil" && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--yellow)]" />}
@@ -39,7 +39,7 @@ export const BottonNavigator = () => {
         <span className={`text-xs ${pathname === "/perfil" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"}`}>Perfil</span>
       </Link>
 
-      <Link href="/sugestoes" className="flex flex-col items-center gap-1">
+      <Link href="/sugestoes" className="flex flex-col items-center gap-1 active:opacity-50 transition-opacity">
         <div className="relative">
           <FaLightbulb size={20} className={pathname === "/sugestoes" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"} />
           {pathname === "/sugestoes" && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--yellow)]" />}
