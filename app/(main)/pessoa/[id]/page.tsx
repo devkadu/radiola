@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { tmdbService } from "@/services/tmdb";
+import { seriesSlug as makeSlug } from "@/lib/slugs";
 import type { Metadata } from "next";
 
 interface Props {
@@ -18,10 +19,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: person.biography?.slice(0, 160),
     alternates: { canonical: `${siteUrl}/pessoa/${id}` },
   };
-}
-
-function makeSlug(name: string, id: number) {
-  return `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${id}`;
 }
 
 export default async function PessoaPage({ params }: Props) {

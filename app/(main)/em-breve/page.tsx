@@ -1,16 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { tmdbService } from "@/services/tmdb";
+import { seriesSlug as makeSlug } from "@/lib/slugs";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Em breve",
-  description: "As séries mais aguardadas que estão por vir.",
+  title: "Em breve — Séries mais aguardadas para estrear",
+  description:
+    "Acompanhe as séries mais esperadas que estão prestes a estrear. Seja avisado quando os debates começarem.",
 };
-
-function makeSlug(name: string, id: number) {
-  return `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${id}`;
-}
 
 function formatAirDate(dateStr: string) {
   const date = new Date(dateStr + "T00:00:00");

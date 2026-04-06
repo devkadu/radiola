@@ -1,5 +1,6 @@
 import { cacheService } from "@/services/cache";
 import { tmdbService } from "@/services/tmdb";
+import { seriesSlug } from "@/lib/slugs";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -20,7 +21,7 @@ export async function GET(req: NextRequest) {
       id: s.id,
       name: s.name,
       poster_path: s.poster_path,
-      slug: `${s.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${s.id}`,
+      slug: seriesSlug(s.name, s.id),
     }));
 
   return NextResponse.json({

@@ -5,7 +5,7 @@ import { TopCommenters } from "@/components/TopCommenters/TopCommenters";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Início",
+  title: "Segunda Temporada — Debate séries sem spoilers",
   description:
     "Descubra episódios em debate e séries populares. Comente sem spoilers no seu ritmo.",
 };
@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 const Home = () => {
   return (
     <main className="lg:px-8">
+      <h1 className="sr-only">Segunda Temporada — Debate séries sem spoilers</h1>
       <HotEpisodes />
 
       <section className="px-4 lg:px-0 pb-2">

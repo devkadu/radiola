@@ -3,6 +3,7 @@ import { cacheService } from "@/services/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import { seriesSlug } from "@/lib/slugs";
 import type { Metadata } from "next";
 
 interface SearchPageProps {
@@ -117,7 +118,7 @@ export default async function BuscaPage({ searchParams }: SearchPageProps) {
             {tmdbSeries.map((series: any) => (
               <SeriesCard
                 key={series.id}
-                slug={`${series.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${series.id}`}
+                slug={seriesSlug(series.name, series.id)}
                 name={series.name}
                 posterPath={series.poster_path}
               />

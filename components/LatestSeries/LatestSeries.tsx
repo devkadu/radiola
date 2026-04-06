@@ -1,6 +1,7 @@
 import { tmdbService } from "@/services/tmdb";
 import Image from "next/image";
 import Link from "next/link";
+import { seriesSlug } from "@/lib/slugs";
 
 export const LatestSeries = async () => {
   const { results } = await tmdbService.getLatestSeries();
@@ -9,7 +10,7 @@ export const LatestSeries = async () => {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 pb-24">
       {results.map((series: any) => (
         <Link
-          href={`/series/${series.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${series.id}`}
+          href={`/series/${seriesSlug(series.name, series.id)}`}
           key={series.id}
           className="group relative aspect-[2/3] rounded-xl overflow-hidden bg-gray-800 border border-transparent hover:border-[var(--brand-yellow)] transition-all"
         >

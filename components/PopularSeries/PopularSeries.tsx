@@ -3,9 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
-
-const toSlug = (name: string, id: number) =>
-  `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${id}`;
+import { seriesSlug as toSlug } from "@/lib/slugs";
 
 function SeriesSkeleton() {
   return (

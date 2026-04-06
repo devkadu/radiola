@@ -1,16 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { tmdbService } from "@/services/tmdb";
+import { seriesSlug as makeSlug } from "@/lib/slugs";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Em debate",
-  description: "O que o mundo está assistindo e debatendo agora.",
+  title: "Em debate — Séries mais comentadas agora",
+  description:
+    "Veja as séries em alta no mundo e o que está sendo debatido agora. Atualizado diariamente com dados do TMDB.",
 };
-
-function makeSlug(name: string, id: number) {
-  return `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${id}`;
-}
 
 function formatAirDate(dateStr: string) {
   const date = new Date(dateStr + "T00:00:00");
@@ -38,6 +36,7 @@ export default async function DebatesPage() {
 
   return (
     <main className="px-4 lg:px-0 py-6 flex flex-col gap-10">
+      <h1 className="sr-only">Em debate — Séries mais comentadas agora</h1>
       {/* Em alta agora */}
       <section>
         <div className="flex items-center justify-between mb-1">
