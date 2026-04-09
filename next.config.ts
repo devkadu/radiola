@@ -26,8 +26,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.supabase.co" },
       { protocol: "https", hostname: "*.googleusercontent.com" },
     ],
-    formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 86400,
+    unoptimized: true,
   },
 };
 
