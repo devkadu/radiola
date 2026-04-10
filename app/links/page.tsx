@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FaReddit, FaInstagram, FaXTwitter, FaHouse } from "react-icons/fa6";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,42 +7,52 @@ export const metadata: Metadata = {
   description: "Todos os links da Segunda Temporada em um só lugar.",
 };
 
-const links = [
+export const revalidate = 300; // revalida a cada 5 min
+
+async function getHotEpisode() {
+  try {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const res = await fetch(`${siteUrl}/api/hot-episodes`, { next: { revalidate: 300 } });
+    const data = await res.json();
+    return data?.[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+const socialLinks = [
   {
-    emoji: "🔥",
-    label: "Discussão da semana",
-    sublabel: "Demolidor · Episódio 5",
-    href: "/series/demolidor-renascido-202555",
-    highlight: true,
-    external: false,
-  },
-  {
-    emoji: "🏠",
+    icon: FaHouse,
     label: "Página principal",
     href: "/",
     external: false,
   },
   {
-    emoji: "💬",
+    icon: FaReddit,
     label: "Reddit",
     href: "https://reddit.com/r/suareddit",
     external: true,
+    color: "#FF4500",
   },
   {
-    emoji: "📱",
+    icon: FaInstagram,
     label: "Instagram",
     href: "https://instagram.com/asegundatemporada",
     external: true,
+    color: "#E1306C",
   },
   {
-    emoji: "🐦",
+    icon: FaXTwitter,
     label: "Twitter / X",
     href: "https://x.com/s2temporada",
     external: true,
+    color: "#ffffff",
   },
 ];
 
-export default function LinksPage() {
+export default async function LinksPage() {
+  const hot = await getHotEpisode();
+
   return (
     <main className="min-h-screen bg-[var(--bg)] flex flex-col items-center justify-start px-4 py-14 text-white">
 
@@ -64,24 +75,34 @@ export default function LinksPage() {
 
       {/* Links */}
       <div className="w-full max-w-sm flex flex-col gap-3">
-        {links.map((link) => {
-          const inner = (
-            <div
-              className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl border transition-all
-                ${link.highlight
-                  ? "bg-[var(--yellow-muted)] border-[var(--yellow)] hover:bg-[var(--yellow)]/20"
-                  : "bg-[var(--bg-surface)] border-[var(--border)] hover:border-[var(--yellow)]"
-                }`}
-            >
-              <span className="text-2xl leading-none shrink-0">{link.emoji}</span>
+
+        {/* Episódio mais comentado — dinâmico */}
+        {hot && (
+          <Link href={hot.href}>
+            <div className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border bg-[var(--yellow-muted)] border-[var(--yellow)] hover:bg-[var(--yellow)]/20 transition-all">
+              <span className="text-2xl leading-none shrink-0">🔥</span>
               <div className="flex flex-col min-w-0">
-                <span className={`font-semibold text-sm leading-tight ${link.highlight ? "text-[var(--yellow)]" : "text-[var(--text-primary)]"}`}>
-                  {link.label}
+                <span className="font-semibold text-sm leading-tight text-[var(--yellow)]">
+                  Discussão da semana
                 </span>
-                {link.sublabel && (
-                  <span className="text-xs text-[var(--text-muted)] truncate">{link.sublabel}</span>
-                )}
+                <span className="text-xs text-[var(--text-muted)] truncate">
+                  {hot.series} · {hot.code}
+                </span>
               </div>
+              <svg className="ml-auto shrink-0 text-[var(--text-muted)]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </Link>
+        )}
+
+        {/* Links estáticos */}
+        {socialLinks.map((link) => {
+          const Icon = link.icon;
+          const inner = (
+            <div className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border bg-[var(--bg-surface)] border-[var(--border)] hover:border-[var(--yellow)] transition-all">
+              <Icon size={22} style={{ color: link.color ?? "var(--text-muted)" }} className="shrink-0" />
+              <span className="font-semibold text-sm text-[var(--text-primary)]">{link.label}</span>
               <svg className="ml-auto shrink-0 text-[var(--text-muted)]" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7"/>
               </svg>
