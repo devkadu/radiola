@@ -9,18 +9,12 @@ function parseEpisodeId(epId: string) {
   return { seriesId: m[1], season: parseInt(m[2]), episode: parseInt(m[3]) };
 }
 
-export async function GET() {
+export async function getHotEpisodes(limit = 5) {
   const { data: topIds, error } = await supabase.rpc("hot_episodes");
-
-  if (error) {
-    console.error("[hot-episodes] rpc error:", error);
-    return NextResponse.json([]);
-  }
-
-  if (!topIds?.length) return NextResponse.json([]);
+  if (error || !topIds?.length) return [];
 
   const results = await Promise.all(
-    topIds.map(async (row: any, idx: number) => {
+    topIds.slice(0, limit).map(async (row: any, idx: number) => {
       const parsed = parseEpisodeId(row.episode_id);
       if (!parsed) return null;
 
@@ -46,7 +40,10 @@ export async function GET() {
     })
   );
 
-  return NextResponse.json(results.filter(Boolean), {
-    headers: { "Cache-Control": "no-store" },
-  });
+  return results.filter(Boolean);
+}
+
+export async function GET() {
+  const results = await getHotEpisodes();
+  return NextResponse.json(results, { headers: { "Cache-Control": "no-store" } });
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FaReddit, FaInstagram, FaXTwitter, FaHouse } from "react-icons/fa6";
+import { getHotEpisodes } from "@/app/api/hot-episodes/route";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,18 +8,7 @@ export const metadata: Metadata = {
   description: "Todos os links da Segunda Temporada em um só lugar.",
 };
 
-export const revalidate = 300; // revalida a cada 5 min
-
-async function getHotEpisode() {
-  try {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-    const res = await fetch(`${siteUrl}/api/hot-episodes`, { next: { revalidate: 300 } });
-    const data = await res.json();
-    return data?.[0] ?? null;
-  } catch {
-    return null;
-  }
-}
+export const revalidate = 300;
 
 const socialLinks = [
   {
@@ -51,7 +41,8 @@ const socialLinks = [
 ];
 
 export default async function LinksPage() {
-  const hot = await getHotEpisode();
+  const episodes = await getHotEpisodes(1);
+  const hot = episodes[0] ?? null;
 
   return (
     <main className="min-h-screen bg-[var(--bg)] flex flex-col items-center justify-start px-4 py-14 text-white">
