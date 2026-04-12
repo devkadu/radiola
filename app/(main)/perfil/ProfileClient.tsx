@@ -15,7 +15,6 @@ interface Props { user: User; }
 const MAX_INPUT_BYTES = 15 * 1024 * 1024;
 const MAX_DIMENSION = 400;
 
-
 interface RecentComment {
   id: string;
   text: string;
@@ -127,6 +126,7 @@ export const ProfileClient = ({ user }: Props) => {
   const [recentComments, setRecentComments] = useState<RecentComment[]>([]);
   const [seriesNames, setSeriesNames] = useState<Record<number, string>>({});
   const [followerCount, setFollowerCount] = useState(0);
+  const [watchedEpisodesCount, setWatchedEpisodesCount] = useState(0);
 
   const updateMeta = async (updates: Record<string, boolean>) => {
     const supabase = createClient();
@@ -158,6 +158,9 @@ export const ProfileClient = ({ user }: Props) => {
         for (const r of data ?? []) counts[r.reaction_key] = (counts[r.reaction_key] ?? 0) + 1;
         setReactionCounts(counts);
       });
+
+    supabase.from("watched_episodes").select("id", { count: "exact", head: true }).eq("user_id", user.id)
+      .then(({ count }) => setWatchedEpisodesCount(count ?? 0));
 
     supabase.from("comments").select("id, text, likes, episode_id, created_at")
       .eq("user_id", user.id)
@@ -213,29 +216,10 @@ export const ProfileClient = ({ user }: Props) => {
     }
   };
 
-  const handleToggleNotify = async () => {
-    const next = !notifyReplies;
-    setNotifyReplies(next);
-    await updateMeta({ notify_replies: next });
-  };
-
-  const handleToggleWeekly = async () => {
-    const next = !notifyWeekly;
-    setNotifyWeekly(next);
-    await updateMeta({ notify_weekly: next });
-  };
-
-  const handleTogglePremiere = async () => {
-    const next = !notifyPremiere;
-    setNotifyPremiere(next);
-    await updateMeta({ notify_premiere: next });
-  };
-
-  const handleTogglePublic = async () => {
-    const next = !isPublic;
-    setIsPublic(next);
-    await updateMeta({ profile_public: next });
-  };
+  const handleToggleNotify = async () => { const next = !notifyReplies; setNotifyReplies(next); await updateMeta({ notify_replies: next }); };
+  const handleToggleWeekly = async () => { const next = !notifyWeekly; setNotifyWeekly(next); await updateMeta({ notify_weekly: next }); };
+  const handleTogglePremiere = async () => { const next = !notifyPremiere; setNotifyPremiere(next); await updateMeta({ notify_premiere: next }); };
+  const handleTogglePublic = async () => { const next = !isPublic; setIsPublic(next); await updateMeta({ profile_public: next }); };
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -247,6 +231,15 @@ export const ProfileClient = ({ user }: Props) => {
   const starCounts = [5, 4, 3, 2, 1].map((star) => ({ star, count: reactionCounts[String(star)] ?? 0 }));
   const totalRatings = starCounts.reduce((a, b) => a + b.count, 0);
   const avgRating = totalRatings === 0 ? 0 : starCounts.reduce((a, b) => a + b.star * b.count, 0) / totalRatings;
+
+  const daysMember = Math.floor((Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24));
+
+  const badges: string[] = [];
+  if (watchedEpisodesCount >= 100) badges.push("MARATONISTA");
+  else if (watchedEpisodesCount >= 20) badges.push("ASSÍDUO");
+  if (commentCount >= 20) badges.push("DEBATEDOR");
+  else if (commentCount >= 5) badges.push("PARTICIPATIVO");
+  if (totalRatings >= 15) badges.push("CRÍTICO");
 
   // ── Tela de edição ──────────────────────────────────────────────────────────
   if (editingProfile) {
@@ -343,60 +336,90 @@ export const ProfileClient = ({ user }: Props) => {
 
   // ── Tela principal do perfil ─────────────────────────────────────────────────
   return (
-    <main className="px-4 py-6 lg:py-10 max-w-lg pb-28">
+    <main className="pb-28 min-h-screen">
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Meu perfil</h1>
+      {/* Hero banner */}
+      <div
+        className="relative h-44 overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #0e0e1f 0%, #1d0b35 45%, #0b1a2e 100%)" }}
+      >
+        {/* Radial glows decorativos */}
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse at 70% 60%, #7c3aed44 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, #1e40af33 0%, transparent 45%)",
+          }}
+        />
+        {/* Botão editar */}
+        <button
+          onClick={() => setEditingProfile(true)}
+          className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm text-white text-xs font-semibold hover:bg-white/20 transition-colors z-10"
+        >
+          <FaPencil size={9} />
+          Editar Perfil
+        </button>
+
+        {/* Avatar — sobrepõe o banner */}
+        <div className="absolute -bottom-9 left-5 z-10">
+          <div className="relative">
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="block"
+              aria-label="Alterar foto"
+            >
+              <div className="w-[72px] h-[72px] rounded-full overflow-hidden ring-4 ring-[var(--bg)] bg-[var(--bg-elevated)] relative">
+                {avatarUrl
+                  ? <img src={avatarUrl} alt={username} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  : <div className="w-full h-full flex items-center justify-center bg-[var(--yellow)] text-black font-bold text-xl">{initials}</div>
+                }
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-full">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[var(--yellow)] flex items-center justify-center shadow-md">
+                <FaPencil size={8} className="text-black" />
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+      {error && <p className="text-xs text-red-400 px-5 mt-1">{error}</p>}
+
+      {/* Nome + badges */}
+      <div className="px-5 pt-12 pb-3 flex items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-extrabold text-white leading-tight">{username}</h1>
+          <div className="flex flex-wrap items-center gap-2 mt-1.5">
+            {badges.map((badge) => (
+              <span
+                key={badge}
+                className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-[var(--yellow)]/40 bg-[var(--yellow)]/10 text-[var(--yellow)] tracking-widest uppercase"
+              >
+                {badge}
+              </span>
+            ))}
+            <span className="text-[10px] text-[var(--text-muted)]">
+              Membro desde {memberSince(user.created_at)}
+            </span>
+          </div>
+        </div>
         <button
           onClick={handleShare}
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--yellow-muted)] border border-[var(--yellow)] text-[var(--yellow)] text-sm font-semibold hover:bg-[var(--yellow)] hover:text-black transition-colors"
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--border)] text-[var(--text-muted)] text-xs hover:text-[var(--text-primary)] hover:border-[var(--yellow)] transition-colors"
         >
-          <FaShareNodes size={13} />
+          <FaShareNodes size={11} />
           {copied ? "Copiado!" : "Compartilhar"}
         </button>
       </div>
 
-      {/* User card */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
-        <div className="flex items-start gap-4 mb-5">
-          {/* Avatar */}
-          <div className="relative shrink-0">
-            <div className="w-16 h-16 rounded-full overflow-hidden relative bg-[var(--bg-elevated)]">
-              {avatarUrl
-                ? <img src={avatarUrl} alt={username} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                : <div className="w-full h-full flex items-center justify-center bg-[var(--yellow)] text-black font-bold text-lg">{initials}</div>
-              }
-            </div>
-          </div>
-
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-[var(--text-primary)] text-base truncate">{username}</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <p className="text-sm text-[var(--text-muted)] truncate">{user.email}</p>
-              <BadgePrivate />
-            </div>
-            <p className="text-xs text-[var(--yellow)] mt-0.5">
-              Membro desde {memberSince(user.created_at)}
-            </p>
-            <Link href={`/u/${username}`} className="text-xs text-[var(--yellow)] mt-0.5 hover:underline">
-              segundatemporada.com.br/u/{username}
-            </Link>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <button
-          onClick={() => setEditingProfile(true)}
-          className="w-full py-2 rounded-xl border border-[var(--border)] text-sm text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors"
-        >
-          Editar perfil
-        </button>
-      </div>
-
       {/* Tabs */}
-      <div className="flex border-b border-[var(--border)] mb-2">
+      <div className="flex border-b border-[var(--border)] px-5 mb-4">
         {(["perfil", "calendario"] as const).map((tab) => (
           <button
             key={tab}
@@ -415,136 +438,225 @@ export const ProfileClient = ({ user }: Props) => {
         ))}
       </div>
 
-      {activeTab === "calendario" && <CalendarTab />}
+      {activeTab === "calendario" && <div className="px-4"><CalendarTab /></div>}
 
-      {activeTab === "perfil" && <>
+      {activeTab === "perfil" && (
+        <div className="px-4 lg:grid lg:grid-cols-[1fr_268px] lg:gap-4 lg:items-start">
 
-      {/* Avaliações */}
-      {totalRatings > 0 && (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4 flex items-center gap-2">
-            Suas avaliações <BadgePublic />
-          </p>
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center shrink-0">
-              <span className="text-3xl font-bold text-[var(--yellow)] leading-none">{avgRating.toFixed(1)}</span>
-              <div className="flex gap-0.5 mt-1">
-                {[1,2,3,4,5].map((s) => (
-                  <svg key={s} width="10" height="10" viewBox="0 0 24 24" fill={s <= Math.round(avgRating) ? "var(--yellow)" : "none"} stroke="var(--yellow)" strokeWidth="1.5" strokeLinejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                ))}
-              </div>
-              <span className="text-[10px] text-[var(--text-muted)] mt-1">{totalRatings} ep.</span>
-            </div>
-            <div className="flex flex-col gap-1 flex-1">
-              {starCounts.map(({ star, count }) => {
-                const pct = totalRatings > 0 ? (count / totalRatings) * 100 : 0;
-                return (
-                  <div key={star} className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-[var(--text-muted)] w-2 text-right">{star}</span>
-                    <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
-                      <div className="h-full rounded-full bg-[var(--yellow)] transition-all duration-300" style={{ width: `${pct}%` }} />
-                    </div>
-                    <span className="text-[10px] text-[var(--text-muted)] w-4 text-right">{count}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
+          {/* Coluna esquerda */}
+          <div className="flex flex-col gap-3">
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        {[
-          { label: "comentários", value: commentCount },
-          { label: "séries", value: favorites.length },
-          { label: "curtidas recebidas", value: totalLikes },
-          { label: "seguidores", value: followerCount },
-        ].map((stat) => (
-          <div key={stat.label} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 text-center">
-            <p className="text-2xl font-bold text-[var(--text-primary)]">{stat.value}</p>
-            <p className="text-[11px] text-[var(--text-muted)] mt-1 leading-tight">{stat.label}</p>
-          </div>
-        ))}
-      </div>
+            {/* Bento de stats */}
+            <div className="grid grid-cols-2 gap-3">
 
-      {/* Séries favoritas */}
-      {favorites.length > 0 && (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
-            Séries favoritas <BadgePublic />
-          </p>
-          <div className="grid grid-cols-3 gap-3">
-            {favorites.map((s) => {
-              const prog = seriesProgress[s.series_id];
-              const pct = prog?.total ? Math.min(100, Math.round((prog.watched / prog.total) * 100)) : 0;
-              return (
-                <Link key={s.series_id} href={`/series/${s.series_slug}`} className="group flex flex-col gap-1.5">
-                  <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-[var(--bg-elevated)]">
-                    {s.poster_path
-                      ? <img src={`https://image.tmdb.org/t/p/w300${s.poster_path}`} alt={s.series_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      : <div className="w-full h-full flex items-center justify-center text-2xl">📺</div>
-                    }
-                  </div>
-                  <p className="text-xs text-[var(--text-secondary)] truncate group-hover:text-[var(--yellow)] transition-colors">{s.series_name}</p>
-                  {prog && prog.total > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      <div className="flex-1 h-1 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-[var(--yellow)] transition-all duration-500"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      <span className="text-[9px] text-[var(--text-muted)] shrink-0">{pct}%</span>
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Comentário mais curtido */}
-      {topComment && topComment.likes > 0 && (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
-            Comentário mais curtido <BadgePublic />
-          </p>
-          <p className="text-xs font-semibold text-[var(--yellow)] mb-2 uppercase tracking-wide">
-            {formatEpId(topComment.episode_id, seriesNames)}
-          </p>
-          <p className="text-sm text-[var(--text-primary)] leading-relaxed mb-3">
-            &ldquo;{topComment.text}&rdquo;
-          </p>
-          <p className="text-xs text-[var(--yellow)]">♥ {topComment.likes} curtidas</p>
-        </div>
-      )}
-
-      {/* Últimos comentários */}
-      {recentComments.length > 0 && (
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
-            Últimos comentários <BadgePublic />
-          </p>
-          <div className="flex flex-col">
-            {recentComments.map((c, i) => (
-              <div key={c.id} className={`py-3 ${i < recentComments.length - 1 ? "border-b border-[var(--border)]" : ""}`}>
-                <p className="text-xs font-semibold text-[var(--yellow)] mb-1">{formatEpId(c.episode_id, seriesNames)}</p>
-                <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">&ldquo;{c.text}&rdquo;</p>
-                <div className="flex gap-3 mt-1.5 text-[10px] text-[var(--text-muted)]">
-                  <span>♥ {c.likes ?? 0}</span>
-                  <span>{relativeTime(c.created_at)}</span>
+              {/* Card grande: dias como membro */}
+              <div className="row-span-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 flex flex-col justify-between min-h-[140px]">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Membro há</p>
+                <div>
+                  <p className="text-5xl font-extrabold text-white leading-none">{daysMember}</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1.5 leading-snug">dias na plataforma</p>
                 </div>
               </div>
-            ))}
+
+              {/* Episódios assistidos */}
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">Episódios</p>
+                <p className="text-3xl font-extrabold text-white leading-none">{watchedEpisodesCount.toLocaleString("pt-BR")}</p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">assistidos</p>
+              </div>
+
+              {/* Séries na lista */}
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">Séries</p>
+                <p className="text-3xl font-extrabold text-white leading-none">{favorites.length}</p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">na lista</p>
+              </div>
+
+              {/* Comentários */}
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">Comentários</p>
+                <p className="text-3xl font-extrabold text-white leading-none">{commentCount}</p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">publicados</p>
+              </div>
+
+              {/* Curtidas recebidas */}
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">Curtidas</p>
+                <p className="text-3xl font-extrabold text-white leading-none">{totalLikes}</p>
+                <p className="text-[10px] text-[var(--text-muted)] mt-1">recebidas</p>
+              </div>
+            </div>
+
+            {/* Avaliações */}
+            {totalRatings > 0 && (
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-4 flex items-center gap-2">
+                  Suas avaliações <BadgePublic />
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-center shrink-0">
+                    <span className="text-3xl font-bold text-[var(--yellow)] leading-none">{avgRating.toFixed(1)}</span>
+                    <div className="flex gap-0.5 mt-1">
+                      {[1,2,3,4,5].map((s) => (
+                        <svg key={s} width="10" height="10" viewBox="0 0 24 24" fill={s <= Math.round(avgRating) ? "var(--yellow)" : "none"} stroke="var(--yellow)" strokeWidth="1.5" strokeLinejoin="round">
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-[var(--text-muted)] mt-1">{totalRatings} ep.</span>
+                  </div>
+                  <div className="flex flex-col gap-1 flex-1">
+                    {starCounts.map(({ star, count }) => {
+                      const pct = totalRatings > 0 ? (count / totalRatings) * 100 : 0;
+                      return (
+                        <div key={star} className="flex items-center gap-1.5">
+                          <span className="text-[10px] text-[var(--text-muted)] w-2 text-right">{star}</span>
+                          <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+                            <div className="h-full rounded-full bg-[var(--yellow)] transition-all duration-300" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-[10px] text-[var(--text-muted)] w-4 text-right">{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Séries favoritas — mobile (no desktop vai na sidebar) */}
+            {favorites.length > 0 && (
+              <div className="lg:hidden bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                  Minhas séries <BadgePublic />
+                </p>
+                <div className="grid grid-cols-3 gap-3">
+                  {favorites.map((s) => {
+                    const prog = seriesProgress[s.series_id];
+                    const pct = prog?.total ? Math.min(100, Math.round((prog.watched / prog.total) * 100)) : 0;
+                    return (
+                      <Link key={s.series_id} href={`/series/${s.series_slug}`} className="group flex flex-col gap-1.5">
+                        <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-[var(--bg-elevated)]">
+                          {s.poster_path
+                            ? <img src={`https://image.tmdb.org/t/p/w300${s.poster_path}`} alt={s.series_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            : <div className="w-full h-full flex items-center justify-center text-2xl">📺</div>
+                          }
+                        </div>
+                        <p className="text-xs text-[var(--text-secondary)] truncate group-hover:text-[var(--yellow)] transition-colors">{s.series_name}</p>
+                        {prog && prog.total > 0 && (
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex-1 h-1 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+                              <div className="h-full rounded-full bg-[var(--yellow)] transition-all duration-500" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="text-[9px] text-[var(--text-muted)] shrink-0">{pct}%</span>
+                          </div>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Comentário mais curtido */}
+            {topComment && topComment.likes > 0 && (
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                  Comentário mais curtido <BadgePublic />
+                </p>
+                <p className="text-xs font-semibold text-[var(--yellow)] mb-2 uppercase tracking-wide">
+                  {formatEpId(topComment.episode_id, seriesNames)}
+                </p>
+                <p className="text-sm text-[var(--text-primary)] leading-relaxed mb-3">
+                  &ldquo;{topComment.text}&rdquo;
+                </p>
+                <p className="text-xs text-[var(--yellow)]">♥ {topComment.likes} curtidas</p>
+              </div>
+            )}
+
+            {/* Últimos comentários */}
+            {recentComments.length > 0 && (
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3 flex items-center gap-2">
+                  Últimos comentários <BadgePublic />
+                </p>
+                <div className="flex flex-col">
+                  {recentComments.map((c, i) => (
+                    <div key={c.id} className={`py-3 ${i < recentComments.length - 1 ? "border-b border-[var(--border)]" : ""}`}>
+                      <p className="text-xs font-semibold text-[var(--yellow)] mb-1">{formatEpId(c.episode_id, seriesNames)}</p>
+                      <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed">&ldquo;{c.text}&rdquo;</p>
+                      <div className="flex gap-3 mt-1.5 text-[10px] text-[var(--text-muted)]">
+                        <span>♥ {c.likes ?? 0}</span>
+                        <span>{relativeTime(c.created_at)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          {/* Sidebar direita — desktop */}
+          <div className="hidden lg:flex flex-col gap-3 sticky top-4">
+
+            {favorites.length > 0 && (
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">Minhas séries</p>
+                <div className="flex flex-col">
+                  {favorites.slice(0, 6).map((s, i) => {
+                    const prog = seriesProgress[s.series_id];
+                    const pct = prog?.total ? Math.min(100, Math.round((prog.watched / prog.total) * 100)) : 0;
+                    return (
+                      <Link
+                        key={s.series_id}
+                        href={`/series/${s.series_slug}`}
+                        className={`flex items-center gap-3 py-2.5 group hover:opacity-80 transition-opacity ${i < Math.min(favorites.length, 6) - 1 ? "border-b border-[var(--border)]" : ""}`}
+                      >
+                        <div className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0 bg-[var(--bg-elevated)]">
+                          {s.poster_path && (
+                            <img src={`https://image.tmdb.org/t/p/w92${s.poster_path}`} alt={s.series_name} className="w-full h-full object-cover" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-[var(--text-primary)] truncate group-hover:text-[var(--yellow)] transition-colors leading-tight">
+                            {s.series_name}
+                          </p>
+                          {prog && prog.total > 0 && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <div className="flex-1 h-1 rounded-full bg-[var(--bg-elevated)] overflow-hidden">
+                                <div className="h-full rounded-full bg-[var(--yellow)]" style={{ width: `${pct}%` }} />
+                              </div>
+                              <span className="text-[9px] text-[var(--text-muted)] shrink-0">{pct}%</span>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+                {favorites.length > 6 && (
+                  <p className="text-xs text-[var(--text-muted)] text-center pt-3 border-t border-[var(--border)]">
+                    + {favorites.length - 6} séries
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Link do perfil público */}
+            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">Perfil público</p>
+              <Link
+                href={`/u/${username}`}
+                className="text-xs text-[var(--yellow)] hover:underline break-all"
+              >
+                /u/{username}
+              </Link>
+              <p className="text-[10px] text-[var(--text-muted)] mt-1">{isPublic ? "Visível para todos" : "Apenas você"}</p>
+            </div>
+
           </div>
         </div>
       )}
-
-      </>}
 
     </main>
   );
