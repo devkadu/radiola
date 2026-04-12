@@ -4,6 +4,7 @@ import { SeriesTopBar } from "@/components/SeriesTopBar/SeriesTopBar";
 import { VideoPlayButton } from "@/components/VideoModal/VideoModal";
 import { SeasonTabs } from "@/components/SeasonTabs/SeasonTabs";
 import { FavoriteButton } from "@/components/FavoriteButton/FavoriteButton";
+import { AddToListButton } from "@/components/AddToList/AddToListButton";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -245,12 +246,20 @@ export default async function SeriesPage({ params }: Props) {
           </p>
         )}
 
-        {/* Adicionar à lista — full width no mobile */}
-        <div className="lg:hidden">
-          <FavoriteButton
-            series={{ id: series.id, name: series.name, slug, poster_path: series.poster_path ?? null }}
-            variant="list"
-            fullWidth
+        {/* Ações — mobile */}
+        <div className="lg:hidden flex gap-2">
+          <div className="flex-1">
+            <FavoriteButton
+              series={{ id: series.id, name: series.name, slug, poster_path: series.poster_path ?? null }}
+              variant="list"
+              fullWidth
+            />
+          </div>
+          <AddToListButton
+            seriesId={series.id}
+            seriesName={series.name}
+            posterPath={series.poster_path ?? null}
+            seriesSlug={slug}
           />
         </div>
 
@@ -278,8 +287,14 @@ export default async function SeriesPage({ params }: Props) {
               Indisponível no Brasil
             </span>
           )}
-          {/* Adicionar à lista — alinhado à direita no desktop */}
-          <div className="hidden lg:block ml-auto">
+          {/* Ações — desktop */}
+          <div className="hidden lg:flex items-center gap-2 ml-auto">
+            <AddToListButton
+              seriesId={series.id}
+              seriesName={series.name}
+              posterPath={series.poster_path ?? null}
+              seriesSlug={slug}
+            />
             <FavoriteButton
               series={{ id: series.id, name: series.name, slug, poster_path: series.poster_path ?? null }}
               variant="list"

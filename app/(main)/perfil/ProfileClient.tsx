@@ -8,6 +8,7 @@ import { favoritesService } from "@/services/favorites";
 import { User } from "@supabase/supabase-js";
 import { FaPencil, FaShareNodes, FaArrowLeft } from "react-icons/fa6";
 import { CalendarTab } from "./CalendarTab";
+import { UserLists } from "@/components/UserLists/UserLists";
 import { useQuery } from "@tanstack/react-query";
 
 interface Props { user: User; }
@@ -488,6 +489,9 @@ export const ProfileClient = ({ user }: Props) => {
                 <p className="text-[10px] text-[var(--text-muted)] mt-1">recebidas</p>
               </div>
             </div>
+
+            {/* Listas */}
+            <UserLists />
 
             {/* Avaliações */}
             {totalRatings > 0 && (
