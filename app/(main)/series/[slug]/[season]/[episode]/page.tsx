@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `"${ep.name}" · ${series.name} ${seasonLabel}${episodeLabel}`;
   const description =
     ep.overview?.slice(0, 160) ??
-    `Debate o episódio ${episodeLabel} da ${seasonLabel} de ${series.name} sem spoilers.`;
+    `Debate o episódio ${episodeLabel} da ${seasonLabel} de ${series.name}.`;
   const image = ep.still_path
     ? `https://image.tmdb.org/t/p/w780${ep.still_path}`
     : null;

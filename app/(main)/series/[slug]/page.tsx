@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const description =
     series.overview?.slice(0, 160) ??
-    `Debate os episódios de ${series.name} sem spoilers.`;
+    `Debate os episódios de ${series.name} no seu ritmo.`;
   const image = series.backdrop_path
     ? `https://image.tmdb.org/t/p/w1280${series.backdrop_path}`
     : series.poster_path

@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${series.name} — ${seasonData.name}`;
   const description =
     seasonData.overview?.slice(0, 160) ??
-    `Debate os episódios da ${seasonData.name} de ${series.name} sem spoilers.`;
+    `Debate os episódios da ${seasonData.name} de ${series.name}.`;
 
   return {
     title,

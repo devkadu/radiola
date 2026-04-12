@@ -60,7 +60,7 @@ export default async function LinksPage() {
           <span className="text-xl font-extrabold tracking-tight text-[var(--text-primary)]">Temporada</span>
         </div>
         <p className="text-sm text-[var(--text-muted)] text-center max-w-xs">
-          Debate séries sem spoilers, no seu ritmo.
+          Debate séries no seu ritmo, episódio por episódio.
         </p>
       </div>
 
