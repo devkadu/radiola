@@ -338,30 +338,32 @@ export const ProfileClient = ({ user }: Props) => {
   return (
     <main className="pb-28 min-h-screen">
 
-      {/* Hero banner */}
-      <div
-        className="relative h-44 overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #0e0e1f 0%, #1d0b35 45%, #0b1a2e 100%)" }}
-      >
-        {/* Radial glows decorativos */}
+      {/* Hero banner + avatar wrapper */}
+      <div className="relative">
         <div
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              "radial-gradient(ellipse at 70% 60%, #7c3aed44 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, #1e40af33 0%, transparent 45%)",
-          }}
-        />
-        {/* Botão editar */}
-        <button
-          onClick={() => setEditingProfile(true)}
-          className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm text-white text-xs font-semibold hover:bg-white/20 transition-colors z-10"
+          className="h-44 overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #0e0e1f 0%, #1d0b35 45%, #0b1a2e 100%)" }}
         >
-          <FaPencil size={9} />
-          Editar Perfil
-        </button>
+          {/* Radial glows decorativos */}
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage:
+                "radial-gradient(ellipse at 70% 60%, #7c3aed44 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, #1e40af33 0%, transparent 45%)",
+            }}
+          />
+          {/* Botão editar */}
+          <button
+            onClick={() => setEditingProfile(true)}
+            className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/20 bg-white/10 backdrop-blur-sm text-white text-xs font-semibold hover:bg-white/20 transition-colors z-10"
+          >
+            <FaPencil size={9} />
+            Editar Perfil
+          </button>
+        </div>
 
-        {/* Avatar — sobrepõe o banner */}
-        <div className="absolute -bottom-9 left-5 z-10">
+        {/* Avatar — fora do overflow-hidden, sobrepõe o banner */}
+        <div className="absolute bottom-0 left-5 translate-y-1/2 z-10">
           <div className="relative">
             <button
               onClick={() => fileRef.current?.click()}
@@ -392,7 +394,7 @@ export const ProfileClient = ({ user }: Props) => {
       {error && <p className="text-xs text-red-400 px-5 mt-1">{error}</p>}
 
       {/* Nome + badges */}
-      <div className="px-5 pt-12 pb-3 flex items-end justify-between gap-3">
+      <div className="px-5 pt-10 pb-3 flex items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-extrabold text-white leading-tight">{username}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-1.5">
