@@ -3,6 +3,7 @@ import { cacheService } from "@/services/cache";
 import { SeriesTopBar } from "@/components/SeriesTopBar/SeriesTopBar";
 import { VideoPlayButton } from "@/components/VideoModal/VideoModal";
 import { SeasonTabs } from "@/components/SeasonTabs/SeasonTabs";
+import { Suspense } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton/FavoriteButton";
 import { AddToListButton } from "@/components/AddToList/AddToListButton";
 import Image from "next/image";
@@ -368,7 +369,9 @@ export default async function SeriesPage({ params }: Props) {
 
         {/* Seasons + Episodes */}
         {seasonsWithEpisodes.length > 0 && (
-          <SeasonTabs slug={slug} seriesId={id} seasons={seasonsWithEpisodes} />
+          <Suspense fallback={null}>
+            <SeasonTabs slug={slug} seriesId={id} seasons={seasonsWithEpisodes} />
+          </Suspense>
         )}
       </div>
     </main>
