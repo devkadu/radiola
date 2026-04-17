@@ -1,0 +1,43 @@
+# Segunda Temporada
+
+> Plataforma brasileira de debate de séries de TV, organizada episódio a episódio.
+
+Segunda Temporada é uma comunidade onde fãs de séries comentam, avaliam e debatem cada episódio no seu próprio ritmo. O conteúdo é organizado por série, temporada e episódio — permitindo conversas focadas sem misturar discussões de capítulos diferentes.
+
+## O que é
+
+- Comunidade de debate de séries em português (Brasil)
+- Comentários organizados por episódio, não por série inteira
+- Sistema de avaliação por estrelas por episódio
+- Perfis públicos com histórico de séries assistidas e avaliações
+- Listas personalizadas de séries por usuário
+- Temporadas em alta baseadas em interações reais da comunidade
+
+## Quem usa
+
+Fãs de séries brasileiros que querem debater episódios específicos com outras pessoas que já assistiram aquele ponto da série — sem spoilers acidentais de quem está mais avançado.
+
+## Conteúdo disponível
+
+- Páginas individuais para cada episódio de séries populares
+- Debates ativos nas séries mais comentadas da semana
+- Catálogo de séries filtrado por plataforma (Netflix, HBO, Disney+, Apple TV+, etc.) e gênero
+- Perfis públicos de usuários com avaliações e comentários
+- Grade de estreias de séries aguardadas
+
+## URLs principais
+
+- https://segundatemporada.com.br — Página inicial com episódios em destaque
+- https://segundatemporada.com.br/series — Catálogo completo de séries
+- https://segundatemporada.com.br/debates — Séries mais comentadas agora
+- https://segundatemporada.com.br/em-breve — Próximas estreias
+
+## Tecnologia
+
+Construído com Next.js, Supabase e dados de metadados fornecidos pelo TMDB (The Movie Database).
+
+## Contato e redes
+
+- Instagram: https://instagram.com/segundatemporada.br
+- Reddit: https://reddit.com/r/segundatemporada
+- Site: https://segundatemporada.com.br
