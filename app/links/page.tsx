@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FaReddit, FaInstagram, FaXTwitter, FaHouse } from "react-icons/fa6";
+import { FaInstagram, FaXTwitter, FaHouse, FaTiktok } from "react-icons/fa6";
 import { getHotEpisodes } from "@/app/api/hot-episodes/route";
 import type { Metadata } from "next";
 
@@ -18,16 +18,9 @@ const socialLinks = [
     external: false,
   },
   {
-    icon: FaReddit,
-    label: "Reddit",
-    href: "https://reddit.com/r/suareddit",
-    external: true,
-    color: "#FF4500",
-  },
-  {
     icon: FaInstagram,
     label: "Instagram",
-    href: "https://instagram.com/asegundatemporada",
+    href: "https://www.instagram.com/asegundatemporada/",
     external: true,
     color: "#E1306C",
   },
@@ -35,6 +28,13 @@ const socialLinks = [
     icon: FaXTwitter,
     label: "Twitter / X",
     href: "https://x.com/s2temporada",
+    external: true,
+    color: "#ffffff",
+  },
+  {
+    icon: FaTiktok,
+    label: "TikTok",
+    href: "https://www.tiktok.com/@segunda.temporada3",
     external: true,
     color: "#ffffff",
   },

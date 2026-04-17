@@ -38,6 +38,7 @@ Construído com Next.js, Supabase e dados de metadados fornecidos pelo TMDB (The
 
 ## Contato e redes
 
-- Instagram: https://instagram.com/segundatemporada.br
-- Reddit: https://reddit.com/r/segundatemporada
+- Instagram: https://www.instagram.com/asegundatemporada/
+- X (Twitter): https://x.com/s2temporada
+- TikTok: https://www.tiktok.com/@segunda.temporada3
 - Site: https://segundatemporada.com.br
