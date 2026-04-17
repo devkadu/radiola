@@ -60,16 +60,36 @@ function CircleProgress({ pct, size = 56 }: { pct: number; size?: number }) {
 export default async function PublicProfilePage({ params }: Props) {
   const { username } = await params;
 
+  const decodedUsername = decodeURIComponent(username);
+
+  // Primeiro: busca pelo username na tabela de comentários (caminho rápido)
   const { data: sample } = await supabaseAdmin
     .from("comments")
     .select("user_id")
-    .eq("username", username)
+    .eq("username", decodedUsername)
     .limit(1)
     .maybeSingle();
 
-  const { data: { user: target } } = sample
-    ? await supabaseAdmin.auth.admin.getUserById(sample.user_id)
-    : { data: { user: null } };
+  let target: any = null;
+
+  if (sample) {
+    const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(sample.user_id);
+    target = user;
+  } else {
+    // Fallback: varre os usuários do Auth procurando pelo username nos metadados
+    // (cobre usuários que ainda não comentaram)
+    let page = 1;
+    outer: while (true) {
+      const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage: 1000 });
+      if (error || !users?.length) break;
+      for (const u of users) {
+        const meta = u.user_metadata?.username ?? u.email?.split("@")[0] ?? "";
+        if (meta === decodedUsername) { target = u; break outer; }
+      }
+      if (users.length < 1000) break;
+      page++;
+    }
+  }
 
   if (!target) {
     return (
