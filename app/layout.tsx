@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   description: "Comentários organizados por episódio para quem leva séries a sério.",
   verification: {
-    google: "A-42VZAQsgby6OQc2-UWD_ZKb3HbQEzyQJl",
+    google: "A-42VZAQsgby6OQc2-UWD_ZKb3HbQEzyQJF7ieeN64Y",
   },
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
