@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     template: "%s | Segunda Temporada",
   },
   description: "Comentários organizados por episódio para quem leva séries a sério.",
+  verification: {
+    google: "A-42VZAQsgby6OQc2-UWD_ZKb3HbQEzyQJl",
+  },
   icons: {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     shortcut: "/icon.svg",
