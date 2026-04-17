@@ -37,7 +37,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const seasonLabel = `T${String(seasonNumber).padStart(2, "0")}`;
   const episodeLabel = `E${String(episodeNumber).padStart(2, "0")}`;
-  const title = `"${ep.name}" · ${series.name} ${seasonLabel}${episodeLabel}`;
+  const titleBase = `${series.name} ${seasonLabel}${episodeLabel}`;
+  const available = 50 - titleBase.length - 5; // 5 = ` · ""`
+  const safeEpName = available >= 5
+    ? (ep.name.length > available ? ep.name.slice(0, available - 1) + "…" : ep.name)
+    : null;
+  const title = safeEpName ? `"${safeEpName}" · ${titleBase}` : titleBase;
   const description =
     ep.overview?.slice(0, 160) ??
     `Debate o episódio ${episodeLabel} da ${seasonLabel} de ${series.name}.`;
@@ -197,9 +202,9 @@ export default async function EpisodePage({ params }: Props) {
               {series.name} · {seasonLabel}
             </Link>
 
-            <p className="text-xl font-bold leading-snug">
+            <h1 className="text-xl font-bold leading-snug">
               &ldquo;{ep.name}&rdquo;
-            </p>
+            </h1>
 
             <p className="text-xs text-[var(--text-muted)]">
               {episodeLabel}
