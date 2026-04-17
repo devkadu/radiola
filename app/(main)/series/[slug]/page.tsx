@@ -73,12 +73,15 @@ export async function generateStaticParams() {
 export default async function SeriesPage({ params }: Props) {
   const { slug } = await params;
   const id = slug.split("-").pop()!;
-  const series = await tmdbService.getSeriesDetails(id);
+  const series = await tmdbService.getSeriesDetails(id).catch(() => null);
+  if (!series) return <main className="min-h-screen flex items-center justify-center text-[var(--text-muted)]"><p>Série não encontrada.</p></main>;
 
   const seasons = series.seasons?.filter((s: any) => s.season_number > 0) ?? [];
-  const seasonDetails = await Promise.all(
-    seasons.map((s: any) => tmdbService.getSeasonDetails(id, s.season_number))
-  );
+  const seasonDetails = (
+    await Promise.all(
+      seasons.map((s: any) => tmdbService.getSeasonDetails(id, s.season_number).catch(() => null))
+    )
+  ).filter(Boolean);
   const allEpisodes = seasonDetails.flatMap((s: any) => s.episodes ?? []);
   await Promise.all([
     cacheService.cacheSeries(series),
