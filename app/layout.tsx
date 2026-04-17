@@ -85,6 +85,14 @@ const jsonLd = {
       description: "Comentários organizados por episódio para quem leva séries a sério.",
       inLanguage: "pt-BR",
       publisher: { "@id": `${siteUrl}/#organization` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${siteUrl}/busca?q={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
     },
   ],
 };

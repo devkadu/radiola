@@ -5,9 +5,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: siteUrl, priority: 1, changeFrequency: "daily" },
-    { url: `${siteUrl}/series`, priority: 0.8, changeFrequency: "daily" },
-    { url: `${siteUrl}/debates`, priority: 0.6, changeFrequency: "weekly" },
+    { url: siteUrl,                    priority: 1.0, changeFrequency: "daily"   },
+    { url: `${siteUrl}/series`,        priority: 0.9, changeFrequency: "daily"   },
+    { url: `${siteUrl}/debates`,       priority: 0.8, changeFrequency: "daily"   },
+    { url: `${siteUrl}/em-breve`,      priority: 0.6, changeFrequency: "weekly"  },
   ];
 
   const { data: seriesList } = await supabase

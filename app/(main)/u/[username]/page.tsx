@@ -8,6 +8,8 @@ interface Props {
   params: Promise<{ username: string }>;
 }
 
+export const revalidate = 3600; // 1h
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
   return {

@@ -10,6 +10,8 @@ interface Props {
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
+export const revalidate = 86400; // 24h — dados de pessoa mudam raramente
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const person = await tmdbService.getPersonDetails(id).catch(() => null);

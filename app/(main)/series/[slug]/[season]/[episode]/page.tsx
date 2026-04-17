@@ -22,6 +22,42 @@ interface Props {
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
+export const revalidate = 1800; // 30min — metadados de episódio mudam raramente
+
+export async function generateStaticParams() {
+  const { supabase } = await import("@/lib/supabase");
+  const { seasonSlug } = await import("@/lib/slugs");
+
+  // Top 20 séries (por id = mais antigas/populares) com todos os seus episódios
+  const { data: seriesList } = await supabase
+    .from("series")
+    .select("slug, id")
+    .not("slug", "is", null)
+    .order("id")
+    .limit(20);
+
+  if (!seriesList?.length) return [];
+
+  const { data: episodes } = await supabase
+    .from("episodes")
+    .select("slug, season_number, episode_number, series_id")
+    .in("series_id", seriesList.map((s) => s.id));
+
+  if (!episodes?.length) return [];
+
+  const seriesById = Object.fromEntries(seriesList.map((s) => [s.id, s.slug]));
+
+  return episodes.flatMap((ep) => {
+    const seriesSlugVal = seriesById[ep.series_id];
+    if (!seriesSlugVal) return [];
+    return [{
+      slug: seriesSlugVal,
+      season: seasonSlug(ep.season_number),
+      episode: ep.slug,
+    }];
+  });
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, season: seasonParam, episode: episodeParam } = await params;
   const seriesId = idFromSeriesSlug(slug);
@@ -44,10 +80,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : null;
   const title = safeEpName ? `"${safeEpName}" · ${titleBase}` : titleBase;
   const description =
-    ep.overview?.slice(0, 160) ??
+    ep.overview?.slice(0, 155) ??
     `Debate o episódio ${episodeLabel} da ${seasonLabel} de ${series.name}.`;
   const image = ep.still_path
     ? `https://image.tmdb.org/t/p/w780${ep.still_path}`
+    : series.backdrop_path
+    ? `https://image.tmdb.org/t/p/w780${series.backdrop_path}`
     : null;
 
   return {
@@ -59,6 +97,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       type: "video.episode",
       ...(image && { images: [{ url: image, width: 780, height: 439, alt: ep.name }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: image ? [image] : ["/opengraph-image"],
     },
   };
 }

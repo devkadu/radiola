@@ -29,8 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!series) return {};
 
   const description =
-    series.overview?.slice(0, 160) ??
-    `Debate os episódios de ${series.name} no seu ritmo.`;
+    series.overview?.slice(0, 155) ??
+    `Debate os episódios de ${series.name} no seu ritmo. Comente episódio a episódio.`;
   const image = series.backdrop_path
     ? `https://image.tmdb.org/t/p/w1280${series.backdrop_path}`
     : series.poster_path
@@ -47,10 +47,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "video.tv_show",
       ...(image && { images: [{ url: image, width: 1280, height: 720, alt: series.name }] }),
     },
+    twitter: {
+      card: "summary_large_image",
+      title: series.name,
+      description,
+      images: image ? [image] : ["/opengraph-image"],
+    },
   };
 }
 
 export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const { supabase } = await import("@/lib/supabase");
+  const { data } = await supabase
+    .from("series")
+    .select("slug")
+    .not("slug", "is", null)
+    .order("id")
+    .limit(60);
+  return (data ?? []).map((s) => ({ slug: s.slug }));
+}
 
 export default async function SeriesPage({ params }: Props) {
   const { slug } = await params;
@@ -106,6 +123,15 @@ export default async function SeriesPage({ params }: Props) {
         ...(series.number_of_seasons && { numberOfSeasons: series.number_of_seasons }),
         ...(series.number_of_episodes && { numberOfEpisodes: series.number_of_episodes }),
         ...(series.genres?.length && { genre: series.genres.map((g: any) => g.name) }),
+        ...(series.vote_average > 0 && {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: series.vote_average.toFixed(1),
+            ratingCount: series.vote_count ?? 1,
+            bestRating: "10",
+            worstRating: "1",
+          },
+        }),
         url: seriesUrl,
         inLanguage: "pt-BR",
         ...(cast.length > 0 && {

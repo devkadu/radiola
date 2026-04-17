@@ -15,6 +15,8 @@ function formatAirDate(dateStr: string) {
   return date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
 }
 
+export const revalidate = 86400; // 24h — grade de estreias muda pouco
+
 export default async function EmBrevePage() {
   const data = await tmdbService.getUpcomingSeries();
   const series: TmdbSeries[] = data.results ?? [];
