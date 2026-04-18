@@ -42,7 +42,7 @@ const ALLOWED_BOTS = [
   /telegrambot/i,
 ];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const ua = request.headers.get("user-agent") ?? "";
   const { pathname } = request.nextUrl;
 

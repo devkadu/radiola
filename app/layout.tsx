@@ -9,6 +9,7 @@ export const viewport: Viewport = {
 import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { Providers } from "./providers";
+import { NavigationProgress } from "@/components/NavigationProgress/NavigationProgress";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
@@ -112,6 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Providers>
+          <NavigationProgress />
           <AuthProvider>{children}</AuthProvider>
         </Providers>
         <Analytics />
