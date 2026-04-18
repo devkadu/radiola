@@ -2,6 +2,7 @@ import { tmdbService } from "@/services/tmdb";
 import { cacheService } from "@/services/cache";
 import { SeriesTopBar } from "@/components/SeriesTopBar/SeriesTopBar";
 import { VideoPlayButton } from "@/components/VideoModal/VideoModal";
+import { TrailersSection } from "@/components/TrailerPlayer/TrailersSection";
 import { SeasonTabs } from "@/components/SeasonTabs/SeasonTabs";
 import { Suspense } from "react";
 import { FavoriteButton } from "@/components/FavoriteButton/FavoriteButton";
@@ -102,9 +103,14 @@ export default async function SeriesPage({ params }: Props) {
   const brProviders: { logo_path: string; provider_name: string }[] =
     providersData.results?.BR?.flatrate ?? [];
 
-  const trailer = series.videos?.results?.find(
-    (v: any) => ["Trailer", "Teaser", "Clip"].includes(v.type) && v.site === "YouTube"
+  const allVideos: any[] = series.videos?.results ?? [];
+  const trailer = allVideos.find(
+    (v) => ["Trailer", "Teaser", "Clip"].includes(v.type) && v.site === "YouTube"
   );
+  const trailers = allVideos
+    .filter((v) => ["Trailer", "Teaser"].includes(v.type) && v.site === "YouTube")
+    .sort((a, b) => new Date(b.published_at ?? 0).getTime() - new Date(a.published_at ?? 0).getTime())
+    .slice(0, 5);
 
   const releaseYear = series.first_air_date?.split("-")[0];
 
@@ -368,6 +374,11 @@ export default async function SeriesPage({ params }: Props) {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Trailers com comentários por timestamp */}
+        {trailers.length > 0 && (
+          <TrailersSection trailers={trailers} seriesId={id} />
         )}
 
         {/* Seasons + Episodes */}

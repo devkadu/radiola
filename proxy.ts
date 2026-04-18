@@ -2,57 +2,29 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const BLOCKED_UA_PATTERNS = [
-  /python-requests/i,
-  /python-httpx/i,
-  /curl\//i,
-  /wget\//i,
-  /java\/\d/i,
-  /go-http-client/i,
-  /axios\/\d/i,
-  /node-fetch/i,
-  /scrapy/i,
-  /mechanize/i,
-  /htmlunit/i,
-  /phantomjs/i,
-  /headlesschrome/i,
-  /selenium/i,
-  /puppeteer/i,
-  /playwright/i,
-  /okhttp/i,
-  /libwww-perl/i,
-  /masscan/i,
-  /zgrab/i,
-  /nmap/i,
-  /scraperapi/i,
-  /scrapingbee/i,
-  /apify/i,
+  /scraperforce/i, /python-requests/i, /python-httpx/i, /curl\//i, /wget\//i,
+  /java\/\d/i, /go-http-client/i, /axios\/\d/i, /node-fetch/i, /node\.js/i,
+  /scrapy/i, /mechanize/i, /htmlunit/i, /phantomjs/i, /headlesschrome/i,
+  /selenium/i, /puppeteer/i, /playwright/i, /okhttp/i, /libwww-perl/i,
+  /masscan/i, /zgrab/i, /nmap/i,
 ];
 
 const ALLOWED_BOTS = [
-  /googlebot/i,
-  /bingbot/i,
-  /slurp/i,
-  /duckduckbot/i,
-  /baiduspider/i,
-  /yandexbot/i,
-  /facebookexternalhit/i,
-  /twitterbot/i,
-  /linkedinbot/i,
-  /whatsapp/i,
-  /telegrambot/i,
+  /googlebot/i, /bingbot/i, /slurp/i, /duckduckbot/i, /baiduspider/i,
+  /yandexbot/i, /facebookexternalhit/i, /twitterbot/i, /linkedinbot/i, /whatsapp/i,
 ];
 
 export async function proxy(request: NextRequest) {
   const ua = request.headers.get("user-agent") ?? "";
   const { pathname } = request.nextUrl;
 
+  // Bot blocking
   if (!ALLOWED_BOTS.some((p) => p.test(ua))) {
     if (BLOCKED_UA_PATTERNS.some((p) => p.test(ua))) {
-      return new NextResponse(null, { status: 403 });
+      return new NextResponse("Forbidden", { status: 403 });
     }
-
     if (!ua && pathname.startsWith("/api/")) {
-      return new NextResponse(null, { status: 403 });
+      return new NextResponse("Forbidden", { status: 403 });
     }
   }
 
@@ -89,5 +61,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)" ],
 };
