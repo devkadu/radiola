@@ -7,6 +7,7 @@ import {
 import { EpisodeReactions } from "@/components/EpisodeReactions/EpisodeReactions";
 import { BackTopBar } from "@/components/BackTopBar/BackTopBar";
 import { episodeId } from "@/services/comments";
+import { supabase } from "@/lib/supabase";
 import { CollapsibleSinopse, ShareEpisodeButton } from "./_components";
 import { EpisodeCommentsSection } from "./_section";
 import { EpisodeVideoButton } from "./_video";
@@ -123,10 +124,14 @@ export default async function EpisodePage({ params }: Props) {
   const seasonNumber = numberFromSeasonSlug(seasonParam);
   const episodeNumber = numberFromEpisodeSlug(episodeParam);
 
-  const [series, ep, videos] = await Promise.all([
+  const computedEpisodeId = episodeId(seriesId, seasonNumber, episodeNumber);
+
+  const [series, ep, videos, reactionsResult, commentsResult] = await Promise.all([
     tmdbService.getSeriesDetails(seriesId).catch(() => null),
     tmdbService.getEpisodeDetails(seriesId, seasonNumber, episodeNumber).catch(() => null),
     tmdbService.getEpisodeVideos(seriesId, seasonNumber, episodeNumber).catch(() => ({ results: [] })),
+    supabase.from("episode_reactions").select("reaction_key").eq("episode_id", computedEpisodeId),
+    supabase.from("comments").select("id", { count: "exact", head: true }).eq("episode_id", computedEpisodeId),
   ]);
 
   const youtubeVideo = (videos?.results ?? []).find(
@@ -147,7 +152,15 @@ export default async function EpisodePage({ params }: Props) {
     );
   }
 
-  const computedEpisodeId = episodeId(seriesId, seasonNumber, episodeNumber);
+  const ratings = (reactionsResult.data ?? [])
+    .map((r) => parseInt(r.reaction_key))
+    .filter((n) => !isNaN(n));
+  const ratingCount = ratings.length;
+  const ratingValue = ratingCount > 0
+    ? ratings.reduce((a, b) => a + b, 0) / ratingCount
+    : 0;
+  const commentCount = commentsResult.count ?? 0;
+
   const genres: { id: number; name: string }[] = series.genres ?? [];
 
   const seasonLabel = `T${String(seasonNumber).padStart(2, "0")}`;
@@ -183,6 +196,22 @@ export default async function EpisodePage({ params }: Props) {
           name: series.name,
           url: seriesUrl,
         },
+        ...(ratingCount >= 3 && {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: ratingValue.toFixed(1),
+            ratingCount,
+            bestRating: "5",
+            worstRating: "1",
+          },
+        }),
+        ...(commentCount > 0 && {
+          interactionStatistic: {
+            "@type": "InteractionCounter",
+            interactionType: "https://schema.org/CommentAction",
+            userInteractionCount: commentCount,
+          },
+        }),
       },
       {
         "@type": "BreadcrumbList",
