@@ -128,32 +128,47 @@ export async function WeekCalendar() {
                 {slots.length === 0 ? (
                   <div className="h-10 rounded-lg border border-dashed border-[var(--border)] opacity-30" />
                 ) : (
-                  slots.map((ep) => (
-                    <Link
-                      key={ep.seriesId}
-                      href={ep.href}
-                      className="px-2.5 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--yellow)]/50 hover:bg-[var(--bg-elevated)] transition-colors flex flex-col gap-1"
-                    >
-                      <p className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight line-clamp-2">
-                        {ep.seriesName}
-                      </p>
-                      <div className="flex items-center justify-between gap-1">
-                        <p className="text-[10px] text-[var(--text-muted)]">
-                          {ep.seasonNumber}×{ep.episodeNumber}
+                  slots.map((ep) => {
+                    const isPremiere = ep.episodeNumber === 1;
+                    const isSeriesPremiere = isPremiere && ep.seasonNumber === 1;
+                    return (
+                      <Link
+                        key={ep.seriesId}
+                        href={ep.href}
+                        className={`px-2.5 py-2 rounded-lg border transition-colors flex flex-col gap-1 ${
+                          isPremiere
+                            ? "bg-[var(--yellow)]/5 border-[var(--yellow)]/25 hover:border-[var(--yellow)]/50 hover:bg-[var(--yellow)]/10"
+                            : "bg-[var(--bg-surface)] border-[var(--border)] hover:border-[var(--yellow)]/50 hover:bg-[var(--bg-elevated)]"
+                        }`}
+                      >
+                        <p className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight line-clamp-2">
+                          {ep.seriesName}
                         </p>
-                        {ep.providerLogo && (
-                          <Image
-                            src={`https://image.tmdb.org/t/p/w45${ep.providerLogo}`}
-                            alt={ep.providerName ?? ""}
-                            width={14}
-                            height={14}
-                            className="rounded-sm shrink-0"
-                            title={ep.providerName ?? ""}
-                          />
-                        )}
-                      </div>
-                    </Link>
-                  ))
+                        <div className="flex items-center justify-between gap-1">
+                          <div className="flex items-center gap-1 min-w-0">
+                            <p className="text-[10px] text-[var(--text-muted)] shrink-0">
+                              {ep.seasonNumber}×{ep.episodeNumber}
+                            </p>
+                            {isPremiere && (
+                              <span className="text-[9px] font-bold tracking-wide text-[var(--yellow)] shrink-0">
+                                {isSeriesPremiere ? "🎬 estreia" : "🔁 estreia"}
+                              </span>
+                            )}
+                          </div>
+                          {ep.providerLogo && (
+                            <Image
+                              src={`https://image.tmdb.org/t/p/w45${ep.providerLogo}`}
+                              alt={ep.providerName ?? ""}
+                              width={14}
+                              height={14}
+                              className="rounded-sm shrink-0"
+                              title={ep.providerName ?? ""}
+                            />
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })
                 )}
               </div>
             );
