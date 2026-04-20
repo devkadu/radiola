@@ -48,12 +48,18 @@ export async function WeekCalendar() {
   const weekEnd = weekDays[6].date;
 
   const data = await tmdbService.getOnTheAir(1).catch(() => ({ results: [] }));
-  const series: any[] = data.results ?? [];
+  const seriesList: any[] = (data.results ?? []).slice(0, 20);
+
+  // next_episode_to_air só vem nos detalhes individuais
+  const details = await Promise.all(
+    seriesList.map((s) => tmdbService.getSeriesDetails(String(s.id)).catch(() => null))
+  );
 
   const byDay: Record<string, EpisodeSlot[]> = {};
   for (const day of weekDays) byDay[day.date] = [];
 
-  for (const s of series) {
+  for (const s of details) {
+    if (!s) continue;
     const ep = s.next_episode_to_air;
     if (!ep?.air_date) continue;
     if (ep.air_date < weekStart || ep.air_date > weekEnd) continue;
