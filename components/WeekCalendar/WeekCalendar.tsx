@@ -82,13 +82,14 @@ export async function WeekCalendar() {
   if (!hasAnyEpisode) return null;
 
   return (
-    <section className="px-4 lg:px-0 py-4">
-      <div className="flex items-center justify-between mb-3">
+    <section className="px-4 lg:px-0 pt-4 pb-2">
+      <div className="flex items-center justify-between mb-1">
         <h2 className="text-lg font-bold text-[var(--text-primary)]">Esta semana</h2>
         <Link href="/em-breve" className="text-xs text-[var(--text-muted)] hover:text-[var(--yellow)] transition-colors">
           calendário →
         </Link>
       </div>
+      <div className="border-b border-[var(--border)] mb-4" />
 
       <div className="overflow-x-auto -mx-4 px-4">
         <div className="flex gap-3 min-w-max pb-1">
@@ -97,7 +98,7 @@ export async function WeekCalendar() {
             if (slots.length === 0 && !day.isToday) return null;
 
             return (
-              <div key={day.date} className="flex flex-col gap-1.5 w-[108px] shrink-0">
+              <div key={day.date} className="flex flex-col gap-1.5 w-[120px] shrink-0">
                 <span
                   className={`text-[10px] font-bold uppercase tracking-widest ${
                     day.isToday
@@ -109,17 +110,19 @@ export async function WeekCalendar() {
                 </span>
 
                 {slots.length === 0 ? (
-                  <div className="h-8 rounded-lg border border-dashed border-[var(--border)] opacity-40" />
+                  <div className="h-10 rounded-lg border border-dashed border-[var(--border)] opacity-40" />
                 ) : (
                   slots.map((ep) => (
                     <Link
                       key={ep.seriesId}
                       href={ep.href}
-                      className="px-2.5 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--yellow)]/50 hover:bg-[var(--bg-elevated)] transition-colors"
-                      title={`${ep.seriesName} · T${String(ep.seasonNumber).padStart(2,"0")}E${String(ep.episodeNumber).padStart(2,"0")}`}
+                      className="px-2.5 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--yellow)]/50 hover:bg-[var(--bg-elevated)] transition-colors"
                     >
                       <p className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight line-clamp-2">
                         {ep.seriesName}
+                      </p>
+                      <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                        {ep.seasonNumber}×{ep.episodeNumber}
                       </p>
                     </Link>
                   ))
