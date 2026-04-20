@@ -22,7 +22,7 @@ const Home = () => {
         <WeekCalendar />
       </Suspense>
 
-      <section className="px-4 lg:px-0 pb-2">
+      <section className="px-4 lg:px-0 pt-2 pb-2">
         <div className="mb-3">
           <h2 className="text-lg font-bold text-[var(--text-primary)]">Séries populares</h2>
         </div>
