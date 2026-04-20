@@ -225,6 +225,18 @@ export const tmdbService = {
     return res.json();
   },
 
+  async getOnTheAir(page = 1) {
+    const res = await fetch(
+      `${BASE_URL}/tv/on_the_air?language=pt-BR&page=${page}`,
+      {
+        headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+        next: { revalidate: 3600 },
+      }
+    );
+    if (!res.ok) throw new Error("Erro ao buscar séries em exibição");
+    return res.json();
+  },
+
   async getUpcomingSeries() {
     const today = new Date().toISOString().split("T")[0];
     const oneYearAhead = new Date();

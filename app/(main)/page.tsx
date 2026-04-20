@@ -2,6 +2,8 @@ import { PopularSeries } from "@/components/PopularSeries";
 import { HotEpisodes } from "@/components/HotEpisodes/HotEpisodes";
 import { TrendingSeasons } from "@/components/TrendingSeasons/TrendingSeasons";
 import { TopCommenters } from "@/components/TopCommenters/TopCommenters";
+import { WeekCalendar } from "@/components/WeekCalendar/WeekCalendar";
+import { Suspense } from "react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -15,6 +17,10 @@ const Home = () => {
     <main className="lg:px-8">
       <h1 className="sr-only">Segunda Temporada — Debate séries episódio a episódio</h1>
       <HotEpisodes />
+
+      <Suspense fallback={null}>
+        <WeekCalendar />
+      </Suspense>
 
       <section className="px-4 lg:px-0 pb-2">
         <div className="mb-3">
