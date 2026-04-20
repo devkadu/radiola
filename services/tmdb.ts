@@ -237,6 +237,22 @@ export const tmdbService = {
     return res.json();
   },
 
+  async getPremieres(dateFrom: string, dateTo: string) {
+    const params = new URLSearchParams({
+      language: "pt-BR",
+      sort_by: "popularity.desc",
+      "first_air_date.gte": dateFrom,
+      "first_air_date.lte": dateTo,
+      include_null_first_air_dates: "false",
+    });
+    const res = await fetch(`${BASE_URL}/discover/tv?${params}`, {
+      headers: { Authorization: `Bearer ${TMDB_TOKEN}` },
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) throw new Error("Erro ao buscar estreias");
+    return res.json();
+  },
+
   async getUpcomingSeries() {
     const today = new Date().toISOString().split("T")[0];
     const oneYearAhead = new Date();

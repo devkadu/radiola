@@ -47,12 +47,20 @@ export async function WeekCalendar() {
   const weekStart = weekDays[0].date;
   const weekEnd = weekDays[6].date;
 
-  const data = await tmdbService.getOnTheAir(1).catch(() => ({ results: [] }));
-  const seriesList: any[] = (data.results ?? []).slice(0, 20);
+  const [onTheAirData, premieresData] = await Promise.all([
+    tmdbService.getOnTheAir(1).catch(() => ({ results: [] })),
+    tmdbService.getPremieres(weekStart, weekEnd).catch(() => ({ results: [] })),
+  ]);
+
+  const seen = new Set<number>();
+  const seriesList: any[] = [];
+  for (const s of [...(onTheAirData.results ?? []), ...(premieresData.results ?? [])]) {
+    if (!seen.has(s.id)) { seen.add(s.id); seriesList.push(s); }
+  }
 
   const [details, providersAll] = await Promise.all([
-    Promise.all(seriesList.map((s) => tmdbService.getSeriesDetails(String(s.id)).catch(() => null))),
-    Promise.all(seriesList.map((s) => tmdbService.getWatchProviders(String(s.id)).catch(() => null))),
+    Promise.all(seriesList.slice(0, 30).map((s) => tmdbService.getSeriesDetails(String(s.id)).catch(() => null))),
+    Promise.all(seriesList.slice(0, 30).map((s) => tmdbService.getWatchProviders(String(s.id)).catch(() => null))),
   ]);
 
   const byDay: Record<string, EpisodeSlot[]> = {};
@@ -60,9 +68,13 @@ export async function WeekCalendar() {
 
   details.forEach((s, i) => {
     if (!s) return;
-    const ep = s.next_episode_to_air;
+    const ep =
+      s.next_episode_to_air?.air_date >= weekStart && s.next_episode_to_air?.air_date <= weekEnd
+        ? s.next_episode_to_air
+        : s.last_episode_to_air?.air_date >= weekStart && s.last_episode_to_air?.air_date <= weekEnd
+        ? s.last_episode_to_air
+        : null;
     if (!ep?.air_date) return;
-    if (ep.air_date < weekStart || ep.air_date > weekEnd) return;
 
     const brFlatrate = providersAll[i]?.results?.BR?.flatrate ?? [];
     const provider = brFlatrate[0] ?? null;
