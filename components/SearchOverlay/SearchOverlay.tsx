@@ -6,6 +6,7 @@ import { FaMagnifyingGlass, FaXmark } from "react-icons/fa6";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchOverlay } from "@/context/SearchContext";
+import type { SmartAnswer } from "@/lib/smartSearch";
 
 interface SearchResult {
   series: { id: number; name: string; slug: string; poster_path: string | null }[];
@@ -17,13 +18,6 @@ interface SearchResult {
     episode_number: number;
     series: { id: number; name: string; slug: string };
   }[];
-}
-
-interface SmartAnswer {
-  type: string;
-  answer: string;
-  seriesName: string;
-  tags: string[];
 }
 
 function useSearch(query: string) {
