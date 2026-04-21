@@ -18,7 +18,7 @@ export const BottonNavigator = () => {
         <span className={`text-xs ${pathname === "/" ? "text-[var(--yellow)]" : "text-[var(--text-muted)]"}`}>Início</span>
       </Link>
 
-      <button onClick={openSearch} className="flex flex-col items-center gap-1">
+      <button onClick={() => openSearch()} className="flex flex-col items-center gap-1">
         <FaMagnifyingGlass size={20} className="text-[var(--text-muted)]" />
         <span className="text-xs text-[var(--text-muted)]">Buscar</span>
       </button>

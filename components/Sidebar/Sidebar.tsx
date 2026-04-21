@@ -67,7 +67,7 @@ export const Sidebar = () => {
       {/* Busca */}
       <div className="px-3 mb-2">
         <button
-          onClick={openSearch}
+          onClick={() => openSearch()}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] transition-colors"
         >
           <FaMagnifyingGlass size={16} />

@@ -182,7 +182,7 @@ export const Header = () => {
 
         {/* Mobile: ícone de busca + auth */}
         <div className="lg:hidden ml-auto flex items-center gap-3">
-          <button onClick={open} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+          <button onClick={() => open()} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
             <FaMagnifyingGlass size={18} />
           </button>
           {user ? (
