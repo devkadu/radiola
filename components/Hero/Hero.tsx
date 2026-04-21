@@ -1,18 +1,74 @@
 import { tmdbService } from "@/services/tmdb";
-import { seriesSlug } from "@/lib/slugs";
 import { HeroSearch } from "./HeroSearch";
 import Image from "next/image";
-import Link from "next/link";
 
 export async function Hero() {
-  const data = await tmdbService.getPopularSeries(1).catch(() => ({ results: [] }));
-  const series: any[] = (data.results ?? []).slice(0, 8);
+  const [page1, page2] = await Promise.all([
+    tmdbService.getPopularSeries(1).catch(() => ({ results: [] })),
+    tmdbService.getPopularSeries(2).catch(() => ({ results: [] })),
+  ]);
+  const all: any[] = [...(page1.results ?? []), ...(page2.results ?? [])];
+  // repete até ter pelo menos 30 para preencher o fundo
+  const bg = Array.from({ length: 30 }, (_, i) => all[i % all.length]);
 
   return (
-    <section className="px-4 lg:px-0 pt-6 pb-4 lg:grid lg:grid-cols-[1fr_1fr] lg:gap-10 lg:items-center">
+    <section className="relative overflow-hidden min-h-[460px] lg:min-h-[520px] flex items-center">
 
-      {/* Esquerda */}
-      <div className="flex flex-col gap-5 lg:py-8">
+      {/* Fundo: grid rotacionado, ancorado à direita */}
+      <div className="absolute top-0 right-0 bottom-0 left-[35%] overflow-hidden">
+        <div
+          className="absolute grid gap-2"
+          style={{
+            gridTemplateColumns: "repeat(5, 160px)",
+            gridAutoRows: "240px",
+            transform: "rotate(-14deg)",
+            transformOrigin: "center center",
+            top: "-40%",
+            left: "-20%",
+            right: "-20%",
+            bottom: "-40%",
+          }}
+        >
+          {bg.map((s, i) => (
+            <div key={i} className="relative rounded-xl overflow-hidden bg-[var(--bg-elevated)]">
+              {s?.poster_path && (
+                <Image
+                  src={`https://image.tmdb.org/t/p/w342${s.poster_path}`}
+                  alt={s.name ?? ""}
+                  fill
+                  className="object-cover"
+                  sizes="160px"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* overlay escuro geral */}
+        <div className="absolute inset-0 bg-black/50" />
+        {/* fade esquerdo para fundir com o conteúdo */}
+        <div
+          className="absolute inset-y-0 left-0 w-40 pointer-events-none"
+          style={{ background: "linear-gradient(to right, var(--bg), transparent)" }}
+        />
+        {/* fade direito */}
+        <div
+          className="absolute inset-y-0 right-0 w-16 pointer-events-none"
+          style={{ background: "linear-gradient(to left, var(--bg) 20%, transparent)" }}
+        />
+        {/* fade topo e base */}
+        <div
+          className="absolute inset-x-0 top-0 h-24 pointer-events-none"
+          style={{ background: "linear-gradient(to bottom, var(--bg), transparent)" }}
+        />
+        <div
+          className="absolute inset-x-0 bottom-0 h-24 pointer-events-none"
+          style={{ background: "linear-gradient(to top, var(--bg), transparent)" }}
+        />
+      </div>
+
+      {/* Conteúdo */}
+      <div className="relative z-10 px-4 lg:px-0 py-16 w-full lg:max-w-[52%] flex flex-col gap-5">
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[var(--yellow)]">
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--yellow)] shrink-0" />
           Para quem não larga uma boa série
@@ -30,68 +86,6 @@ export async function Hero() {
         </div>
 
         <HeroSearch />
-      </div>
-
-      {/* Direita — cards em perspectiva 3D, só desktop */}
-      <div
-        className="hidden lg:block relative h-[420px]"
-        style={{ perspective: "1100px", perspectiveOrigin: "30% 50%" }}
-      >
-        {series.slice(0, 5).map((s, i) => {
-          const slug = seriesSlug(s.name, s.id);
-          // cada card: rotação Y crescente, recuo em Z e offset X/Y para fan-out
-          const configs = [
-            { rotY: -22, rotZ: -2,  x:  10, y:  10, z:   0, w: 155, h: 235, zIdx: 5 },
-            { rotY: -10, rotZ: -1,  x: 110, y: -15, z:  30, w: 148, h: 225, zIdx: 4 },
-            { rotY:   0, rotZ:  0,  x: 210, y: -25, z:  50, w: 142, h: 215, zIdx: 3 },
-            { rotY:  10, rotZ:  1,  x: 310, y: -10, z:  20, w: 135, h: 205, zIdx: 2 },
-            { rotY:  20, rotZ:  2,  x: 395, y:  15, z:   0, w: 128, h: 195, zIdx: 1 },
-          ];
-          const c = configs[i];
-          return (
-            <Link
-              key={s.id}
-              href={`/series/${slug}`}
-              className="absolute group rounded-xl overflow-hidden bg-[var(--bg-elevated)]"
-              style={{
-                width: c.w,
-                height: c.h,
-                left: c.x,
-                top: `calc(50% - ${c.h / 2}px + ${c.y}px)`,
-                transform: `rotateY(${c.rotY}deg) rotateZ(${c.rotZ}deg) translateZ(${c.z}px)`,
-                zIndex: c.zIdx,
-                boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 4px 16px rgba(0,0,0,0.5)",
-                transition: "transform 0.4s ease, box-shadow 0.4s ease",
-              }}
-            >
-              {s.poster_path && (
-                <Image
-                  src={`https://image.tmdb.org/t/p/w342${s.poster_path}`}
-                  alt={s.name}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="180px"
-                />
-              )}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(170deg, rgba(0,0,0,0.4) 0%, transparent 40%, rgba(0,0,0,0.75) 100%)",
-                }}
-              />
-              <p className="absolute bottom-3 inset-x-3 text-[11px] font-bold text-white leading-tight line-clamp-2 drop-shadow-lg">
-                {s.name}
-              </p>
-            </Link>
-          );
-        })}
-
-        {/* fade nas bordas para fundir com o fundo */}
-        <div className="absolute inset-y-0 left-0 w-10 pointer-events-none z-20"
-          style={{ background: "linear-gradient(to right, var(--bg), transparent)" }} />
-        <div className="absolute inset-y-0 right-0 w-20 pointer-events-none z-20"
-          style={{ background: "linear-gradient(to left, var(--bg), transparent)" }} />
       </div>
 
     </section>
