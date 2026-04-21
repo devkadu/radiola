@@ -19,7 +19,7 @@ export async function Hero() {
         <div
           className="absolute grid gap-2"
           style={{
-            gridTemplateColumns: "repeat(5, 160px)",
+            gridTemplateColumns: "repeat(6, 160px)",
             gridAutoRows: "240px",
             transform: "rotate(-14deg)",
             transformOrigin: "center center",
