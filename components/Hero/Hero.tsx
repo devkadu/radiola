@@ -32,35 +32,58 @@ export async function Hero() {
         <HeroSearch />
       </div>
 
-      {/* Direita — grid de séries, só desktop */}
-      <div className="hidden lg:grid grid-cols-4 grid-rows-2 gap-2 h-[380px]">
-        {series.map((s) => {
+      {/* Direita — faixas diagonais, só desktop */}
+      <div className="hidden lg:flex h-[400px] relative">
+        {series.slice(0, 5).map((s, i) => {
           const slug = seriesSlug(s.name, s.id);
+          const isFirst = i === 0;
+          const isLast = i === 4;
+          const clip = `polygon(${isFirst ? "0" : "12%"} 0, 100% 0, ${isLast ? "100%" : "88%"} 100%, 0% 100%)`;
           return (
             <Link
               key={s.id}
               href={`/series/${slug}`}
-              className="relative rounded-xl overflow-hidden group bg-[var(--bg-elevated)]"
+              className="relative flex-1 group bg-[var(--bg-elevated)] overflow-hidden"
+              style={{
+                clipPath: clip,
+                marginRight: isLast ? 0 : "-5%",
+                zIndex: 5 - i,
+              }}
             >
               {s.poster_path && (
                 <Image
                   src={`https://image.tmdb.org/t/p/w342${s.poster_path}`}
                   alt={s.name}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  sizes="160px"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="220px"
                 />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/50" />
-              <p className="absolute top-2 inset-x-2 text-[9px] font-bold uppercase tracking-widest text-white/50 leading-tight line-clamp-2">
+              {/* gradiente diagonal por card */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(160deg, rgba(0,0,0,0.55) 0%, transparent 45%, rgba(0,0,0,0.7) 100%)",
+                }}
+              />
+              {/* nome pequeno no topo */}
+              <p className="absolute top-3 left-[18%] right-2 text-[9px] font-bold uppercase tracking-widest text-white/50 leading-tight line-clamp-1">
                 {s.name}
               </p>
-              <p className="absolute bottom-2 inset-x-2 text-[11px] font-bold text-white leading-tight line-clamp-2">
+              {/* nome grande embaixo */}
+              <p className="absolute bottom-3 left-[18%] right-2 text-[12px] font-bold text-white leading-tight line-clamp-2">
                 {s.name}
               </p>
             </Link>
           );
         })}
+
+        {/* fade lateral esquerdo para fundir com o fundo */}
+        <div
+          className="absolute inset-y-0 left-0 w-8 pointer-events-none z-10"
+          style={{ background: "linear-gradient(to right, var(--bg), transparent)" }}
+        />
       </div>
 
     </section>
