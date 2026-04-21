@@ -32,22 +32,36 @@ export async function Hero() {
         <HeroSearch />
       </div>
 
-      {/* Direita — faixas diagonais, só desktop */}
-      <div className="hidden lg:flex h-[400px] relative">
+      {/* Direita — cards em perspectiva 3D, só desktop */}
+      <div
+        className="hidden lg:block relative h-[420px]"
+        style={{ perspective: "1100px", perspectiveOrigin: "30% 50%" }}
+      >
         {series.slice(0, 5).map((s, i) => {
           const slug = seriesSlug(s.name, s.id);
-          const isFirst = i === 0;
-          const isLast = i === 4;
-          const clip = `polygon(${isFirst ? "0" : "12%"} 0, 100% 0, ${isLast ? "100%" : "88%"} 100%, 0% 100%)`;
+          // cada card: rotação Y crescente, recuo em Z e offset X/Y para fan-out
+          const configs = [
+            { rotY: -22, rotZ: -2,  x:  10, y:  10, z:   0, w: 155, h: 235, zIdx: 5 },
+            { rotY: -10, rotZ: -1,  x: 110, y: -15, z:  30, w: 148, h: 225, zIdx: 4 },
+            { rotY:   0, rotZ:  0,  x: 210, y: -25, z:  50, w: 142, h: 215, zIdx: 3 },
+            { rotY:  10, rotZ:  1,  x: 310, y: -10, z:  20, w: 135, h: 205, zIdx: 2 },
+            { rotY:  20, rotZ:  2,  x: 395, y:  15, z:   0, w: 128, h: 195, zIdx: 1 },
+          ];
+          const c = configs[i];
           return (
             <Link
               key={s.id}
               href={`/series/${slug}`}
-              className="relative flex-1 group bg-[var(--bg-elevated)] overflow-hidden"
+              className="absolute group rounded-xl overflow-hidden bg-[var(--bg-elevated)]"
               style={{
-                clipPath: clip,
-                marginRight: isLast ? 0 : "-5%",
-                zIndex: 5 - i,
+                width: c.w,
+                height: c.h,
+                left: c.x,
+                top: `calc(50% - ${c.h / 2}px + ${c.y}px)`,
+                transform: `rotateY(${c.rotY}deg) rotateZ(${c.rotZ}deg) translateZ(${c.z}px)`,
+                zIndex: c.zIdx,
+                boxShadow: "0 20px 60px rgba(0,0,0,0.7), 0 4px 16px rgba(0,0,0,0.5)",
+                transition: "transform 0.4s ease, box-shadow 0.4s ease",
               }}
             >
               {s.poster_path && (
@@ -56,34 +70,28 @@ export async function Hero() {
                   alt={s.name}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="220px"
+                  sizes="180px"
                 />
               )}
-              {/* gradiente diagonal por card */}
               <div
                 className="absolute inset-0"
                 style={{
                   background:
-                    "linear-gradient(160deg, rgba(0,0,0,0.55) 0%, transparent 45%, rgba(0,0,0,0.7) 100%)",
+                    "linear-gradient(170deg, rgba(0,0,0,0.4) 0%, transparent 40%, rgba(0,0,0,0.75) 100%)",
                 }}
               />
-              {/* nome pequeno no topo */}
-              <p className="absolute top-3 left-[18%] right-2 text-[9px] font-bold uppercase tracking-widest text-white/50 leading-tight line-clamp-1">
-                {s.name}
-              </p>
-              {/* nome grande embaixo */}
-              <p className="absolute bottom-3 left-[18%] right-2 text-[12px] font-bold text-white leading-tight line-clamp-2">
+              <p className="absolute bottom-3 inset-x-3 text-[11px] font-bold text-white leading-tight line-clamp-2 drop-shadow-lg">
                 {s.name}
               </p>
             </Link>
           );
         })}
 
-        {/* fade lateral esquerdo para fundir com o fundo */}
-        <div
-          className="absolute inset-y-0 left-0 w-8 pointer-events-none z-10"
-          style={{ background: "linear-gradient(to right, var(--bg), transparent)" }}
-        />
+        {/* fade nas bordas para fundir com o fundo */}
+        <div className="absolute inset-y-0 left-0 w-10 pointer-events-none z-20"
+          style={{ background: "linear-gradient(to right, var(--bg), transparent)" }} />
+        <div className="absolute inset-y-0 right-0 w-20 pointer-events-none z-20"
+          style={{ background: "linear-gradient(to left, var(--bg), transparent)" }} />
       </div>
 
     </section>
