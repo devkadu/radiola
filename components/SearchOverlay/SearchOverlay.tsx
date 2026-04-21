@@ -52,6 +52,7 @@ const INTENT_LABEL: Record<string, string> = {
   material: "📖 material original",
   prod_status: "📺 status de produção",
   similares: "✨ você também vai amar",
+  discovery: "🎯 pra você assistir",
 };
 
 // Renderiza markdown bold simples (**texto**)
@@ -139,10 +140,26 @@ export const SearchOverlay = () => {
             <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--yellow)] mb-2">
               ✨ {INTENT_LABEL[smart.type] ?? "resposta rápida"}
             </p>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-line mb-1">
               <SmartText text={smart.answer} />
             </p>
-            {smart.tags.length > 0 && (
+            {smart.series && smart.series.length > 0 && (
+              <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
+                {smart.series.map((s) => (
+                  <Link key={s.id} href={`/series/${s.slug}`} onClick={onSelect} className="shrink-0 flex flex-col gap-1 w-16">
+                    <div className="w-16 h-24 rounded-lg overflow-hidden bg-[var(--bg-elevated)] relative">
+                      {s.poster_path ? (
+                        <Image src={`https://image.tmdb.org/t/p/w154${s.poster_path}`} alt={s.name} fill className="object-cover" sizes="64px" />
+                      ) : (
+                        <div className="w-full h-full bg-[var(--bg-elevated)]" />
+                      )}
+                    </div>
+                    <p className="text-[10px] text-[var(--text-muted)] text-center line-clamp-2 leading-tight">{s.name}</p>
+                  </Link>
+                ))}
+              </div>
+            )}
+            {smart.tags.length > 0 && !smart.series && (
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {smart.tags.map((tag) => (
                   <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]">

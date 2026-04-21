@@ -6,6 +6,9 @@
  *   ANTHROPIC_API_KEY=sk-... npx tsx scripts/populate-series-context.ts
  */
 
+import { config } from "dotenv";
+config({ path: ".env" });
+
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 
@@ -59,7 +62,8 @@ const PROMPT = (name: string) => `Você é um especialista em séries de TV. Res
   },
   "prod_status": "status atual em 1 frase (ex: '2ª temporada confirmada para 2026', 'cancelada', 'em exibição')",
   "similares_nomes": ["Nome Série 1", "Nome Série 2", "Nome Série 3"],
-  "tags": ["array de tags como: anime, sci-fi, suspense, maratona, terror, drama, comédia, ação, fantasia, distopia, obra-adaptada"]
+  "tags": ["array de tags como: anime, sci-fi, suspense, maratona, terror, drama, comédia, ação, fantasia, distopia, obra-adaptada"],
+  "streaming": ["plataformas onde está disponível no Brasil, use exatamente: netflix, amazon, hbo, disney, apple, globoplay, paramount, crunchyroll"]
 }`;
 
 async function fetchContext(seriesId: number, name: string) {
@@ -69,7 +73,8 @@ async function fetchContext(seriesId: number, name: string) {
     messages: [{ role: "user", content: PROMPT(name) }],
   });
 
-  const text = (msg.content[0] as any).text.trim();
+  const raw = (msg.content[0] as any).text.trim();
+  const text = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
   return JSON.parse(text);
 }
 
@@ -86,15 +91,12 @@ async function main() {
         series_name: series.name,
         material: data.material,
         prod_status: data.prod_status,
-        similares: [],  // populado separado para evitar dependência de ids
+        similares: [],
         tags: data.tags ?? [],
+        similares_nomes: data.similares_nomes ?? [],
+        streaming: data.streaming ?? [],
         updated_at: new Date().toISOString(),
       });
-
-      // Salva nomes dos similares num campo extra para lookup posterior
-      await supabase.from("series_context")
-        .update({ similares_nomes: data.similares_nomes })
-        .eq("series_id", series.id);
 
       console.log(`   ✓ tags: ${data.tags?.join(", ")}`);
       console.log(`   ✓ status: ${data.prod_status}`);

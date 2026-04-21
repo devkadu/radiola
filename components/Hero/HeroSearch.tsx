@@ -6,7 +6,7 @@ import { FiSearch } from "react-icons/fi";
 const TAGS = [
   { label: "parecida com Dark",    query: "parecida com Dark" },
   { label: "curta pra maratonar",  query: "curta pra maratonar" },
-  { label: "One Piece",            query: "One Piece" },
+  { label: "novidades One Piece",  query: "novidades One Piece" },
   { label: "onde continuar Silo",  query: "onde continuar Silo" },
   { label: "novidades The Boys",   query: "novidades The Boys" },
 ];

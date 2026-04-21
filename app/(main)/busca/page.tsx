@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { seriesSlug } from "@/lib/slugs";
+import { BuscaInput } from "@/components/BuscaInput/BuscaInput";
+import { getSmartAnswer } from "@/lib/smartSearch";
 import type { Metadata } from "next";
 
 interface SearchPageProps {
@@ -26,7 +28,8 @@ export default async function BuscaPage({ searchParams }: SearchPageProps) {
     return (
       <div className="px-4 pt-6 pb-24 flex flex-col gap-6">
         <h1 className="text-[var(--text-primary)] font-bold text-xl">Busca</h1>
-        <div className="flex flex-col items-center gap-3 py-20 text-[var(--text-muted)]">
+        <BuscaInput initialValue="" />
+        <div className="flex flex-col items-center gap-3 py-16 text-[var(--text-muted)]">
           <FaMagnifyingGlass size={36} />
           <p className="text-sm">Digite algo para buscar</p>
         </div>
@@ -34,8 +37,9 @@ export default async function BuscaPage({ searchParams }: SearchPageProps) {
     );
   }
 
-  // Busca em paralelo: cache local (Supabase) + TMDB
-  const [cached, tmdbData] = await Promise.all([
+  // Busca em paralelo: smart answer + cache local + TMDB
+  const [smart, cached, tmdbData] = await Promise.all([
+    getSmartAnswer(query),
     cacheService.search(query),
     tmdbService.searchSeries(query),
   ]);
@@ -50,16 +54,56 @@ export default async function BuscaPage({ searchParams }: SearchPageProps) {
 
   return (
     <div className="px-4 pt-6 pb-24 flex flex-col gap-8">
-      <div>
-        <h1 className="text-[var(--text-primary)] font-bold text-xl">
-          Resultados para &ldquo;{query}&rdquo;
-        </h1>
-        <p className="text-[var(--text-muted)] text-sm mt-1">
-          {totalCount} resultado{totalCount !== 1 ? "s" : ""}
-        </p>
+      <div className="flex flex-col gap-3">
+        <BuscaInput initialValue={query} />
+        <div>
+          <h1 className="text-[var(--text-primary)] font-bold text-xl">
+            Resultados para &ldquo;{query}&rdquo;
+          </h1>
+          <p className="text-[var(--text-muted)] text-sm mt-1">
+            {totalCount} resultado{totalCount !== 1 ? "s" : ""}
+          </p>
+        </div>
       </div>
 
-      {totalCount === 0 && (
+      {/* Zona inteligente */}
+      {smart && (
+        <div className="rounded-2xl border border-[var(--yellow)]/20 bg-[var(--yellow)]/5 p-4">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--yellow)] mb-2">
+            ✨ {INTENT_LABEL[smart.type] ?? "resposta rápida"}
+          </p>
+          <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-line mb-1">
+            <SmartText text={smart.answer} />
+          </p>
+          {smart.series && smart.series.length > 0 && (
+            <div className="flex gap-3 mt-3 overflow-x-auto pb-1">
+              {smart.series.map((s) => (
+                <Link key={s.id} href={`/series/${s.slug}`} className="shrink-0 flex flex-col gap-1.5 w-20">
+                  <div className="w-20 h-[120px] rounded-xl overflow-hidden bg-[var(--bg-elevated)] relative">
+                    {s.poster_path ? (
+                      <Image src={`https://image.tmdb.org/t/p/w154${s.poster_path}`} alt={s.name} fill className="object-cover hover:scale-105 transition-transform duration-300" sizes="80px" />
+                    ) : (
+                      <div className="w-full h-full bg-[var(--bg-elevated)]" />
+                    )}
+                  </div>
+                  <p className="text-[11px] text-[var(--text-muted)] text-center line-clamp-2 leading-tight">{s.name}</p>
+                </Link>
+              ))}
+            </div>
+          )}
+          {smart.tags.length > 0 && !smart.series && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {smart.tags.map((tag) => (
+                <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {totalCount === 0 && !smart && (
         <div className="flex flex-col items-center gap-3 py-20 text-[var(--text-muted)]">
           <FaMagnifyingGlass size={36} />
           <p className="text-sm">Nenhum resultado para &ldquo;{query}&rdquo;</p>
@@ -127,6 +171,24 @@ export default async function BuscaPage({ searchParams }: SearchPageProps) {
         </section>
       )}
     </div>
+  );
+}
+
+const INTENT_LABEL: Record<string, string> = {
+  material: "📖 material original",
+  prod_status: "📺 status de produção",
+  similares: "✨ você também vai amar",
+  discovery: "🎯 pra você assistir",
+};
+
+function SmartText({ text }: { text: string }) {
+  const parts = text.split(/\*\*(.*?)\*\*/g);
+  return (
+    <span>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? <strong key={i} className="text-[var(--text-primary)] font-semibold">{p}</strong> : p
+      )}
+    </span>
   );
 }
 
