@@ -4,11 +4,11 @@ import { useSearchOverlay } from "@/context/SearchContext";
 import { FiSearch } from "react-icons/fi";
 
 const TAGS = [
-  "parecida com Dark",
-  "curta pra maratonar",
-  "One Piece",
-  "onde continuar Silo",
-  "novidades The Boys",
+  { label: "parecida com Dark",    query: "parecida com Dark" },
+  { label: "curta pra maratonar",  query: "curta pra maratonar" },
+  { label: "One Piece",            query: "One Piece" },
+  { label: "onde continuar Silo",  query: "onde continuar Silo" },
+  { label: "novidades The Boys",   query: "novidades The Boys" },
 ];
 
 export function HeroSearch() {
@@ -17,7 +17,7 @@ export function HeroSearch() {
   return (
     <div className="flex flex-col gap-3">
       <button
-        onClick={open}
+        onClick={() => open()}
         className="flex items-center gap-2 w-full max-w-sm px-4 py-3 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] text-[var(--text-muted)] text-sm hover:border-[var(--yellow)]/40 transition-colors text-left"
       >
         <FiSearch size={15} className="shrink-0" />
@@ -27,11 +27,11 @@ export function HeroSearch() {
       <div className="flex flex-wrap gap-2">
         {TAGS.map((tag) => (
           <button
-            key={tag}
-            onClick={open}
+            key={tag.label}
+            onClick={() => open(tag.query)}
             className="px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] text-xs text-[var(--text-muted)] hover:border-[var(--yellow)]/40 hover:text-[var(--text-primary)] transition-colors"
           >
-            {tag}
+            {tag.label}
           </button>
         ))}
       </div>

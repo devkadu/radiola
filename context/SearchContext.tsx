@@ -4,14 +4,22 @@ import { createContext, useContext, useState } from "react";
 
 const SearchContext = createContext<{
   isOpen: boolean;
-  open: () => void;
+  initialQuery: string;
+  open: (query?: string) => void;
   close: () => void;
-}>({ isOpen: false, open: () => {}, close: () => {} });
+}>({ isOpen: false, initialQuery: "", open: () => {}, close: () => {} });
 
 export const SearchProvider = ({ children }: { children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [initialQuery, setInitialQuery] = useState("");
+
+  const open = (query = "") => {
+    setInitialQuery(query);
+    setIsOpen(true);
+  };
+
   return (
-    <SearchContext.Provider value={{ isOpen, open: () => setIsOpen(true), close: () => setIsOpen(false) }}>
+    <SearchContext.Provider value={{ isOpen, initialQuery, open, close: () => setIsOpen(false) }}>
       {children}
     </SearchContext.Provider>
   );

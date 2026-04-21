@@ -19,33 +19,68 @@ interface SearchResult {
   }[];
 }
 
+interface SmartAnswer {
+  type: string;
+  answer: string;
+  seriesName: string;
+  tags: string[];
+}
+
 function useSearch(query: string) {
   const [results, setResults] = useState<SearchResult | null>(null);
+  const [smart, setSmart] = useState<SmartAnswer | null>(null);
+
   useEffect(() => {
-    if (query.length < 2) { setResults(null); return; }
+    if (query.length < 2) { setResults(null); setSmart(null); return; }
+
     const timer = setTimeout(async () => {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-      setResults(await res.json());
-    }, 300);
+      const [regularRes, smartRes] = await Promise.all([
+        fetch(`/api/search?q=${encodeURIComponent(query)}`).then(r => r.json()),
+        fetch(`/api/smart-search?q=${encodeURIComponent(query)}`).then(r => r.json()),
+      ]);
+      setResults(regularRes);
+      setSmart(smartRes.smartAnswer ?? null);
+    }, 350);
+
     return () => clearTimeout(timer);
   }, [query]);
-  return results;
+
+  return { results, smart };
+}
+
+const INTENT_LABEL: Record<string, string> = {
+  material: "📖 material original",
+  prod_status: "📺 status de produção",
+  similares: "✨ você também vai amar",
+};
+
+// Renderiza markdown bold simples (**texto**)
+function SmartText({ text }: { text: string }) {
+  const parts = text.split(/\*\*(.*?)\*\*/g);
+  return (
+    <span>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? <strong key={i} className="text-[var(--text-primary)] font-semibold">{p}</strong> : p
+      )}
+    </span>
+  );
 }
 
 export const SearchOverlay = () => {
-  const { isOpen, close } = useSearchOverlay();
+  const { isOpen, initialQuery, close } = useSearchOverlay();
   const router = useRouter();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const results = useSearch(query);
+  const { results, smart } = useSearch(query);
 
   useEffect(() => {
     if (isOpen) {
+      setQuery(initialQuery);
       setTimeout(() => inputRef.current?.focus(), 50);
     } else {
       setQuery("");
     }
-  }, [isOpen]);
+  }, [isOpen, initialQuery]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && query.trim()) {
@@ -56,13 +91,13 @@ export const SearchOverlay = () => {
   };
 
   const onSelect = () => close();
-
   const hasResults = results && (results.series.length > 0 || results.episodes.length > 0);
 
   return (
     <div className={`fixed inset-0 z-50 bg-[var(--bg)] flex flex-col transition-all duration-300 ${
       isOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
     }`}>
+
       {/* Input */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-[var(--border)]">
         <div className="flex items-center gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[4px] px-3 py-2 flex-1">
@@ -70,7 +105,7 @@ export const SearchOverlay = () => {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Buscar série ou episódio..."
+            placeholder="Buscar série, humor, gênero..."
             className="bg-transparent text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none w-full"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -87,23 +122,47 @@ export const SearchOverlay = () => {
         </button>
       </div>
 
-      {/* Resultados */}
+      {/* Conteúdo */}
       <div className="flex-1 overflow-y-auto">
-        {!results && query.length < 2 && (
+
+        {/* Estado vazio */}
+        {!results && !smart && query.length < 2 && (
           <div className="flex flex-col items-center gap-3 py-20 text-[var(--text-muted)]">
             <FaMagnifyingGlass size={32} />
             <p className="text-sm">Digite para buscar</p>
           </div>
         )}
 
-        {results && !hasResults && (
+        {/* Zona A — Resposta inteligente */}
+        {smart && (
+          <div className="mx-4 mt-4 rounded-2xl border border-[var(--yellow)]/20 bg-[var(--yellow)]/5 p-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--yellow)] mb-2">
+              ✨ {INTENT_LABEL[smart.type] ?? "resposta rápida"}
+            </p>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
+              <SmartText text={smart.answer} />
+            </p>
+            {smart.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {smart.tags.map((tag) => (
+                  <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Zona B — Resultados de navegação */}
+        {results && !hasResults && !smart && (
           <div className="px-4 py-6 text-center">
             <p className="text-sm text-[var(--text-muted)]">Nenhum resultado encontrado</p>
           </div>
         )}
 
-        {results && results.episodes.length > 0 && (
-          <div>
+        {results?.episodes && results.episodes.length > 0 && (
+          <div className="mt-2">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] px-4 pt-3 pb-1">
               Episódios
             </p>
@@ -129,32 +188,26 @@ export const SearchOverlay = () => {
           </div>
         )}
 
-        {results && results.series.length > 0 && (
-          <div>
+        {results?.series && results.series.length > 0 && (
+          <div className="mt-2">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] px-4 pt-3 pb-1">
               Séries
             </p>
-            {results.series.map((series, i) => (
+            {results.series.map((s, i) => (
               <Link
-                key={series.id}
-                href={`/series/${series.slug}`}
+                key={s.id}
+                href={`/series/${s.slug}`}
                 onClick={onSelect}
                 className={`flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--bg-elevated)] transition-colors ${i > 0 ? "border-t border-[var(--border)]" : ""}`}
               >
-                <div className="w-12 h-16 rounded overflow-hidden bg-[var(--bg-elevated)] shrink-0 relative">
-                  {series.poster_path ? (
-                    <Image
-                      src={`https://image.tmdb.org/t/p/w92${series.poster_path}`}
-                      alt={series.name}
-                      fill
-                      className="object-cover"
-                      sizes="48px"
-                    />
+                <div className="w-10 h-14 rounded overflow-hidden bg-[var(--bg-elevated)] shrink-0 relative">
+                  {s.poster_path ? (
+                    <Image src={`https://image.tmdb.org/t/p/w92${s.poster_path}`} alt={s.name} fill className="object-cover" sizes="40px" />
                   ) : (
                     <div className="w-full h-full bg-[var(--bg-elevated)]" />
                   )}
                 </div>
-                <p className="text-sm text-[var(--text-primary)] truncate">{series.name}</p>
+                <p className="text-sm text-[var(--text-primary)] truncate">{s.name}</p>
               </Link>
             ))}
           </div>
@@ -164,7 +217,7 @@ export const SearchOverlay = () => {
           <Link
             href={`/busca?q=${encodeURIComponent(query)}`}
             onClick={onSelect}
-            className="flex items-center justify-center gap-2 px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--yellow)] hover:bg-[var(--bg-elevated)] transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-3 border-t border-[var(--border)] text-xs text-[var(--yellow)] hover:bg-[var(--bg-elevated)] transition-colors mt-2"
           >
             Ver todos os resultados para &ldquo;{query}&rdquo; →
           </Link>
