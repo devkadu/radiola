@@ -1,5 +1,5 @@
 import { PopularSeries } from "@/components/PopularSeries";
-import { HotEpisodes } from "@/components/HotEpisodes/HotEpisodes";
+import { Hero } from "@/components/Hero";
 import { TrendingSeasons } from "@/components/TrendingSeasons/TrendingSeasons";
 import { TopCommenters } from "@/components/TopCommenters/TopCommenters";
 import { WeekCalendar } from "@/components/WeekCalendar/WeekCalendar";
@@ -12,11 +12,12 @@ export const metadata: Metadata = {
     "Descubra episódios em debate e séries populares. Comente no seu ritmo, episódio por episódio.",
 };
 
-const Home = () => {
+const Home = async () => {
   return (
     <main className="lg:px-8">
-      <h1 className="sr-only">Segunda Temporada — Debate séries episódio a episódio</h1>
-      <HotEpisodes />
+      <Suspense fallback={null}>
+        <Hero />
+      </Suspense>
 
       <Suspense fallback={null}>
         <WeekCalendar />
