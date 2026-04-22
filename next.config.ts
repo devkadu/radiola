@@ -9,14 +9,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Mantém segmentos de página no router cache do cliente
-    // evitando re-fetch ao navegar de volta para uma página visitada
-    staleTimes: {
-      dynamic: 30,   // páginas dinâmicas: 30s
-      static: 300,   // páginas estáticas: 5min
-    },
-  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
