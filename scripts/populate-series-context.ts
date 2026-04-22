@@ -60,9 +60,9 @@ const PROMPT = (name: string) => `Você é um especialista em séries de TV. Res
     "onde_continuar": "onde o fã pode continuar (ex: 'Capítulo 121 do mangá Berserk'). null se não se aplica.",
     "fonte": "nome da obra + editora/plataforma. null se não se aplica."
   },
-  "prod_status": "status atual em 1 frase (ex: '2ª temporada confirmada para 2026', 'cancelada', 'em exibição')",
+  "prod_status": "status atual em 1 frase considerando que hoje é abril de 2026 (ex: '5ª temporada estreou em novembro de 2025', 'cancelada em 2024', 'em exibição desde 2023')",
   "similares_nomes": ["Nome Série 1", "Nome Série 2", "Nome Série 3"],
-  "tags": ["array de tags como: anime, sci-fi, suspense, maratona, terror, drama, comédia, ação, fantasia, distopia, obra-adaptada"],
+  "tags": ["use apenas tags desta lista: anime, sci-fi, suspense, terror, drama, comédia, ação, fantasia, distopia, obra-adaptada, crime, romance, maratona, minissérie. Use 'minissérie' APENAS para séries com 1 temporada curta e história fechada (ex: Chernobyl, The Night Of). Use 'maratona' para séries longas com múltiplas temporadas boas pra binge. Não use os dois juntos."],
   "streaming": ["plataformas onde está disponível no Brasil, use exatamente: netflix, amazon, hbo, disney, apple, globoplay, paramount, crunchyroll"]
 }`;
 

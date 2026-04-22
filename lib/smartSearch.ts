@@ -31,6 +31,7 @@ const INTENT_MAP: { keywords: string[]; intent: string }[] = [
     "crime", "policial", "detetive", "investigação", "investigacao",
     "romance", "romântica", "romantica",
     "maratonar", "maratona",
+    "curta", "curto", "minissérie", "minisserie", "mini série", "poucos episódios", "história fechada",
   ], intent: "genre" },
 ];
 
@@ -46,7 +47,8 @@ const GENRE_TAG_MAP: { keywords: string[]; tag: string; label: string }[] = [
   { keywords: ["distopia", "pós-apocalíptico", "pos-apocaliptico"], tag: "distopia", label: "distopia" },
   { keywords: ["crime", "policial", "detetive", "investigação", "investigacao"], tag: "crime", label: "crime" },
   { keywords: ["romance", "romântica", "romantica"], tag: "romance", label: "romance" },
-  { keywords: ["maratonar", "maratona"], tag: "maratona", label: "pra maratonar" },
+  { keywords: ["maratonar", "maratona", "binge", "vários episódios", "varios episodios"], tag: "maratona", label: "pra maratonar" },
+  { keywords: ["curta", "curto", "minissérie", "minisserie", "mini série", "mini serie", "episódios curtos", "poucos episódios", "história fechada", "historia fechada"], tag: "minissérie", label: "minissérie" },
 ];
 
 function detectIntent(query: string): string | null {
