@@ -84,8 +84,8 @@ export const Header = () => {
               <path d="M18 7l10 8-10 8V7z" fill="rgba(10,10,10,0.4)"/>
             </svg>
           </div>
-          <span className="text-sm font-extrabold tracking-tight text-[var(--text-primary)] leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-            Segunda<br/>Temporada
+          <span className="text-sm font-extrabold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="text-[var(--text-primary)]">Segunda </span><span className="text-[var(--yellow)]">Temporada</span>
           </span>
         </Link>
 

@@ -26,7 +26,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </svg>
           </div>
           <span className="text-base font-extrabold tracking-tight text-black" style={{ fontFamily: "var(--font-display)" }}>
-            Segunda Temporada
+            Segunda <span className="text-black/40">Temporada</span>
           </span>
         </Link>
 
@@ -67,8 +67,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 <path d="M18 7l10 8-10 8V7z" fill="rgba(10,10,10,0.4)"/>
               </svg>
             </div>
-            <span className="text-base font-extrabold tracking-tight text-[var(--text-primary)]" style={{ fontFamily: "var(--font-display)" }}>
-              Segunda Temporada
+            <span className="text-base font-extrabold tracking-tight" style={{ fontFamily: "var(--font-display)" }}>
+              <span className="text-[var(--text-primary)]">Segunda </span><span className="text-[var(--yellow)]">Temporada</span>
             </span>
           </Link>
         </div>
