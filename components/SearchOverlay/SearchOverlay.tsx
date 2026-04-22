@@ -42,6 +42,15 @@ function useSearch(query: string) {
   return { results, smart };
 }
 
+const SUGGESTIONS = [
+  { emoji: "🔥", label: "Onde continuar One Piece no mangá?", query: "onde continuar One Piece" },
+  { emoji: "🗓️", label: "Quando volta Stranger Things?", query: "quando volta Stranger Things" },
+  { emoji: "✨", label: "Séries parecidas com Dark", query: "parecida com Dark" },
+  { emoji: "📺", label: "Novidades de The Boys", query: "novidades The Boys" },
+  { emoji: "🎯", label: "Séries de ficção científica", query: "séries de ficção científica" },
+  { emoji: "😂", label: "Séries engraçadas pra maratonar", query: "séries de comédia" },
+];
+
 const INTENT_LABEL: Record<string, string> = {
   material: "📖 material original",
   prod_status: "📺 status de produção",
@@ -120,11 +129,24 @@ export const SearchOverlay = () => {
       {/* Conteúdo */}
       <div className="flex-1 overflow-y-auto">
 
-        {/* Estado vazio */}
-        {!results && !smart && query.length < 2 && (
-          <div className="flex flex-col items-center gap-3 py-20 text-[var(--text-muted)]">
-            <FaMagnifyingGlass size={32} />
-            <p className="text-sm">Digite para buscar</p>
+        {/* Zero state — sugestões */}
+        {query.length < 2 && (
+          <div className="px-4 pt-5 pb-4 flex flex-col gap-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-2">perguntas populares</p>
+              <div className="flex flex-col gap-1">
+                {SUGGESTIONS.map((s) => (
+                  <button
+                    key={s.query}
+                    onClick={() => setQuery(s.query)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-[var(--bg-elevated)] transition-colors text-left w-full"
+                  >
+                    <span className="text-base leading-none">{s.emoji}</span>
+                    <span className="text-sm text-[var(--text-secondary)]">{s.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
