@@ -21,6 +21,7 @@ interface NextEpisode {
   href: string;
   isUpcoming: boolean;
   airDate: string | null;
+  commentCount?: number;
 }
 
 interface Props {
@@ -99,24 +100,24 @@ export function PersonalizedHome({ username }: Props) {
           {loading ? (
             <div className="flex flex-col gap-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-[88px] rounded-2xl bg-[var(--bg-elevated)] animate-pulse" />
+                <div key={i} className="h-[100px] rounded-xl bg-[var(--bg-elevated)] animate-pulse" />
               ))}
             </div>
           ) : episodes.length > 0 ? (
             <>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2" style={{ height: "532px", overflowY: "auto" }}>
                 {episodes.map((ep) => (
                   <NextEpisodeCard key={ep.seriesId} episode={ep} onWatched={handleWatched} />
                 ))}
               </div>
-              <p className="text-[11px] text-[var(--text-muted)] text-center lg:hidden mt-1">
+              <p className="text-[11px] text-[var(--text-muted)] text-center lg:hidden">
                 ← arraste para marcar como assistido
               </p>
             </>
           ) : (
-            <div className="rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border)] px-4 py-8 text-center">
+            <div className="rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] px-4 py-8 text-center">
               <p className="text-sm text-[var(--text-muted)]">Nenhuma série na sua lista ainda.</p>
-              <Link href="/series" className="text-xs text-[#A0C830] mt-1 block">Explorar séries →</Link>
+              <Link href="/series" className="text-xs mt-1 block" style={{ color: "#A0C830" }}>Explorar séries →</Link>
             </div>
           )}
         </div>
