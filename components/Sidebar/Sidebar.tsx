@@ -57,10 +57,9 @@ export const Sidebar = () => {
               <path d="M18 7l10 8-10 8V7z" fill="rgba(10,10,10,0.4)"/>
             </svg>
           </div>
-          <div className="flex flex-col leading-tight" style={{ fontFamily: "var(--font-display)" }}>
-            <span className="text-base font-extrabold tracking-tight text-[var(--text-primary)]">Segunda</span>
-            <span className="text-base font-extrabold tracking-tight text-[var(--text-primary)]">Temporada</span>
-          </div>
+          <span className="text-base font-extrabold tracking-tight leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+            <span className="text-[var(--text-primary)]">Segunda </span><span className="text-[var(--yellow)]">Temporada</span>
+          </span>
         </Link>
       </div>
 
