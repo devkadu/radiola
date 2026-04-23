@@ -3,7 +3,10 @@ import { Hero } from "@/components/Hero";
 import { TrendingSeasons } from "@/components/TrendingSeasons/TrendingSeasons";
 import { TopCommenters } from "@/components/TopCommenters/TopCommenters";
 import { WeekCalendar } from "@/components/WeekCalendar/WeekCalendar";
+import { PersonalizedHome } from "@/components/PersonalizedHome/PersonalizedHome";
 import { Suspense } from "react";
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,11 +16,29 @@ export const metadata: Metadata = {
 };
 
 const Home = async () => {
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: () => {},
+      },
+    }
+  );
+  const { data: { user } } = await supabase.auth.getUser();
+  const username = user?.user_metadata?.username || user?.user_metadata?.name || user?.email?.split("@")[0] || "";
+
   return (
     <main className="lg:px-8">
-      <Suspense fallback={null}>
-        <Hero />
-      </Suspense>
+      {user ? (
+        <PersonalizedHome username={username} />
+      ) : (
+        <Suspense fallback={null}>
+          <Hero />
+        </Suspense>
+      )}
 
       <Suspense fallback={null}>
         <WeekCalendar />
