@@ -105,7 +105,7 @@ export function PersonalizedHome({ username }: Props) {
             </div>
           ) : episodes.length > 0 ? (
             <>
-              <div className="space-y-2" style={{ height: "452px", overflowY: "auto" }}>
+              <div className="space-y-2 h-[360px] lg:h-[452px]" style={{ overflowY: "auto" }}>
                 {episodes.map((ep) => (
                   <NextEpisodeCard key={ep.seriesId} episode={ep} onWatched={handleWatched} />
                 ))}

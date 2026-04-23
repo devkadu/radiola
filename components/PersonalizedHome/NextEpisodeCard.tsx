@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { FaComment } from "react-icons/fa6";
 import { useAuth } from "@/context/AuthContext";
 import { watchedEpisodesService } from "@/services/watchedEpisodes";
 import { WatchedBottomSheet } from "./WatchedBottomSheet";
@@ -159,7 +160,10 @@ export function NextEpisodeCard({ episode, onWatched }: Props) {
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className="text-[11px] text-[var(--text-muted)]">{epLabel}</span>
                 {(episode.commentCount ?? 0) > 0 && (
-                  <span className="text-[11px] text-[var(--text-muted)]">· {episode.commentCount} comentários</span>
+                  <span className="flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
+                    <FaComment size={10} />
+                    {episode.commentCount}
+                  </span>
                 )}
                 {episode.isUpcoming && episode.airDate && (
                   <span className="text-[11px] text-amber-400">
@@ -179,7 +183,7 @@ export function NextEpisodeCard({ episode, onWatched }: Props) {
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                assistido
+                marcar como assistido
               </button>
             )}
           </Link>
