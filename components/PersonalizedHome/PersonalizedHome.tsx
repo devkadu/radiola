@@ -100,12 +100,12 @@ export function PersonalizedHome({ username }: Props) {
           {loading ? (
             <div className="flex flex-col gap-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-[100px] rounded-xl bg-[var(--bg-elevated)] animate-pulse" />
+                <div key={i} className="h-[72px] rounded-xl bg-[var(--bg-elevated)] animate-pulse" />
               ))}
             </div>
           ) : episodes.length > 0 ? (
             <>
-              <div className="flex flex-col gap-2" style={{ height: "532px", overflowY: "auto" }}>
+              <div className="flex flex-col gap-2" style={{ height: "392px", overflowY: "auto" }}>
                 {episodes.map((ep) => (
                   <NextEpisodeCard key={ep.seriesId} episode={ep} onWatched={handleWatched} />
                 ))}

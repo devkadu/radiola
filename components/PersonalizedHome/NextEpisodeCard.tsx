@@ -19,17 +19,17 @@ interface NextEpisode {
   href: string;
   isUpcoming: boolean;
   airDate: string | null;
+  commentCount?: number;
 }
 
 interface Props {
   episode: NextEpisode;
   onWatched: (seriesId: number) => void;
-  discussingCount?: number;
 }
 
 const SWIPE_THRESHOLD = 60;
 
-export function NextEpisodeCard({ episode, onWatched, discussingCount = 0 }: Props) {
+export function NextEpisodeCard({ episode, onWatched }: Props) {
   const { user } = useAuth();
   const [watched, setWatched] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -84,11 +84,11 @@ export function NextEpisodeCard({ episode, onWatched, discussingCount = 0 }: Pro
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl">
-        {/* Fundo de swipe — ✓ assistido */}
+      <div className="relative overflow-hidden rounded-xl">
+        {/* Fundo swipe */}
         <div
-          className="absolute inset-0 flex items-center justify-end pr-5 rounded-2xl"
-          style={{ background: `rgba(160,200,48,${swipeProgress * 0.25})` }}
+          className="absolute inset-0 flex items-center justify-end pr-5 rounded-xl"
+          style={{ background: `rgba(160,200,48,${swipeProgress * 0.2})` }}
         >
           <div className="flex items-center gap-1.5" style={{ opacity: swipeProgress }}>
             <div className="w-5 h-5 rounded-full bg-[#A0C830] flex items-center justify-center">
@@ -102,9 +102,9 @@ export function NextEpisodeCard({ episode, onWatched, discussingCount = 0 }: Pro
 
         {/* Card */}
         <div
-          className="relative rounded-2xl border border-white/8 overflow-hidden transition-colors"
+          className="relative rounded-xl border border-[var(--border)] overflow-hidden"
           style={{
-            background: watched ? "#131a10" : "var(--bg-elevated)",
+            background: watched ? "#0f1a0c" : "var(--bg-elevated)",
             transform: `translateX(${swipeX}px)`,
             transition: swiping ? "none" : "transform 0.3s ease",
           }}
@@ -112,25 +112,31 @@ export function NextEpisodeCard({ episode, onWatched, discussingCount = 0 }: Pro
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <Link href={episode.href} className="flex h-[88px]">
-            {/* Thumbnail */}
-            <div className="relative w-16 shrink-0 overflow-hidden">
+          <Link href={episode.href} className="flex h-[72px]">
+            <div className="relative w-[100px] shrink-0 overflow-hidden">
               {image ? (
-                <Image src={image} alt={episode.episodeName} fill className="object-cover" sizes="64px" />
+                <Image src={image} alt={episode.episodeName} fill className="object-cover" sizes="140px" />
               ) : (
                 <div className="w-full h-full bg-[var(--bg-surface)]" />
               )}
 
-              {/* Overlay escurecido quando assistido */}
-              {watched && <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <div className="w-6 h-6 rounded-full bg-[#A0C830] flex items-center justify-center">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-              </div>}
+              {/* Gradiente fade para o conteúdo */}
+              <div className="absolute inset-0" style={{
+                background: "linear-gradient(to right, transparent 50%, var(--bg-elevated) 100%)"
+              }} />
 
-              {/* Barra de progresso na base */}
+              {/* Overlay + check quando assistido */}
+              {watched && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full bg-[#A0C830] flex items-center justify-center">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                </div>
+              )}
+
+              {/* Barra de progresso */}
               <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10">
                 <div
                   className="h-full transition-all duration-500"
@@ -141,17 +147,19 @@ export function NextEpisodeCard({ episode, onWatched, discussingCount = 0 }: Pro
 
             {/* Info */}
             <div className="flex-1 flex flex-col justify-center px-3 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[#A0C830] truncate">{episode.seriesName}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider truncate" style={{ color: "#A0C830" }}>
+                {episode.seriesName}
+              </p>
               <p
-                className="text-[13px] font-semibold truncate mt-0.5 transition-colors"
-                style={{ color: watched ? "rgba(255,255,255,0.4)" : "var(--text-primary)" }}
+                className="text-sm font-semibold truncate mt-0.5 transition-colors"
+                style={{ color: watched ? "rgba(255,255,255,0.35)" : "var(--text-primary)" }}
               >
                 {episode.episodeName}
               </p>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <span className="text-[11px] text-[var(--text-muted)]">{epLabel}</span>
-                {discussingCount > 0 && (
-                  <span className="text-[11px] text-[#A0C830]/70">{discussingCount} discutindo</span>
+                {(episode.commentCount ?? 0) > 0 && (
+                  <span className="text-[11px] text-[var(--text-muted)]">· {episode.commentCount} comentários</span>
                 )}
                 {episode.isUpcoming && episode.airDate && (
                   <span className="text-[11px] text-amber-400">
@@ -161,14 +169,14 @@ export function NextEpisodeCard({ episode, onWatched, discussingCount = 0 }: Pro
               </div>
             </div>
 
-            {/* Botão assistido — desktop */}
+            {/* Botão desktop */}
             {!episode.isUpcoming && !watched && (
               <button
                 onClick={(e) => { e.preventDefault(); handleMarkWatched(); }}
-                className="hidden lg:flex items-center gap-1.5 shrink-0 mr-3 self-center px-3 py-1.5 rounded-full text-xs font-semibold transition-colors"
-                style={{ background: "rgba(160,200,48,0.1)", color: "#A0C830" }}
+                className="hidden lg:flex items-center gap-1.5 shrink-0 mr-3 self-center px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border border-[var(--border)] hover:border-[#A0C830]/50 hover:bg-[#A0C830]/10"
+                style={{ color: "var(--text-muted)" }}
               >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#A0C830" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
                 assistido
