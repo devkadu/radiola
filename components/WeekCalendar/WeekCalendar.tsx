@@ -16,18 +16,14 @@ const DAY_LABELS: Record<number, string> = {
 function getWeekDays() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const todayDow = today.getDay();
-
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - ((todayDow + 6) % 7));
 
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
     return {
       date: d.toISOString().split("T")[0],
       dow: d.getDay(),
-      isToday: d.toDateString() === today.toDateString(),
+      isToday: i === 0,
     };
   });
 }
