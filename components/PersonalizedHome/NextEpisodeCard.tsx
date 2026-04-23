@@ -112,8 +112,8 @@ export function NextEpisodeCard({ episode, onWatched }: Props) {
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          <Link href={episode.href} className="flex h-[72px]">
-            <div className="relative w-[100px] shrink-0 overflow-hidden">
+          <Link href={episode.href} className="flex h-[84px]">
+            <div className="relative w-[120px] shrink-0 overflow-hidden">
               {image ? (
                 <Image src={image} alt={episode.episodeName} fill className="object-cover" sizes="140px" />
               ) : (
