@@ -38,23 +38,19 @@ export async function GET() {
 
   const today = new Date().toISOString().split("T")[0];
 
-  const results = await Promise.all(
+  const rawResults = await Promise.all(
     favs.map(async (fav) => {
       const seriesId = String(fav.series_id);
 
-      // Pega episódios assistidos desta série, ordena por temporada/episódio desc para achar o mais recente
       const watchedForSeries = [...watchedSet]
         .map(parseEpisodeId)
         .filter((p) => p && p.seriesId === seriesId)
         .sort((a, b) => b!.season !== a!.season ? b!.season - a!.season : b!.episode - a!.episode);
 
       const latest = watchedForSeries[0];
-
-      // Determina de onde procurar o próximo episódio
       let searchSeason = latest ? latest.season : 1;
       let searchEpisode = latest ? latest.episode + 1 : 1;
 
-      // Tenta encontrar o próximo episódio (pode estar na mesma ou na próxima temporada)
       for (let attempt = 0; attempt < 2; attempt++) {
         const nextEp = await tmdbService
           .getEpisodeDetails(seriesId, searchSeason, searchEpisode)
@@ -63,6 +59,7 @@ export async function GET() {
         if (nextEp) {
           const airDate = nextEp.air_date ?? null;
           const isUpcoming = airDate ? airDate > today : false;
+          const epId = `${fav.series_id}-s${searchSeason}-e${searchEpisode}`;
 
           return {
             seriesId: fav.series_id,
@@ -76,19 +73,39 @@ export async function GET() {
             isUpcoming,
             still_path: nextEp.still_path ?? null,
             href: `/series/${fav.series_slug}/${seasonSlug(searchSeason)}/${episodeSlug(searchEpisode, nextEp.name)}`,
+            epId,
+            commentCount: 0,
           };
         }
 
-        // Episódio não existe — tenta o primeiro ep da próxima temporada
         searchSeason += 1;
         searchEpisode = 1;
       }
 
-      return null; // Série finalizada ou sem próximo episódio
+      return null;
     })
   );
 
-  return NextResponse.json(results.filter(Boolean), {
+  const results = rawResults.filter(Boolean) as NonNullable<typeof rawResults[0]>[];
+
+  // Busca contagem de comentários em batch para todos os episódios
+  if (results.length > 0) {
+    const epIds = results.map((r) => r.epId);
+    const { data: commentRows } = await supabase
+      .from("comments")
+      .select("episode_id")
+      .in("episode_id", epIds);
+
+    const counts: Record<string, number> = {};
+    for (const row of commentRows ?? []) {
+      counts[row.episode_id] = (counts[row.episode_id] ?? 0) + 1;
+    }
+    for (const r of results) {
+      r.commentCount = counts[r.epId] ?? 0;
+    }
+  }
+
+  return NextResponse.json(results, {
     headers: { "Cache-Control": "no-store" },
   });
 }

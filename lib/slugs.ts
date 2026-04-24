@@ -6,8 +6,10 @@ export const slugify = (text: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-export const seriesSlug = (name: string, id: number) =>
-  `${slugify(name)}-${id}`;
+export const seriesSlug = (name: string, id: number) => {
+  const slug = slugify(name ?? "");
+  return slug ? `${slug}-${id}` : `serie-${id}`;
+};
 
 export const seasonSlug = (seasonNumber: number) =>
   `temporada-${seasonNumber}`;

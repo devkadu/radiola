@@ -24,7 +24,7 @@ export const BottonNavigator = () => {
     { href: "/", label: "Início", icon: <FaHouse size={20} /> },
     { href: null, label: "Buscar", icon: <FaMagnifyingGlass size={20} />, action: () => openSearch() },
     { href: "/series", label: "Séries", icon: <FaTv size={20} /> },
-    { href: "/em-debate", label: "Debates", icon: <FaFire size={20} /> },
+    { href: "/debates", label: "Debates", icon: <FaFire size={20} /> },
     { href: "/perfil", label: "Perfil", icon: null },
   ];
 
