@@ -15,8 +15,6 @@ interface HotEpisode {
   href: string;
 }
 
-const tabs = ["Comunidade", "Nas suas séries"];
-
 function EpisodeCard({ ep, last, first }: { ep: HotEpisode; last: boolean; first: boolean }) {
   return (
     <Link
@@ -95,6 +93,12 @@ export const HotEpisodes = () => {
   const [activeTab, setActiveTab] = useState(0);
   const { user } = useAuth();
 
+  // Logado: ["Nas suas séries", "Comunidade"] — deslogado: sem tabs
+  const tabs = user ? ["Nas suas séries", "Comunidade"] : [];
+
+  const communityIndex = user ? 1 : 0;
+  const mySeriesIndex = 0;
+
   const { data: hotEpisodes = [], isLoading: hotLoading } = useQuery<HotEpisode[]>({
     queryKey: ["hot-episodes"],
     queryFn: () => fetch("/api/hot-episodes").then((r) => r.json()),
@@ -109,55 +113,38 @@ export const HotEpisodes = () => {
       const ids = favorites.map((f: any) => f.series_id).join(",");
       return fetch(`/api/my-series-episodes?ids=${ids}`).then((r) => r.json());
     },
-    enabled: activeTab === 1 && !!user,
+    enabled: !!user && activeTab === mySeriesIndex,
     staleTime: 2 * 60 * 1000,
   });
 
   return (
     <section className="px-4 lg:px-0 pt-4 pb-6">
-      {/* Heading */}
-      <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-3">
-        Em Alta
+      <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--yellow)] mb-3">
+        Conversas em Alta
       </p>
 
-      {/* Tabs — underline style */}
-      <div className="flex gap-6 mb-4 border-b border-[var(--border)]">
-        {tabs.map((tab, i) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(i)}
-            className={`pb-2.5 text-sm font-semibold transition-colors relative ${
-              activeTab === i
-                ? "text-[var(--text-primary)]"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            }`}
-          >
-            {tab}
-            {activeTab === i && (
-              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--yellow)] rounded-full" />
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Aba: Nas suas séries — não logado */}
-      {activeTab === 1 && !user && (
-        <div className="flex flex-col items-center gap-4 py-10 text-center">
-          <p className="text-sm text-[var(--text-secondary)]">
-            Veja a atividade mais recente nas séries que você favorita.
-          </p>
-          <div className="flex gap-3">
-            <Link href="/login" className="text-sm px-5 py-2 rounded-full border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
-              Entrar
-            </Link>
-            <Link href="/criar-conta" className="text-sm px-5 py-2 rounded-full bg-[var(--yellow)] text-black font-semibold hover:bg-[var(--yellow-dim)] transition-colors">
-              Criar conta
-            </Link>
-          </div>
+      {user && (
+        <div className="flex gap-6 mb-4 border-b border-[var(--border)]">
+          {tabs.map((tab, i) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(i)}
+              className={`pb-2.5 text-sm font-semibold transition-colors relative ${
+                activeTab === i
+                  ? "text-[var(--text-primary)]"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+            >
+              {tab}
+              {activeTab === i && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--yellow)] rounded-full" />
+              )}
+            </button>
+          ))}
         </div>
       )}
 
-      {activeTab === 0 && (
+      {!user && (
         <EpisodeList
           episodes={hotEpisodes}
           loading={hotLoading}
@@ -165,11 +152,19 @@ export const HotEpisodes = () => {
         />
       )}
 
-      {activeTab === 1 && user && (
+      {user && activeTab === mySeriesIndex && (
         <EpisodeList
           episodes={myEpisodes}
           loading={myLoading}
           emptyMsg="Nenhum comentário nas suas séries ainda."
+        />
+      )}
+
+      {user && activeTab === communityIndex && (
+        <EpisodeList
+          episodes={hotEpisodes}
+          loading={hotLoading}
+          emptyMsg="Nenhum episódio comentado ainda. Seja o primeiro!"
         />
       )}
     </section>

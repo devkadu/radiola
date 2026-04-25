@@ -12,7 +12,7 @@ export async function Hero() {
   const bg = Array.from({ length: 30 }, (_, i) => all[i % all.length]);
 
   return (
-    <section className="relative overflow-hidden min-h-[460px] lg:min-h-[520px] flex items-center">
+    <section className="relative overflow-hidden min-h-[360px] lg:min-h-[400px] flex items-center">
 
       {/* Fundo: grid rotacionado, ancorado à direita */}
       <div className="absolute top-0 right-0 bottom-0 left-[35%] overflow-hidden">
@@ -68,7 +68,7 @@ export async function Hero() {
       </div>
 
       {/* Conteúdo */}
-      <div className="relative z-10 px-4 lg:px-0 py-16 w-full lg:max-w-[52%] flex flex-col gap-5">
+      <div className="relative z-10 px-4 lg:px-0 py-10 w-full lg:max-w-[52%] flex flex-col gap-4">
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[var(--yellow)]">
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--yellow)] shrink-0" />
           Para quem não larga uma boa série

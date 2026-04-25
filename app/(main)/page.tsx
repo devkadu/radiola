@@ -4,6 +4,8 @@ import { TrendingSeasons } from "@/components/TrendingSeasons/TrendingSeasons";
 import { TopCommenters } from "@/components/TopCommenters/TopCommenters";
 import { WeekCalendar } from "@/components/WeekCalendar/WeekCalendar";
 import { PersonalizedHome } from "@/components/PersonalizedHome/PersonalizedHome";
+import { HotEpisodes } from "@/components/HotEpisodes/HotEpisodes";
+import { HowItWorks } from "@/components/HowItWorks/HowItWorks";
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
@@ -39,6 +41,10 @@ const Home = async () => {
           <Hero />
         </Suspense>
       )}
+
+      <HotEpisodes />
+
+      {!user && <HowItWorks />}
 
       <Suspense fallback={null}>
         <WeekCalendar />

@@ -24,12 +24,12 @@ export function HeroSearch() {
         buscar série, humor, gênero…
       </button>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2 overflow-x-auto scrollbar-none">
         {TAGS.map((tag) => (
           <button
             key={tag.label}
             onClick={() => open(tag.query)}
-            className="px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] text-xs text-[var(--text-muted)] hover:border-[var(--yellow)]/40 hover:text-[var(--text-primary)] transition-colors"
+            className="shrink-0 px-3 py-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] text-xs text-[var(--text-muted)] hover:border-[var(--yellow)]/40 hover:text-[var(--text-primary)] transition-colors"
           >
             {tag.label}
           </button>
