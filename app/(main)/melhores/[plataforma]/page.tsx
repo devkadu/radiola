@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { seriesSlug } from "@/lib/slugs";
+import { ShareButton } from "./ShareButton";
+import { MelhoresFooter } from "./MelhoresFooter";
 
 export const revalidate = 86400; // 24h
 
@@ -10,17 +12,17 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.co
 const TMDB_TOKEN = process.env.TMDB_ACCESS_TOKEN;
 const TMDB_BASE = "https://api.themoviedb.org/3";
 
-// Mapeamento plataforma → metadados + network_id TMDB
-const PLATFORMS: Record<string, {
-  networkId: number;
+type ListConfig = {
   name: string;
   slug: string;
   description: string;
   intro: string;
   color: string;
-}> = {
+  tmdbParams: Record<string, string>;
+};
+
+const PLATFORMS: Record<string, ListConfig> = {
   "apple-tv-plus": {
-    networkId: 2552,
     name: "Apple TV+",
     slug: "apple-tv-plus",
     color: "#a3a3a3",
@@ -28,9 +30,9 @@ const PLATFORMS: Record<string, {
     intro: `O <strong>Apple TV+</strong> entrou no mercado de streaming em 2019 apostando em qualidade em vez de quantidade — e a estratégia funcionou. Com produções originais que acumulam Emmys e Globos de Ouro, o serviço da Apple se consolidou como um dos mais premiados da indústria.
 
 Se você ainda não sabe por onde começar, ou quer descobrir o que o catálogo tem de melhor, esta lista reúne as <strong>10 melhores séries do Apple TV+</strong> com base nas avaliações do público no TMDB — sem spoilers e com contexto suficiente para você decidir qual assistir primeiro.`,
+    tmdbParams: { with_networks: "2552" },
   },
   "netflix": {
-    networkId: 213,
     name: "Netflix",
     slug: "netflix",
     color: "#e50914",
@@ -38,9 +40,9 @@ Se você ainda não sabe por onde começar, ou quer descobrir o que o catálogo 
     intro: `A <strong>Netflix</strong> foi pioneira no streaming moderno e ainda hoje é referência quando o assunto é séries originais. Com um catálogo enorme e produções em todos os gêneros, saber o que assistir pode ser difícil.
 
 Esta lista reúne as <strong>10 melhores séries da Netflix</strong> com base nas avaliações do público no TMDB — um ponto de partida confiável para quem quer maratonar algo de qualidade.`,
+    tmdbParams: { with_networks: "213" },
   },
   "hbo": {
-    networkId: 49,
     name: "HBO",
     slug: "hbo",
     color: "#6c2bd9",
@@ -48,9 +50,9 @@ Esta lista reúne as <strong>10 melhores séries da Netflix</strong> com base na
     intro: `A <strong>HBO</strong> é sinônimo de televisão de qualidade. De The Sopranos a Game of Thrones, a emissora americana definiu o que significa uma série de prestígio — e continua produzindo conteúdo aclamado até hoje.
 
 Esta lista reúne as <strong>10 melhores séries da HBO</strong> com base nas avaliações do público no TMDB.`,
+    tmdbParams: { with_networks: "49" },
   },
   "prime-video": {
-    networkId: 1024,
     name: "Amazon Prime Video",
     slug: "prime-video",
     color: "#00a8e1",
@@ -58,16 +60,57 @@ Esta lista reúne as <strong>10 melhores séries da HBO</strong> com base nas av
     intro: `O <strong>Amazon Prime Video</strong> investiu pesado em produções originais e hoje conta com algumas das séries mais comentadas dos últimos anos — de thrillers políticos a fantasias de alto orçamento.
 
 Esta lista reúne as <strong>10 melhores séries do Amazon Prime Video</strong> com base nas avaliações do público no TMDB.`,
+    tmdbParams: { with_networks: "1024" },
+  },
+  "doramas": {
+    name: "Doramas",
+    slug: "doramas",
+    color: "#f472b6",
+    description: "Os 10 melhores doramas coreanos avaliados pelo público, do romance ao thriller psicológico.",
+    intro: `Os <strong>doramas coreanos</strong> conquistaram o mundo inteiro — e o Brasil não ficou de fora. Com roteiros intensos, produções impecáveis e personagens inesquecíveis, os K-dramas se tornaram um dos gêneros mais assistidos nos streamings.
+
+Esta lista reúne os <strong>10 melhores doramas</strong> com base nas avaliações do público no TMDB — do romance clássico ao thriller que você não vai conseguir parar de assistir.`,
+    tmdbParams: { with_original_language: "ko", with_genres: "18", "vote_count.gte": "500" },
+  },
+  "drama": {
+    name: "Drama",
+    slug: "drama",
+    color: "#f59e0b",
+    description: "As 10 melhores séries de drama avaliadas pelo público no mundo todo.",
+    intro: `O gênero <strong>drama</strong> produz as séries mais premiadas e debatidas da televisão. São histórias que ficam na cabeça — personagens complexos, dilemas morais e roteiros que não têm medo de ir fundo.
+
+Esta lista reúne as <strong>10 melhores séries de drama</strong> com base nas avaliações do público no TMDB, de diferentes países e plataformas.`,
+    tmdbParams: { with_genres: "18", "vote_count.gte": "1000" },
+  },
+  "comedia": {
+    name: "Comédia",
+    slug: "comedia",
+    color: "#34d399",
+    description: "As 10 melhores séries de comédia avaliadas pelo público, das sitcoms clássicas às comédias modernas.",
+    intro: `Uma boa <strong>série de comédia</strong> é difícil de fazer — e fácil de amar. Das sitcoms que definiram gerações às comédias contemporâneas que misturam humor e drama, este gênero tem algumas das séries mais assistidas da história.
+
+Esta lista reúne as <strong>10 melhores séries de comédia</strong> com base nas avaliações do público no TMDB.`,
+    tmdbParams: { with_genres: "35", "vote_count.gte": "500" },
+  },
+  "anime": {
+    name: "Anime",
+    slug: "anime",
+    color: "#fb923c",
+    description: "Os 10 melhores animes avaliados pelo público, da ação épica ao drama psicológico.",
+    intro: `Os <strong>animes</strong> deixaram de ser nicho há muito tempo. Com narrativas complexas, animações impressionantes e fãs apaixonados no mundo inteiro, as séries japonesas estão entre as produções mais bem avaliadas de todos os tempos.
+
+Esta lista reúne os <strong>10 melhores animes</strong> com base nas avaliações do público no TMDB — para quem quer começar ou descobrir o que está perdendo.`,
+    tmdbParams: { with_original_language: "ja", with_genres: "16", "vote_count.gte": "500" },
   },
 };
 
-async function getTopSeries(networkId: number) {
+async function getTopSeries(tmdbParams: Record<string, string>) {
   const params = new URLSearchParams({
     language: "pt-BR",
     sort_by: "vote_average.desc",
     "vote_count.gte": "200",
-    with_networks: networkId.toString(),
     page: "1",
+    ...tmdbParams,
   });
 
   const res = await fetch(`${TMDB_BASE}/discover/tv?${params}`, {
@@ -119,7 +162,7 @@ export default async function MelhoresPage({ params }: Props) {
   const platform = PLATFORMS[plataforma];
   if (!platform) notFound();
 
-  const series = await getTopSeries(platform.networkId);
+  const series = await getTopSeries(platform.tmdbParams);
   const title = `As 10 Melhores Séries do ${platform.name} (${new Date().getFullYear()})`;
 
   const jsonLd = {
@@ -154,6 +197,9 @@ export default async function MelhoresPage({ params }: Props) {
           className="text-sm text-[var(--text-secondary)] leading-relaxed"
           dangerouslySetInnerHTML={{ __html: platform.intro }}
         />
+        <div className="mt-4">
+          <ShareButton title={title} url={`/melhores/${platform.slug}`} />
+        </div>
       </div>
 
       {/* Lista */}
@@ -218,30 +264,13 @@ export default async function MelhoresPage({ params }: Props) {
         })}
       </ol>
 
-      {/* Conclusão + CTA */}
-      <div className="mt-12 pt-8 border-t border-[var(--border)] flex flex-col gap-4">
-        <h2 className="text-lg font-bold text-[var(--text-primary)]">
-          Já assistiu alguma dessas?
-        </h2>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-          Na Segunda Temporada você comenta episódio por episódio, sem medo de spoiler.
-          Cada série tem seu próprio espaço de debate — e a discussão só aparece depois que você marca que assistiu.
-        </p>
-        <div className="flex gap-3">
-          <Link
-            href="/criar-conta"
-            className="text-sm px-5 py-2.5 rounded-full bg-[var(--yellow)] text-black font-bold hover:bg-[var(--yellow-dim)] transition-colors"
-          >
-            Criar conta grátis
-          </Link>
-          <Link
-            href="/series"
-            className="text-sm px-5 py-2.5 rounded-full border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--yellow)]/40 transition-colors"
-          >
-            Ver catálogo
-          </Link>
-        </div>
-      </div>
+      <MelhoresFooter
+        plataforma={plataforma}
+        platformName={platform.name}
+        platformColor={platform.color}
+        pageUrl={`/melhores/${platform.slug}`}
+        pageTitle={title}
+      />
     </main>
   );
 }
