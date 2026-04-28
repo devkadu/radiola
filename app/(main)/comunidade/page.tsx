@@ -51,7 +51,7 @@ export default async function ComunidadePage() {
       .select("id, title, subtitle, slug, published_at")
       .eq("status", "published")
       .order("published_at", { ascending: false }),
-    ...LISTAS.map((l) => fetchTopPosters(l.tmdbParams)),
+    ...LISTAS.map((l) => fetchTopPosters(l.tmdbParams as Record<string, string>)),
   ]);
 
   return (
