@@ -85,6 +85,12 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
+  if (pathname.startsWith("/admin")) {
+    if (user?.id !== process.env.ADMIN_USER_ID) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
   return response;
 }
 

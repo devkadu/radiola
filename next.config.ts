@@ -9,6 +9,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  transpilePackages: ["react-markdown"],
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

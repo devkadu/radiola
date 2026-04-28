@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaTableCells, FaTv, FaStar, FaUser, FaMagnifyingGlass, FaArrowRightFromBracket, FaLightbulb } from "react-icons/fa6";
+import { FaTableCells, FaTv, FaStar, FaUser, FaMagnifyingGlass, FaArrowRightFromBracket, FaLightbulb, FaUsers } from "react-icons/fa6";
 import { createClient } from "@/lib/supabase-browser";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -13,6 +13,7 @@ const menuItems = [
   { href: "/", label: "Início", icon: FaTableCells },
   { href: "/series", label: "Séries", icon: FaTv },
   { href: "/debates", label: "Em debate", icon: FaStar },
+  { href: "/comunidade", label: "Comunidade", icon: FaUsers },
   { href: "/perfil", label: "Meu perfil", icon: FaUser },
   { href: "/sugestoes", label: "Sugestões", icon: FaLightbulb },
 ];

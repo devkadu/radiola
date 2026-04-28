@@ -73,7 +73,7 @@ export const Header = () => {
 
   if (pathname === "/") return (
     <header className="sticky top-0 z-40 bg-[var(--bg)] lg:hidden">
-      <div className="flex items-center px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
           <div className="w-8 h-8 bg-[var(--yellow)] rounded-[8px] flex items-center justify-center shrink-0">
             <svg width="18" height="18" viewBox="0 0 30 30" fill="none">
@@ -85,6 +85,9 @@ export const Header = () => {
             <span className="text-[var(--text-primary)]">Segunda </span><span className="text-[var(--yellow)]">Temporada</span>
           </span>
         </Link>
+        <button onClick={() => open()} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+          <FaMagnifyingGlass size={18} />
+        </button>
       </div>
     </header>
   );

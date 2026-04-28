@@ -8,10 +8,11 @@ import { favoritesService } from "@/services/favorites";
 import { User } from "@supabase/supabase-js";
 import { FaPencil, FaShareNodes, FaArrowLeft } from "react-icons/fa6";
 import { CalendarTab } from "./CalendarTab";
+import { AdminTab } from "./AdminTab";
 import { UserLists } from "@/components/UserLists/UserLists";
 import { useQuery } from "@tanstack/react-query";
 
-interface Props { user: User; }
+interface Props { user: User; isAdmin?: boolean; }
 
 const MAX_INPUT_BYTES = 15 * 1024 * 1024;
 const MAX_DIMENSION = 400;
@@ -98,7 +99,7 @@ function ToggleItem({ label, desc, value, onToggle }: ToggleItemProps) {
   );
 }
 
-export const ProfileClient = ({ user }: Props) => {
+export const ProfileClient = ({ user, isAdmin }: Props) => {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const username = user.user_metadata?.username || user.email?.split("@")[0] || "usuário";
@@ -112,7 +113,7 @@ export const ProfileClient = ({ user }: Props) => {
   const [isPublic, setIsPublic] = useState<boolean>(user.user_metadata?.profile_public !== false);
   const [copied, setCopied] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
-  const [activeTab, setActiveTab] = useState<"perfil" | "calendario">("perfil");
+  const [activeTab, setActiveTab] = useState<"perfil" | "calendario" | "admin">("perfil");
 
   const { data: seriesProgress = {} } = useQuery<Record<number, { watched: number; total: number }>>({
     queryKey: ["series-progress"],
@@ -423,18 +424,22 @@ export const ProfileClient = ({ user }: Props) => {
 
       {/* Tabs */}
       <div className="flex border-b border-[var(--border)] px-5 mb-4">
-        {(["perfil", "calendario"] as const).map((tab) => (
+        {([
+          { key: "perfil", label: "Perfil" },
+          { key: "calendario", label: "Calendário" },
+          ...(isAdmin ? [{ key: "admin", label: "Admin" }] : []),
+        ] as { key: typeof activeTab; label: string }[]).map((tab) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
             className={`pb-2.5 px-1 mr-5 text-sm font-semibold transition-colors relative ${
-              activeTab === tab
+              activeTab === tab.key
                 ? "text-[var(--text-primary)]"
                 : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
             }`}
           >
-            {tab === "perfil" ? "Perfil" : "Calendário"}
-            {activeTab === tab && (
+            {tab.label}
+            {activeTab === tab.key && (
               <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[var(--yellow)] rounded-full" />
             )}
           </button>
@@ -442,6 +447,7 @@ export const ProfileClient = ({ user }: Props) => {
       </div>
 
       {activeTab === "calendario" && <div className="px-4"><CalendarTab /></div>}
+      {activeTab === "admin" && <AdminTab />}
 
       {activeTab === "perfil" && (
         <div className="px-4 lg:grid lg:grid-cols-[1fr_268px] lg:gap-4 lg:items-start">

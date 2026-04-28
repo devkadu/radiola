@@ -13,5 +13,7 @@ export default async function PerfilPage() {
 
   if (!user) redirect("/login");
 
-  return <ProfileClient user={user} />;
+  const isAdmin = user.id === process.env.ADMIN_USER_ID;
+
+  return <ProfileClient user={user} isAdmin={isAdmin} />;
 }

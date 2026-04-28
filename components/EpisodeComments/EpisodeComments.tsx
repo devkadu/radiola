@@ -7,12 +7,14 @@ import { commentsService, Comment, episodeId } from "@/services/comments";
 import { FaTrash, FaHeart } from "react-icons/fa6";
 
 interface Props {
-  seriesId: string;
-  seasonNumber: number;
-  episodeNumber: number;
+  seriesId?: string;
+  seasonNumber?: number;
+  episodeNumber?: number;
   episodeTitle?: string;
   episodeUrl?: string;
   refreshKey?: number;
+  id?: string; // override direto do epId (ex: "article-abc123")
+  emptyMessage?: string;
 }
 
 function relativeTime(date: string) {
@@ -119,9 +121,9 @@ function ReplyBox({ epId, parentId, parentUsername, episodeTitle, episodeUrl, on
 type Tab = "recentes" | "relevantes";
 interface LikeState { [id: string]: { liked: boolean; count: number } }
 
-export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, episodeTitle, episodeUrl, refreshKey }: Props) => {
+export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, episodeTitle, episodeUrl, refreshKey, id, emptyMessage }: Props) => {
   const { user } = useAuth();
-  const epId = episodeId(seriesId, seasonNumber, episodeNumber);
+  const epId = id ?? episodeId(seriesId!, seasonNumber!, episodeNumber!);
 
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -283,7 +285,7 @@ export const EpisodeComments = ({ seriesId, seasonNumber, episodeNumber, episode
 
       {!loading && comments.length === 0 && (
         <p className="text-sm text-[var(--text-muted)] text-center py-4">
-          Seja o primeiro a comentar este episódio.
+          {emptyMessage ?? "Seja o primeiro a comentar este episódio."}
         </p>
       )}
     </div>

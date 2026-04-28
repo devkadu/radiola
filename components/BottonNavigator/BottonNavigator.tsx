@@ -2,8 +2,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { FaHouse, FaMagnifyingGlass, FaTv, FaCircleUser, FaFire } from "react-icons/fa6";
-import { useSearchOverlay } from "@/context/SearchContext";
+import { FaHouse, FaTv, FaCircleUser, FaUsers } from "react-icons/fa6";
 import { useAuth } from "@/context/AuthContext";
 
 function NavDot({ active }: { active: boolean }) {
@@ -13,7 +12,6 @@ function NavDot({ active }: { active: boolean }) {
 
 export const BottonNavigator = () => {
   const pathname = usePathname();
-  const { open: openSearch } = useSearchOverlay();
   const { user } = useAuth();
 
   const avatarUrl = user?.user_metadata?.avatar_url ?? user?.user_metadata?.picture ?? null;
@@ -22,9 +20,8 @@ export const BottonNavigator = () => {
 
   const tabs = [
     { href: "/", label: "Início", icon: <FaHouse size={20} /> },
-    { href: null, label: "Buscar", icon: <FaMagnifyingGlass size={20} />, action: () => openSearch() },
     { href: "/series", label: "Séries", icon: <FaTv size={20} /> },
-    { href: "/debates", label: "Debates", icon: <FaFire size={20} /> },
+    { href: "/comunidade", label: "Comunidade", icon: <FaUsers size={20} /> },
     { href: "/perfil", label: "Perfil", icon: null },
   ];
 
@@ -33,15 +30,6 @@ export const BottonNavigator = () => {
       {tabs.map((tab) => {
         const active = tab.href ? pathname === tab.href : false;
         const color = active ? "var(--yellow)" : "var(--text-muted)";
-
-        if (tab.action) {
-          return (
-            <button key={tab.label} onClick={tab.action} className="flex flex-col items-center gap-0.5 px-2 py-1">
-              <span style={{ color }}>{tab.icon}</span>
-              <span className="text-[10px]" style={{ color }}>{tab.label}</span>
-            </button>
-          );
-        }
 
         if (tab.label === "Perfil") {
           return (
