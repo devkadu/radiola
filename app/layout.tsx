@@ -11,6 +11,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Providers } from "./providers";
 import { NavigationProgress } from "@/components/NavigationProgress/NavigationProgress";
 import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -117,6 +118,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthProvider>{children}</AuthProvider>
         </Providers>
         <Analytics />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
       </body>
     </html>
   );
