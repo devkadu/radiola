@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FaInstagram, FaXTwitter, FaHouse, FaTiktok } from "react-icons/fa6";
-import { getHotEpisodes } from "@/app/api/hot-episodes/route";
+import { getHotEpisodes } from "@/lib/hot-episodes";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

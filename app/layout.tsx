@@ -10,7 +10,6 @@ import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { Providers } from "./providers";
 import { NavigationProgress } from "@/components/NavigationProgress/NavigationProgress";
-import { Analytics } from "@vercel/analytics/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
@@ -117,7 +116,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <NavigationProgress />
           <AuthProvider>{children}</AuthProvider>
         </Providers>
-        <Analytics />
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
       </body>
     </html>
