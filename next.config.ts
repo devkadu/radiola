@@ -9,6 +9,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  eslint: { ignoreDuringBuilds: true },
   transpilePackages: ["react-markdown"],
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

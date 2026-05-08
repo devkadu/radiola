@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { tmdbService } from "@/services/tmdb";
 import { cacheService } from "@/services/cache";
 import Image from "next/image";

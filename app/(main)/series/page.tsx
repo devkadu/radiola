@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { tmdbService } from "@/services/tmdb";
 import { SeriesBrowser } from "@/components/SeriesBrowser/SeriesBrowser";
 import type { Metadata } from "next";

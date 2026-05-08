@@ -8,6 +8,8 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -30,7 +30,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br"),
+  metadataBase: new URL((() => { const u = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br"; return u.startsWith("http") ? u : `https://${u}`; })()),
   title: {
     default: "Segunda Temporada",
     template: "%s | Segunda Temporada",
