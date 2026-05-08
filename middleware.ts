@@ -56,6 +56,16 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  const needsAuth =
+    pathname.startsWith("/perfil") ||
+    pathname.startsWith("/admin") ||
+    pathname === "/login" ||
+    pathname === "/criar-conta";
+
+  if (!needsAuth) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
