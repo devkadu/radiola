@@ -15,7 +15,7 @@ function formatAirDate(dateStr: string) {
   return date.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
 }
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export default async function DebatesPage() {
   const [trendingData, upcomingData] = await Promise.all([
