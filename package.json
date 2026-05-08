@@ -6,10 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "build:worker": "opennextjs-cloudflare build",
-    "preview": "opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare deploy"
+    "lint": "eslint"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
@@ -28,7 +25,6 @@
     "resend": "^6.9.4"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1.19.7",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -37,7 +33,6 @@
     "eslint": "^9",
     "eslint-config-next": "^15.5.16",
     "tailwindcss": "^3.4.19",
-    "typescript": "^5",
-    "wrangler": "^4.88.0"
+    "typescript": "^5"
   }
 }
