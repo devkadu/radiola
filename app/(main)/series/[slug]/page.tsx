@@ -83,10 +83,7 @@ export default async function SeriesPage({ params }: Props) {
     )
   ).filter(Boolean);
   const allEpisodes = seasonDetails.flatMap((s: any) => s.episodes ?? []);
-  await Promise.all([
-    cacheService.cacheSeries(series),
-    cacheService.cacheEpisodes(series.id, allEpisodes),
-  ]);
+  await cacheService.cacheSeries(series);
 
   const seasonsWithEpisodes = seasonDetails.map((sd: any) => ({
     season_number: sd.season_number,

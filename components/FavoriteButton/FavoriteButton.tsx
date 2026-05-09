@@ -158,6 +158,11 @@ export const FavoriteButton = ({ series, compact, variant = "icon", fullWidth }:
     setFavorited(next);
     if (next) {
       await favoritesService.add(user.id, series);
+      fetch("/api/cache-episodes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ seriesId: series.id }),
+      });
       setSuccessMsg("Série adicionada à lista");
     } else {
       await favoritesService.remove(user.id, series.id);
