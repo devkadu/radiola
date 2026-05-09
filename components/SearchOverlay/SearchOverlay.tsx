@@ -28,12 +28,16 @@ function useSearch(query: string) {
     if (query.length < 2) { setResults(null); setSmart(null); return; }
 
     const timer = setTimeout(async () => {
-      const [regularRes, smartRes] = await Promise.all([
+      const useSmartSearch = query.trim().split(/\s+/).length >= 3 || query.length > 15;
+      const requests: Promise<any>[] = [
         fetch(`/api/search?q=${encodeURIComponent(query)}`).then(r => r.json()),
-        fetch(`/api/smart-search?q=${encodeURIComponent(query)}`).then(r => r.json()),
-      ]);
+      ];
+      if (useSmartSearch) {
+        requests.push(fetch(`/api/smart-search?q=${encodeURIComponent(query)}`).then(r => r.json()));
+      }
+      const [regularRes, smartRes] = await Promise.all(requests);
       setResults(regularRes);
-      setSmart(smartRes.smartAnswer ?? null);
+      setSmart(smartRes?.smartAnswer ?? null);
     }, 350);
 
     return () => clearTimeout(timer);

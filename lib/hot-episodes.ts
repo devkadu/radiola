@@ -1,12 +1,7 @@
 import { supabaseAdmin as supabase } from "@/lib/supabase-admin";
 import { tmdbService } from "@/services/tmdb";
 import { seriesSlug, episodeSlug } from "@/lib/slugs";
-
-function parseEpisodeId(epId: string) {
-  const m = epId.match(/^(\d+)-s(\d+)-e(\d+)$/);
-  if (!m) return null;
-  return { seriesId: m[1], season: parseInt(m[2]), episode: parseInt(m[3]) };
-}
+import { parseEpisodeId } from "@/lib/episode-utils";
 
 export async function getHotEpisodes(limit = 5) {
   const { data: topIds, error } = await supabase.rpc("hot_episodes");
