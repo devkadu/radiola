@@ -37,8 +37,9 @@ export async function POST(request: NextRequest) {
     );
 
     const { data: { user } } = await supabase.auth.getUser();
-    const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "Anônimo";
-    const email = user?.email ?? "—";
+    if (!user) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    const username = user.user_metadata?.username || user.email?.split("@")[0] || "Anônimo";
+    const email = user.email ?? "—";
 
     await resend.emails.send({
       from: FROM,

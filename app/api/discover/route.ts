@@ -1,10 +1,17 @@
 import { tmdbService } from "@/services/tmdb";
 import { NextRequest, NextResponse } from "next/server";
 
+const ALLOWED_SORT = new Set([
+  "popularity.desc", "popularity.asc",
+  "vote_average.desc", "vote_average.asc",
+  "first_air_date.desc", "first_air_date.asc",
+]);
+
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const page       = Number(searchParams.get("page") ?? "1");
-  const sortBy     = searchParams.get("sortBy")     ?? "popularity.desc";
+  const page       = Math.min(Math.max(Number(searchParams.get("page") ?? "1") || 1, 1), 500);
+  const rawSort    = searchParams.get("sortBy") ?? "popularity.desc";
+  const sortBy     = ALLOWED_SORT.has(rawSort) ? rawSort : "popularity.desc";
   const genreId    = searchParams.get("genreId")    ? Number(searchParams.get("genreId"))    : null;
   const providerId = searchParams.get("providerId") ? Number(searchParams.get("providerId")) : null;
 
