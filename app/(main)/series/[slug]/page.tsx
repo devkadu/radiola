@@ -82,7 +82,6 @@ export default async function SeriesPage({ params }: Props) {
       seasons.map((s: any) => tmdbService.getSeasonDetails(id, s.season_number).catch(() => null))
     )
   ).filter(Boolean);
-  const allEpisodes = seasonDetails.flatMap((s: any) => s.episodes ?? []);
   await cacheService.cacheSeries(series);
 
   const seasonsWithEpisodes = seasonDetails.map((sd: any) => ({

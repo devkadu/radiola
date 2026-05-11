@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { tmdbService } from "@/services/tmdb";
 import { idFromSeriesSlug, numberFromSeasonSlug, episodeSlug } from "@/lib/slugs";
 import { BackTopBar } from "@/components/BackTopBar/BackTopBar";
