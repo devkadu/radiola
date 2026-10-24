@@ -1,1 +1,0 @@
-export { GenreTags } from "./GenreTags";

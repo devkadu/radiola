@@ -1,0 +1,1 @@
+export function ProfileVisibilityBadge() { return <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-green-950 text-green-400 border border-green-900 tracking-wide uppercase">visível</span>; }

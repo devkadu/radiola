@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "routes": [
+    {
+      "src": "/(?!robots\\.txt$).*",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(?:[cC][lL][aA][uU][dD][eE][bB][oO][tT]|[gG][pP][tT][bB][oO][tT]|[cC][hH][aA][tT][gG][pP][tT]-[uU][sS][eE][rR]|[cC][cC][bB][oO][tT]|[bB][yY][tT][eE][sS][pP][iI][dD][eE][rR]|[mM][eE][tT][aA]-[eE][xX][tT][eE][rR][nN][aA][lL][aA][gG][eE][nN][tT]|[aA][nN][tT][hH][rR][oO][pP][iI][cC]-[aA][iI]|[cC][lL][aA][uU][dD][eE]-[wW][eE][bB]).*"
+        }
+      ],
+      "mitigate": {
+        "action": "deny"
+      }
+    }
+  ]
+}

@@ -1,23 +1,17 @@
 /**
  * Popula a tabela series_context usando Claude Haiku.
- * Custo estimado: ~R$0,20 para 50 séries.
- *
- * Uso:
- *   ANTHROPIC_API_KEY=sk-... npx tsx scripts/populate-series-context.ts
+ * Simula por padrão. Configure as credenciais no ambiente e use --run para
+ * consumir a API paga e gravar os dados:
+ *   node --experimental-strip-types scripts/populate-series-context.ts --run
  */
 
 import { config } from "dotenv";
-config({ path: ".env" });
 
+
+import { pathToFileURL } from "node:url";
+import { z } from "zod";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 const SERIES_LIST = [
   { id: 76479,  name: "The Boys" },
@@ -60,33 +54,45 @@ const PROMPT = (name: string) => `Você é um especialista em séries de TV. Res
     "onde_continuar": "onde o fã pode continuar (ex: 'Capítulo 121 do mangá Berserk'). null se não se aplica.",
     "fonte": "nome da obra + editora/plataforma. null se não se aplica."
   },
-  "prod_status": "status atual em 1 frase considerando que hoje é abril de 2026 (ex: '5ª temporada estreou em novembro de 2025', 'cancelada em 2024', 'em exibição desde 2023')",
+  "prod_status": "status atual em 1 frase considerando a data ${new Date().toISOString().slice(0, 10)} (ex: '5ª temporada estreou em novembro de 2025', 'cancelada em 2024', 'em exibição desde 2023')",
   "similares_nomes": ["Nome Série 1", "Nome Série 2", "Nome Série 3"],
   "tags": ["use apenas tags desta lista: anime, sci-fi, suspense, terror, drama, comédia, ação, fantasia, distopia, obra-adaptada, crime, romance, maratona, minissérie. Use 'minissérie' APENAS para séries com 1 temporada curta e história fechada (ex: Chernobyl, The Night Of). Use 'maratona' para séries longas com múltiplas temporadas boas pra binge. Não use os dois juntos."],
   "streaming": ["plataformas onde está disponível no Brasil, use exatamente: netflix, amazon, hbo, disney, apple, globoplay, paramount, crunchyroll"]
 }`;
 
-async function fetchContext(seriesId: number, name: string) {
+async function fetchContext(anthropic: Anthropic, name: string) {
   const msg = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 600,
     messages: [{ role: "user", content: PROMPT(name) }],
   });
 
-  const raw = (msg.content[0] as any).text.trim();
+  const block = msg.content.find(block => block.type === "text");
+  if (!block || block.type !== "text") throw new Error("Resposta sem texto");
+  const raw = block.text.trim();
   const text = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
-  return JSON.parse(text);
+  return z.object({
+    material: z.object({ tipo: z.enum(["manga", "book", "comic", "game", "none"]), onde_parou: z.string().nullable(), onde_continuar: z.string().nullable(), fonte: z.string().nullable() }),
+    prod_status: z.string().max(500), similares_nomes: z.array(z.string()).max(10), tags: z.array(z.string()).max(15), streaming: z.array(z.string()).max(10),
+  }).parse(JSON.parse(text));
 }
 
-async function main() {
+export async function main() {
+  if (!process.argv.includes("--run")) {
+    console.log("Simulação: use --run para consumir a API e gravar os contextos.");
+    return;
+  }
+  config({ path: ".env", quiet: true });
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, (process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY)!, { auth: { persistSession: false, autoRefreshToken: false } });
   console.log(`Populando ${SERIES_LIST.length} séries...\n`);
 
   for (const series of SERIES_LIST) {
     try {
       console.log(`→ ${series.name} (${series.id})`);
-      const data = await fetchContext(series.id, series.name);
+      const data = await fetchContext(anthropic, series.name);
 
-      await supabase.from("series_context").upsert({
+      const { error } = await supabase.from("series_context").upsert({
         series_id: series.id,
         series_name: series.name,
         material: data.material,
@@ -98,6 +104,7 @@ async function main() {
         updated_at: new Date().toISOString(),
       });
 
+      if (error) throw error;
       console.log(`   ✓ tags: ${data.tags?.join(", ")}`);
       console.log(`   ✓ status: ${data.prod_status}`);
 
@@ -111,4 +118,6 @@ async function main() {
   console.log("\nConcluído!");
 }
 
-main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch(() => { console.error("Falha ao popular contextos."); process.exitCode = 1; });
+}

@@ -1,0 +1,2 @@
+# Local documentation and private reports must not be uploaded by the Vercel CLI.
+docs/

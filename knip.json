@@ -1,0 +1,8 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "scripts/cleanup-db.mjs",
+    "scripts/cleanup-series.mjs",
+    "scripts/populate-series-context.ts"
+  ]
+}
