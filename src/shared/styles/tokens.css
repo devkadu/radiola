@@ -1,0 +1,31 @@
+:root {
+  /* Fundos */
+  --bg: #0a0a0a;
+  --bg-surface: #141414;
+  --bg-elevated: #1e1e1e;
+
+  /* Bordas */
+  --border: rgba(200, 245, 101, 0.1);
+
+  /* Lima (acento) */
+  --yellow: #c8f565;
+  --yellow-dim: #9abf45;
+  --yellow-muted: rgba(200, 245, 101, 0.1);
+
+  /* Texto */
+  --text-primary: #f5f0e8;
+  --text-secondary: #888888;
+  --text-muted: rgba(245, 240, 232, 0.3);
+
+  /* Utilitários */
+  --green: #4caf50;
+  --red: #e53935;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.08);
+  --scrollbar-thumb-hover: rgba(200, 245, 101, 0.3);
+
+  /* Aliases de compatibilidade */
+  --background: var(--bg);
+  --foreground: var(--text-primary);
+  --brand-yellow: var(--yellow);
+  --border-muted: var(--border);
+}

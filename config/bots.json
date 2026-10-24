@@ -1,0 +1,12 @@
+{
+  "blockedAgents": [
+    "ClaudeBot",
+    "GPTBot",
+    "ChatGPT-User",
+    "CCBot",
+    "Bytespider",
+    "meta-externalagent",
+    "anthropic-ai",
+    "Claude-Web"
+  ]
+}

@@ -1,0 +1,81 @@
+"use client";
+import { endpoints } from "@/shared/constants/endpoint";
+
+import type { Series } from "@/features/catalog/types/tmdb";
+import { seriesSlug as toSlug } from "@/features/catalog/utils/slugs";
+import { fetchJson } from "@/shared/http/fetch-json";
+import { useQuery } from "@tanstack/react-query";
+import Image from "@/shared/components/image/image";
+import Link from "next/link";
+
+function SeriesSkeleton() {
+  return (
+    <div className="rounded-xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border)] animate-pulse">
+      <div className="w-full aspect-[2/3] bg-[var(--bg-elevated)]" />
+      <div className="p-3 flex flex-col gap-2">
+        <div className="h-3.5 bg-[var(--bg-elevated)] rounded w-3/4" />
+        <div className="h-3 bg-[var(--bg-elevated)] rounded w-1/3" />
+      </div>
+    </div>
+  );
+}
+
+export const PopularSeries = () => {
+  const { data: series = [], isLoading: loading } = useQuery<(Pick<Series, "id" | "name" | "poster_path"> & { favorite_count: number })[]>({
+    queryKey: ["popular-series"],
+    queryFn: ({ signal }) => fetchJson(endpoints.INTERNAL.POPULAR_SERIES, { signal }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-muted)]">
+          Favoritas da comunidade
+        </p>
+        <Link href="/series" className="text-sm text-[var(--yellow)] hover:text-[var(--yellow-dim)] transition-colors shrink-0">
+          Ver todas →
+        </Link>
+      </div>
+
+      {/* Grid */}
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide lg:grid lg:grid-cols-8 lg:overflow-visible">
+        {loading
+          ? Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="shrink-0 w-[calc((100vw-3.5rem)/3.5)] lg:w-auto">
+                <SeriesSkeleton />
+              </div>
+            ))
+          : series.slice(0, 8).map((s) => (
+              <Link
+                key={s.id}
+                href={`/series/${toSlug(s.name, s.id)}`}
+                className="shrink-0 w-[calc((100vw-3.5rem)/3.5)] lg:w-auto rounded-lg overflow-hidden bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--yellow)] transition-colors"
+              >
+                <div className="relative w-full aspect-[2/3]">
+                  {s.poster_path ? (
+                    <Image
+                      src={`https://image.tmdb.org/t/p/w185${s.poster_path}`}
+                      alt={s.name}
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 1024px) 12vw, 110px"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-[var(--bg-elevated)] text-2xl">
+                      📺
+                    </div>
+                  )}
+                </div>
+                <div className="p-2">
+                  <p className="text-xs font-semibold text-[var(--text-primary)] leading-tight truncate">{s.name}</p>
+                  <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
+                    {s.favorite_count} {s.favorite_count === 1 ? "pessoa" : "pessoas"}
+                  </p>
+                </div>
+              </Link>
+            ))}
+      </div>
+    </div>
+  );
+};

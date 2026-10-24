@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 const securityHeaders = [
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -10,13 +12,13 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.youtube.com",
+      `script-src 'self' 'unsafe-inline'${isDevelopment ? " 'unsafe-eval'" : ""} https://www.googletagmanager.com https://www.youtube.com`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://image.tmdb.org https://*.supabase.co https://lh3.googleusercontent.com https://i.ytimg.com",
       "media-src 'self'",
       "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
-      "connect-src 'self' https://*.supabase.co https://api.themoviedb.org https://www.google-analytics.com",
-      "font-src 'self'",
+      `connect-src 'self' https://*.supabase.co https://api.themoviedb.org https://www.google-analytics.com${process.env.NEXT_BUILD_CHECK === "1" ? " http://127.0.0.1:15432" : ""}`,
+      "font-src 'self' data:",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -26,7 +28,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  eslint: { ignoreDuringBuilds: true },
+  distDir: process.env.NEXT_BUILD_CHECK === "1" ? ".next-check" : ".next",
   transpilePackages: ["react-markdown"],
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

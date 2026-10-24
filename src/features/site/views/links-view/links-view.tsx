@@ -1,0 +1,141 @@
+import { AppMark } from "@/shared/components/icons/app-mark/app-mark";
+import Link from "next/link";
+
+import { FaHouse,FaInstagram,FaTiktok,FaXTwitter } from "react-icons/fa6";
+
+import { getHotEpisodes } from "@/features/discussions/server/queries/get-hot-episodes";
+
+const socialLinks = [
+  {
+    icon: FaHouse,
+    label: "Página principal",
+    href: "/",
+    external: false,
+  },
+  {
+    icon: FaInstagram,
+    label: "Instagram",
+    href: "https://www.instagram.com/asegundatemporada/",
+    external: true,
+    color: "#E1306C",
+  },
+  {
+    icon: FaXTwitter,
+    label: "Twitter / X",
+    href: "https://x.com/s2temporada",
+    external: true,
+    color: "#ffffff",
+  },
+  {
+    icon: FaTiktok,
+    label: "TikTok",
+    href: "https://www.tiktok.com/@segunda.temporada3",
+    external: true,
+    color: "#ffffff",
+  },
+];
+
+export async function LinksView() {
+  const episodes = await getHotEpisodes(1);
+  const hot = episodes[0] ?? null;
+
+  return (
+    <main className="min-h-screen bg-[var(--bg)] flex flex-col items-center justify-start px-4 py-14 text-white">
+      {/* Logo + nome */}
+      <div className="flex flex-col items-center gap-3 mb-10">
+        <div className="w-16 h-16 bg-[var(--yellow)] rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
+          <AppMark width={32} height={32} />
+        </div>
+        <div
+          className="flex flex-col items-center leading-tight"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          <span className="text-xl font-extrabold tracking-tight text-[var(--text-primary)]">
+            Segunda
+          </span>
+          <span className="text-xl font-extrabold tracking-tight text-[var(--text-primary)]">
+            Temporada
+          </span>
+        </div>
+        <p className="text-sm text-[var(--text-muted)] text-center max-w-xs">
+          Debate séries no seu ritmo, episódio por episódio.
+        </p>
+      </div>
+
+      {/* Links */}
+      <div className="w-full max-w-sm flex flex-col gap-3">
+        {/* Episódio mais comentado — dinâmico */}
+        {hot && (
+          <Link href={hot.href}>
+            <div className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border bg-[var(--yellow-muted)] border-[var(--yellow)] hover:bg-[var(--yellow)]/20 transition-all">
+              <span className="text-2xl leading-none shrink-0">🔥</span>
+              <div className="flex flex-col min-w-0">
+                <span className="font-semibold text-sm leading-tight text-[var(--yellow)]">
+                  Discussão da semana
+                </span>
+                <span className="text-xs text-[var(--text-muted)] truncate">
+                  {hot.series} · {hot.code}
+                </span>
+              </div>
+              <svg
+                className="ml-auto shrink-0 text-[var(--text-muted)]"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
+        )}
+
+        {/* Links estáticos */}
+        {socialLinks.map((link) => {
+          const Icon = link.icon;
+          const inner = (
+            <div className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl border bg-[var(--bg-surface)] border-[var(--border)] hover:border-[var(--yellow)] transition-all">
+              <Icon
+                size={22}
+                style={{ color: link.color ?? "var(--text-muted)" }}
+                className="shrink-0"
+              />
+              <span className="font-semibold text-sm text-[var(--text-primary)]">{link.label}</span>
+              <svg
+                className="ml-auto shrink-0 text-[var(--text-muted)]"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </div>
+          );
+
+          return link.external ? (
+            <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer">
+              {inner}
+            </a>
+          ) : (
+            <Link key={link.href} href={link.href}>
+              {inner}
+            </Link>
+          );
+        })}
+      </div>
+
+      <p className="mt-12 text-[10px] text-[var(--text-muted)] tracking-widest uppercase">
+        segundatemporada.com.br
+      </p>
+    </main>
+  );
+}
