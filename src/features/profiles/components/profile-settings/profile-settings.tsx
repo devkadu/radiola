@@ -4,8 +4,8 @@ import { FaArrowLeft,FaPencil } from "react-icons/fa6";
 import type { useAvatarUpload } from "../../hooks/use-avatar-upload";
 import type { useProfileSettings } from "../../hooks/use-profile-settings";
 import { ProfileToggle } from "../profile-toggle/profile-toggle";
-interface Props { username: string; avatar: ReturnType<typeof useAvatarUpload>; settings: ReturnType<typeof useProfileSettings>; onBack: () => void; onSignOut: () => void; }
-export function ProfileSettings({ username, avatar, settings, onBack, onSignOut }: Props) {
+interface Props { username: string; avatar: ReturnType<typeof useAvatarUpload>; settings: ReturnType<typeof useProfileSettings>; onBack: () => void; onSignOut: () => void; signingOut: boolean; }
+export const ProfileSettings = ({ username, avatar, settings, onBack, onSignOut, signingOut }: Props) => {
  const { fileRef, avatarUrl, uploading, error, handleFileChange } = avatar;
  const initials = username.slice(0, 2).toUpperCase();
  const { preferences, toggle } = settings;
@@ -93,10 +93,11 @@ export function ProfileSettings({ username, avatar, settings, onBack, onSignOut 
         {/* Sair */}
         <button
           onClick={onSignOut}
-          className="w-full py-3 rounded-2xl border border-red-900/40 text-red-400 hover:bg-red-950/30 transition-colors text-sm font-medium"
+          disabled={signingOut}
+          className="w-full py-3 rounded-2xl border border-red-900/40 text-red-400 hover:bg-red-950/30 transition-colors text-sm font-medium disabled:opacity-50"
         >
-          Sair da conta
+          {signingOut ? "Saindo…" : "Sair da conta"}
         </button>
       </main>
     );
-}
+};

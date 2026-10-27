@@ -3,12 +3,12 @@ import { AdminTab } from "@/features/editorial/components/admin-panel/admin-pane
 import { UserLists } from "@/features/lists/components/user-lists/user-lists";
 import { endpoints } from "@/shared/constants/endpoint";
 import { fetchJson } from "@/shared/http/fetch-json";
-import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
+import { useSignOut } from "@/features/auth/hooks/use-sign-out";
 import { useQuery } from "@tanstack/react-query";
 import Image from "@/shared/components/image/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { calculateProfileBadges } from "../../functions/calculate-profile-badges";
 import { useAvatarUpload } from "../../hooks/use-avatar-upload";
 import { useProfileOverview } from "../../hooks/use-profile-overview";
@@ -21,9 +21,8 @@ import { ProfileRatings } from "../profile-ratings/profile-ratings";
 import { ProfileSettings } from "../profile-settings/profile-settings";
 import { ProfileStats } from "../profile-stats/profile-stats";
 import { ProfileVisibilityBadge as BadgePublic } from "../profile-visibility-badge/profile-visibility-badge";
-export function ProfileClient({ profile, isAdmin }: { profile: ProfileIdentity; isAdmin?: boolean }) {
- const router = useRouter();
- const { signOut } = useAuth();
+export const ProfileClient = ({ profile, isAdmin }: { profile: ProfileIdentity; isAdmin?: boolean }) => {
+ const { handleSignOut, signingOut, signOutError } = useSignOut();
  const username = profile.username;
  const avatar = useAvatarUpload(profile.id, profile.avatarUrl);
  const settings = useProfileSettings(profile.preferences);
@@ -31,7 +30,27 @@ export function ProfileClient({ profile, isAdmin }: { profile: ProfileIdentity; 
  const [now] = useState(() => Date.now());
  const [editingProfile, setEditingProfile] = useState(false);
  const [activeTab, setActiveTab] = useState<"perfil" | "calendario" | "admin">("perfil");
- const [signOutError, setSignOutError] = useState<string | null>(null);
+ useEffect(() => {
+  const showLists = () => {
+   if (window.location.hash === "#minha-lista") {
+    setEditingProfile(false);
+    setActiveTab("perfil");
+   }
+  };
+  window.addEventListener("hashchange", showLists);
+  return () => window.removeEventListener("hashchange", showLists);
+ }, []);
+ useEffect(() => {
+  if (activeTab === "perfil" && window.location.hash === "#minha-lista") {
+   document.getElementById("minha-lista")?.scrollIntoView();
+  }
+ }, [activeTab, editingProfile]);
+ const changeTab = (tab: typeof activeTab) => {
+  if (window.location.hash === "#minha-lista") {
+   window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+  }
+  setActiveTab(tab);
+ };
  const overview = useProfileOverview(profile.id);
  const { favorites = [], commentCount = 0, totalLikes = 0, reactionCounts = {}, topComment = null, recentComments = [], seriesNames = {}, watchedEpisodesCount = 0 } = overview.data ?? {};
  const { data: seriesProgress = {} } = useQuery<Record<number, { watched: number; total: number }>>({
@@ -42,19 +61,25 @@ export function ProfileClient({ profile, isAdmin }: { profile: ProfileIdentity; 
  const daysMember = Math.max(0, Math.floor((now - new Date(profile.createdAt).getTime()) / 86400000));
  const totalRatings = Object.values(reactionCounts).reduce((sum, count) => sum + count, 0);
  const badges = calculateProfileBadges(watchedEpisodesCount, commentCount, totalRatings);
- const handleSignOut = async () => {
-  setSignOutError(null);
-  try {
-   await signOut();
-   router.push("/"); router.refresh();
-  } catch { setSignOutError("Não foi possível sair. Tente novamente."); }
- };
- if (editingProfile) return <><ProfileSettings username={username} avatar={avatar} settings={settings} onBack={() => setEditingProfile(false)} onSignOut={handleSignOut} />{signOutError && <p role="alert">{signOutError}</p>}</>;
+ if (editingProfile) return <><ProfileSettings username={username} avatar={avatar} settings={settings} onBack={() => setEditingProfile(false)} onSignOut={handleSignOut} signingOut={signingOut} />{signOutError && <p role="alert">{signOutError}</p>}</>;
   // ── Tela principal do perfil ─────────────────────────────────────────────────
   return (
     <main className="pb-28 min-h-screen">
 
-      <ProfileHeader username={username} createdAt={profile.createdAt} badges={badges} avatar={avatar} onEdit={() => setEditingProfile(true)} />
+      <ProfileHeader username={username} createdAt={profile.createdAt} badges={badges} avatar={avatar} onEdit={() => { changeTab("perfil"); setEditingProfile(true); }} />
+
+      <div className="px-5 pb-4">
+        <button
+          type="button"
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="flex min-h-11 items-center gap-2 rounded-xl border border-red-900/40 px-4 text-sm font-medium text-red-400 transition-colors hover:bg-red-950/30 disabled:opacity-50"
+        >
+          <FaArrowRightFromBracket aria-hidden size={14} />
+          {signingOut ? "Saindo…" : "Sair da conta"}
+        </button>
+        {signOutError && <p role="alert" className="mt-2 text-sm text-red-400">{signOutError}</p>}
+      </div>
 
       {overview.isPending && <p role="status" className="px-5">Carregando seu perfil…</p>}
       {overview.error && <p role="alert" className="px-5 text-red-400">Não foi possível carregar seu perfil. <button onClick={() => void overview.refetch()}>Tentar novamente</button></p>}
@@ -67,7 +92,7 @@ export function ProfileClient({ profile, isAdmin }: { profile: ProfileIdentity; 
         ] as { key: typeof activeTab; label: string }[]).map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => changeTab(tab.key)}
             className={`pb-2.5 px-1 mr-5 text-sm font-semibold transition-colors relative ${
               activeTab === tab.key
                 ? "text-[var(--text-primary)]"
@@ -94,7 +119,9 @@ export function ProfileClient({ profile, isAdmin }: { profile: ProfileIdentity; 
             <ProfileStats daysMember={daysMember} watchedEpisodesCount={watchedEpisodesCount} favoriteCount={favorites.length} commentCount={commentCount} totalLikes={totalLikes} />
 
             {/* Listas */}
-            <UserLists />
+            <div id="minha-lista" className="scroll-mt-4">
+              <UserLists />
+            </div>
 
             <ProfileRatings reactionCounts={reactionCounts} />
 
