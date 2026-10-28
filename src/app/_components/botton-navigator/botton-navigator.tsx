@@ -1,5 +1,6 @@
 "use client";
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
+import { ProfileQuickActions } from "@/features/profiles/components/profile-quick-actions/profile-quick-actions";
 import { ROUTES } from "@/shared/constants/routes";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,7 +10,7 @@ import { FaCircleUser,FaHouse,FaTv,FaUsers } from "react-icons/fa6";
 function NavDot({ active }: { active: boolean }) {
   if (!active) return null;
   return (
-    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--yellow)]" />
+    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-(--yellow)" />
   );
 }
 
@@ -29,17 +30,16 @@ export const BottonNavigator = () => {
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg)] border-t border-[var(--border)] flex justify-around items-center py-2 z-40">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-(--bg) border-t border-(--border) flex justify-around items-center py-2 z-40">
       {tabs.map((tab) => {
         const active = tab.href ? pathname === tab.href : false;
         const color = active ? "var(--yellow)" : "var(--text-muted)";
 
         if (tab.label === "Perfil") {
           return (
-            <Link
-              key="perfil"
-              href={ROUTES.profile}
-              className="flex flex-col items-center gap-0.5 px-2 py-1"
+            <ProfileQuickActions
+              key={user?.id ?? "perfil"}
+              active={active}
             >
               <div className="relative">
                 <div
@@ -58,6 +58,7 @@ export const BottonNavigator = () => {
                       height={24}
                       className="object-cover w-full h-full"
                       referrerPolicy="no-referrer"
+                      draggable={false}
                     />
                   ) : (
                     initials || <FaCircleUser size={14} />
@@ -68,7 +69,7 @@ export const BottonNavigator = () => {
               <span className="text-[10px]" style={{ color }}>
                 {tab.label}
               </span>
-            </Link>
+            </ProfileQuickActions>
           );
         }
 

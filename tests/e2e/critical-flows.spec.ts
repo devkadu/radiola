@@ -64,6 +64,52 @@ test("a failed global logout clears local private content and reports the remain
   expect((await page.request.get("/api/profile/overview")).status()).toBe(401);
 });
 
+test.describe("mobile profile actions", () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+  test("short taps open the profile, holds open actions, and both logout buttons work", async ({ page }) => {
+    await loginAsFixture(page);
+    const profileLink = page.getByRole("link", { name: "Perfil", exact: true });
+    await profileLink.tap();
+    await expect(page).toHaveURL(/\/perfil$/);
+    await expect(page.getByRole("button", { name: "Sair da conta", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Calendário", exact: true }).click();
+
+    const session = await page.context().newCDPSession(page);
+    const holdProfile = async () => {
+      const box = await profileLink.boundingBox();
+      if (!box) throw new Error("Profile link is not visible");
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchStart", touchPoints: [{ x: box.x + box.width / 2, y: box.y + box.height / 2 }],
+      });
+      await expect(page.getByRole("menu", { name: "Ações do perfil" })).toBeVisible();
+      await session.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+      await expect(page.getByRole("menu", { name: "Ações do perfil" })).toBeVisible();
+    };
+
+    await holdProfile();
+    await page.getByRole("menuitem", { name: "Minha lista", exact: true }).tap();
+    await expect(page).toHaveURL(/\/perfil#minha-lista$/);
+    await expect(page.locator("#minha-lista")).toBeInViewport();
+    await page.getByRole("button", { name: "Editar Perfil", exact: true }).tap();
+    await expect(page.getByRole("heading", { name: "Editar perfil", exact: true })).toBeVisible();
+    await holdProfile();
+    await page.getByRole("menuitem", { name: "Minha lista", exact: true }).tap();
+    await expect(page.locator("#minha-lista")).toBeInViewport();
+    await page.getByRole("button", { name: "Sair da conta", exact: true }).tap();
+    await expect(page.getByRole("heading", { name: /Acabou o episódio/ })).toBeVisible();
+    expect((await page.request.get("/api/profile/overview")).status()).toBe(401);
+
+    await loginAsFixture(page);
+    await holdProfile();
+    await expect(page).toHaveURL(/\/$/);
+    await page.getByRole("menuitem", { name: "Sair", exact: true }).tap();
+    await expect(page.getByRole("heading", { name: /Acabou o episódio/ })).toBeVisible();
+    expect((await page.request.get("/api/profile/overview")).status()).toBe(401);
+    await session.detach();
+  });
+});
+
 test("authenticated writes reject forged ownership, unknown settings and an unowned list", async ({ page }) => {
   await loginAsFixture(page);
   const favorite = await page.request.post("/api/profile/favorites", {
