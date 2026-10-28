@@ -2,6 +2,7 @@ import { NavigationProgress } from "@/app/_components/navigation-progress/naviga
 import { Providers } from "@/app/providers";
 import { AuthProvider } from "@/features/auth/components/auth-provider/auth-provider.client";
 import "@/shared/styles/globals.css";
+import { socialPreviewMetadata } from "@/shared/constants/social-preview";
 import { serializeJsonLd } from "@/shared/utils/serialize-json-ld";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata,Viewport } from "next";
@@ -29,6 +30,7 @@ const outfit = localFont({
 });
 
 export const metadata: Metadata = {
+  ...socialPreviewMetadata,
   metadataBase: new URL(
     (() => {
       const u = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
@@ -47,20 +49,6 @@ export const metadata: Metadata = {
     icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
     shortcut: "/icon.svg",
     apple: "/icon.svg",
-  },
-  openGraph: {
-    siteName: "Segunda Temporada",
-    locale: "pt_BR",
-    type: "website",
-    title: "Segunda Temporada",
-    description: "Comentários organizados por episódio para quem leva séries a sério.",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Segunda Temporada" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Segunda Temporada",
-    description: "Comentários organizados por episódio para quem leva séries a sério.",
-    images: ["/opengraph-image"],
   },
   robots: {
     index: true,

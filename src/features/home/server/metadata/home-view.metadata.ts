@@ -1,9 +1,10 @@
-
-
 import type { Metadata } from "next";
+import { socialPreviewMetadata } from "@/shared/constants/social-preview";
 
 export const metadata: Metadata = {
-  title: "Segunda Temporada — Debate séries episódio a episódio",
-  description:
-    "Descubra episódios em debate e séries populares. Comente no seu ritmo, episódio por episódio.",
+  ...socialPreviewMetadata,
+  title: { absolute: socialPreviewMetadata.openGraph.title },
+  description: socialPreviewMetadata.openGraph.description,
+  alternates: { canonical: "/" },
+  openGraph: { ...socialPreviewMetadata.openGraph, url: "/" },
 };
