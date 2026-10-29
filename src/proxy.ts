@@ -1,4 +1,5 @@
 import { isAdminUser } from "@/server/auth/admin-guard";
+import { getCatalogCanonicalPath } from "@/features/catalog/server/queries/get-catalog-canonical-path";
 import { isBlockedBot } from "@/server/security/bot-policy";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
@@ -45,6 +46,15 @@ export const proxy = async (request: NextRequest) => {
 
   if (!ua && pathname.startsWith("/api/")) {
     return new NextResponse(null, { status: 403 });
+  }
+
+  if (request.method === "GET" || request.method === "HEAD") {
+    const canonical = await getCatalogCanonicalPath(pathname);
+    if (canonical && canonical !== pathname) {
+      const target = request.nextUrl.clone();
+      target.pathname = canonical;
+      return NextResponse.redirect(target, 308);
+    }
   }
 
   const needsAuth =

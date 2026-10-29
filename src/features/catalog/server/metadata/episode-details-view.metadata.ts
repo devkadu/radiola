@@ -1,19 +1,11 @@
-import { getEpisodeDetails } from "@/server/integrations/tmdb/requests/get-episode-details";
-import { getSeriesDetails } from "@/server/integrations/tmdb/requests/get-series-details";
-
-import {
-idFromSeriesSlug,
-numberFromEpisodeSlug,
-numberFromSeasonSlug,
-} from "@/features/catalog/utils/slugs";
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
+import { resolveEpisodePage } from "../queries/resolve-catalog-page";
 
 import type { Metadata } from "next";
 
 interface Props {
   params: Promise<{ slug: string; season: string; episode: string }>;
 }
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
 export async function generateStaticParams() {
   const { supabase } = await import("@/server/database/public");
@@ -49,18 +41,9 @@ export async function generateStaticParams() {
   });
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
   const { slug, season: seasonParam, episode: episodeParam } = await params;
-  const seriesId = idFromSeriesSlug(slug);
-  const seasonNumber = numberFromSeasonSlug(seasonParam);
-  const episodeNumber = numberFromEpisodeSlug(episodeParam);
-
-  const [series, ep] = await Promise.all([
-    getSeriesDetails(seriesId).catch(() => null),
-    getEpisodeDetails(seriesId, seasonNumber, episodeNumber).catch(() => null),
-  ]);
-
-  if (!series || !ep) return {};
+  const { series, episode: ep, seasonNumber, episodeNumber, path } = await resolveEpisodePage(slug, seasonParam, episodeParam);
 
   const seasonLabel = `T${String(seasonNumber).padStart(2, "0")}`;
   const episodeLabel = `E${String(episodeNumber).padStart(2, "0")}`;
@@ -82,7 +65,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: `${siteUrl}/series/${slug}/${seasonParam}/${episodeParam}` },
+    alternates: { canonical: `${siteUrl}${path}` },
     openGraph: {
       title,
       description,
@@ -96,4 +79,4 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: image ? [image] : ["/opengraph-image"],
     },
   };
-}
+};

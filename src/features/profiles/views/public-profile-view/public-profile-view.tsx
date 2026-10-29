@@ -1,11 +1,10 @@
 import { supabaseAdmin } from "@/server/database/admin";
-import { findProfileUser } from "@/features/profiles/server/queries/find-profile-user";
+import { getPublicProfileUser } from "@/features/profiles/server/queries/get-public-profile-user";
 import { getProfileIdentity } from "@/features/profiles/functions/get-profile-identity";
 
 import { createClient } from "@/server/database/session";
 
 import Link from "next/link";
-
 
 import { FollowButton } from "@/features/profiles/components/follow-button/follow-button.client";
 
@@ -56,17 +55,7 @@ function CircleProgress({ pct, size = 56 }: { pct: number; size?: number }) {
 
 export const PublicProfileView = async ({ params }: Props) => {
   const { username } = await params;
-  const target = await findProfileUser(username);
-
-  if (!target) {
-    return (
-      <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-[var(--text-muted)]">
-        <p className="text-4xl">👤</p>
-        <p className="text-lg font-semibold text-[var(--text-primary)]">Usuário não encontrado</p>
-        <Link href="/" className="text-sm text-[var(--yellow)] hover:underline">← Voltar</Link>
-      </main>
-    );
-  }
+  const target = await getPublicProfileUser(username);
 
   if (target.user_metadata?.profile_public === false) {
     return (
@@ -193,7 +182,7 @@ export const PublicProfileView = async ({ params }: Props) => {
               ) : initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-bold text-[var(--text-primary)] text-xl">{displayUsername}</p>
+              <h1 className="font-bold text-[var(--text-primary)] text-xl">{displayUsername}</h1>
               <p className="text-xs text-[var(--yellow)] mt-0.5">Membro desde {memberSince(target.created_at)}</p>
             </div>
           </div>

@@ -1,8 +1,6 @@
-import { withCatalogNotFound } from "@/features/catalog/server/queries/with-catalog-not-found";
-import { getSeasonDetails } from "@/server/integrations/tmdb/requests/get-season-details";
-import { getSeriesDetails } from "@/server/integrations/tmdb/requests/get-series-details";
+import { resolveSeasonPage } from "@/features/catalog/server/queries/resolve-catalog-page";
 
-import { episodeSlug,idFromSeriesSlug,numberFromSeasonSlug } from "@/features/catalog/utils/slugs";
+import { episodeSlug } from "@/features/catalog/utils/slugs";
 
 import { BackTopBar } from "@/shared/components/back-top-bar/back-top-bar";
 
@@ -10,21 +8,13 @@ import Image from "@/shared/components/image/image";
 
 import Link from "next/link";
 
-
 interface Props {
   params: Promise<{ slug: string; season: string }>;
 }
 
-
-export async function SeasonDetailsView({ params }: Props) {
-  const { slug, season: seasonParam } = await params;
-  const seriesId = idFromSeriesSlug(slug);
-  const seasonNumber = numberFromSeasonSlug(seasonParam);
-
-  const [series, seasonData] = await Promise.all([
-    withCatalogNotFound(getSeriesDetails(seriesId)),
-    withCatalogNotFound(getSeasonDetails(seriesId, seasonNumber)),
-  ]);
+export const SeasonDetailsView = async ({ params }: Props) => {
+  const { slug: requestedSlug, season: requestedSeason } = await params;
+  const { series, season: seasonData, slug, seasonNumber, seasonParam } = await resolveSeasonPage(requestedSlug, requestedSeason);
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-white pb-24 px-4">
@@ -122,4 +112,4 @@ export async function SeasonDetailsView({ params }: Props) {
       </div>
     </main>
   );
-}
+};

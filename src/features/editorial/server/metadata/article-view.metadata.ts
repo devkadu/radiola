@@ -1,3 +1,4 @@
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
 import { supabaseAdmin as supabase } from "@/server/database/admin";
 
 import type { Metadata } from "next";
@@ -5,8 +6,6 @@ import type { Metadata } from "next";
 interface Props {
   params: Promise<{ slug: string }>;
 }
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

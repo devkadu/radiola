@@ -1,8 +1,8 @@
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
 import type { MetadataRoute } from "next";
 import { blockedBotAgents } from "@/server/security/bot-policy";
 
 const robots = (): MetadataRoute.Robots => {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
   return {
     rules: [
       {

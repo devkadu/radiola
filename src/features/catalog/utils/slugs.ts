@@ -13,12 +13,7 @@ export const seriesSlug = (name: string, id: number) => {
 
 export const seasonSlug = (seasonNumber: number) => `temporada-${seasonNumber}`;
 
-export const episodeSlug = (episodeNumber: number, name: string) =>
-  `episodio-${episodeNumber}-${slugify(name)}`;
-
-// Extractors
-export const idFromSeriesSlug = (slug: string) => slug.split("-").pop()!;
-
-export const numberFromSeasonSlug = (slug: string) => Number(slug.replace("temporada-", ""));
-
-export const numberFromEpisodeSlug = (slug: string) => Number(slug.split("-")[1]);
+export const episodeSlug = (episodeNumber: number, name: string) => {
+  const slug = slugify(name ?? "");
+  return `episodio-${episodeNumber}${slug ? `-${slug}` : ""}`;
+};

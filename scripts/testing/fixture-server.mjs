@@ -14,6 +14,15 @@ const encode = value => Buffer.from(JSON.stringify(value)).toString("base64url")
 const token = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: user.id, aud: "authenticated", role: "authenticated", exp: Math.floor(Date.now() / 1000) + 3600 })}.fixture-signature`;
 const episode = { id: 701, name: "O começo", episode_number: 1, season_number: 1, overview: "Um episódio de teste.", still_path: null, air_date: "2025-01-01", vote_average: 8, vote_count: 10, runtime: 45, crew: [], guest_stars: [] };
 const series = { id: 700, name: "Série de teste", original_name: "Fixture Series", overview: "Uma série fictícia para validar a aplicação.", poster_path: null, backdrop_path: null, first_air_date: "2025-01-01", number_of_episodes: 1, number_of_seasons: 1, vote_average: 8, vote_count: 100, genres: [{ id: 18, name: "Drama" }], seasons: [{ id: 70, season_number: 1, name: "Temporada 1", episode_count: 1, poster_path: null, air_date: "2025-01-01" }], videos: { results: [] } };
+const secondEpisode = { ...episode, id: 702, episode_number: 2, name: "Próximo capítulo" };
+const catalogEpisodes = [
+  { ...episode, series_id: 700, slug: "episodio-1-o-comeco" },
+  { ...secondEpisode, series_id: 700, slug: "episodio-2-proximo-capitulo" },
+];
+const articles = [
+  { id: "44444444-4444-4444-8444-444444444444", slug: "artigo-publicado", title: "Artigo de teste", body: "Conteúdo editorial de teste.", status: "published", published_at: "2025-01-01T00:00:00Z", updated_at: "2025-01-02T00:00:00Z" },
+  { id: "55555555-5555-4555-8555-555555555555", slug: "artigo-rascunho", title: "Rascunho de teste", body: "Texto ainda privado.", status: "draft", published_at: null, updated_at: null },
+];
 
 export function startFixtureServer(port = 15432) {
   const requests = [];
@@ -56,6 +65,30 @@ export function startFixtureServer(port = 15432) {
       const target = [user, privateUser].find(account => url.searchParams.get("username") === `eq.${account.user_metadata.username}`);
       return send(target ? [{ user_id: target.id }] : []);
     }
+    const catalogRows = {
+      "/rest/v1/series": [{ ...series, slug: "serie-de-teste-700" }],
+      "/rest/v1/episodes": catalogEpisodes,
+      "/rest/v1/articles": articles,
+    }[url.pathname];
+    if (catalogRows) {
+      if (url.pathname === "/rest/v1/articles" && request.headers.apikey !== "sb_secret_fixture") {
+        return send({ message: "Not authorized" }, 403);
+      }
+      let rows = catalogRows.filter(row => [...url.searchParams].every(([column, filter]) => {
+        if (filter.startsWith("eq.")) return String(row[column]) === filter.slice(3);
+        if (filter === "not.is.null") return row[column] != null;
+        if (filter.startsWith("in.(")) return filter.slice(4, -1).split(",").includes(String(row[column]));
+        return true;
+      }));
+      const offset = Number(url.searchParams.get("offset") ?? 0);
+      const limit = Number(url.searchParams.get("limit") ?? rows.length);
+      response.setHeader("Content-Range", rows.length ? `${offset}-${Math.min(offset + limit, rows.length) - 1}/${rows.length}` : "*/0");
+      rows = rows.slice(offset, offset + limit);
+      if (request.headers.accept?.includes("application/vnd.pgrst.object+json")) {
+        return rows.length === 1 ? send(rows[0]) : send({ code: "PGRST116", message: "No fixture row found", details: "The result contains 0 rows" }, 406);
+      }
+      return send(rows);
+    }
     if (url.pathname.startsWith("/rest/")) {
       response.setHeader("Content-Range", "*/0");
       if (request.headers.accept?.includes("application/vnd.pgrst.object+json")) {
@@ -68,8 +101,12 @@ export function startFixtureServer(port = 15432) {
     if (url.pathname.includes("/genre/")) return send({ genres: [{ id: 18, name: "Drama" }] });
     if (url.pathname.endsWith("/credits") || url.pathname.endsWith("/tv_credits")) return send({ cast: [] });
     if (url.pathname.endsWith("/videos")) return send({ results: [] });
-    if (/\/episode\/\d+$/.test(url.pathname)) return send(episode);
-    if (/\/season\/\d+$/.test(url.pathname)) return send({ id: 70, name: "Temporada 1", season_number: 1, episodes: [episode], poster_path: null, air_date: "2025-01-01" });
+    if (/\/episode\/\d+$/.test(url.pathname)) {
+      const number = Number(url.pathname.split("/").pop());
+      const result = [episode, secondEpisode].find(item => item.episode_number === number);
+      return result ? send(result) : send({ message: "Episode not found" }, 404);
+    }
+    if (/\/season\/\d+$/.test(url.pathname)) return send({ id: 70, name: "Temporada 1", season_number: 1, episodes: [episode, secondEpisode], poster_path: null, air_date: "2025-01-01" });
     if (/\/tv\/\d+$/.test(url.pathname)) return send(series);
     if (/\/person\/\d+$/.test(url.pathname)) return send({ id: 1, name: "Pessoa de teste", biography: "", profile_path: null });
     if (/\/(discover|search|trending|tv)\//.test(url.pathname)) return send({ page: 1, total_pages: 1, total_results: 1, results: [series] });

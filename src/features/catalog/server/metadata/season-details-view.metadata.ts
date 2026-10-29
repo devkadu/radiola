@@ -1,7 +1,5 @@
-import { getSeasonDetails } from "@/server/integrations/tmdb/requests/get-season-details";
-import { getSeriesDetails } from "@/server/integrations/tmdb/requests/get-series-details";
-
-import { idFromSeriesSlug,numberFromSeasonSlug } from "@/features/catalog/utils/slugs";
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
+import { resolveSeasonPage } from "../queries/resolve-catalog-page";
 
 import type { Metadata } from "next";
 
@@ -9,25 +7,15 @@ interface Props {
   params: Promise<{ slug: string; season: string }>;
 }
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
   const { slug, season: seasonParam } = await params;
-  const seriesId = idFromSeriesSlug(slug);
-  const seasonNumber = numberFromSeasonSlug(seasonParam);
-
-  const [series, seasonData] = await Promise.all([
-    getSeriesDetails(seriesId).catch(() => null),
-    getSeasonDetails(seriesId, seasonNumber).catch(() => null),
-  ]);
-
-  if (!series || !seasonData) return {};
+  const { series, season: seasonData, path } = await resolveSeasonPage(slug, seasonParam);
 
   const title = `${series.name} — ${seasonData.name}`;
   const description =
     seasonData.overview?.slice(0, 155) ??
     `Debate os episódios da ${seasonData.name} de ${series.name}.`;
-  const canonical = `${siteUrl}/series/${slug}/${seasonParam}`;
+  const canonical = `${siteUrl}${path}`;
   const image = seasonData.poster_path
     ? `https://image.tmdb.org/t/p/w780${seasonData.poster_path}`
     : series.backdrop_path
@@ -51,4 +39,4 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: image ? [image] : ["/opengraph-image"],
     },
   };
-}
+};

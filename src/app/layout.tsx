@@ -1,3 +1,4 @@
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
 import { NavigationProgress } from "@/app/_components/navigation-progress/navigation-progress";
 import { Providers } from "@/app/providers";
 import { AuthProvider } from "@/features/auth/components/auth-provider/auth-provider.client";
@@ -31,12 +32,7 @@ const outfit = localFont({
 
 export const metadata: Metadata = {
   ...socialPreviewMetadata,
-  metadataBase: new URL(
-    (() => {
-      const u = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
-      return u.startsWith("http") ? u : `https://${u}`;
-    })(),
-  ),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "Segunda Temporada",
     template: "%s | Segunda Temporada",
@@ -60,8 +56,6 @@ export const metadata: Metadata = {
     title: "Segunda Temporada",
   },
 };
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
 const jsonLd = {
   "@context": "https://schema.org",

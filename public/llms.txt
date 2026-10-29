@@ -27,10 +27,10 @@ Fãs de séries brasileiros que querem debater episódios específicos com outra
 
 ## URLs principais
 
-- https://segundatemporada.com.br — Página inicial com episódios em destaque
-- https://segundatemporada.com.br/series — Catálogo completo de séries
-- https://segundatemporada.com.br/debates — Séries mais comentadas agora
-- https://segundatemporada.com.br/em-breve — Próximas estreias
+- https://www.segundatemporada.com.br — Página inicial com episódios em destaque
+- https://www.segundatemporada.com.br/series — Catálogo completo de séries
+- https://www.segundatemporada.com.br/debates — Séries mais comentadas agora
+- https://www.segundatemporada.com.br/em-breve — Próximas estreias
 
 ## Tecnologia
 
@@ -41,4 +41,4 @@ Construído com Next.js, Supabase e dados de metadados fornecidos pelo TMDB (The
 - Instagram: https://www.instagram.com/asegundatemporada/
 - X (Twitter): https://x.com/s2temporada
 - TikTok: https://www.tiktok.com/@segunda.temporada3
-- Site: https://segundatemporada.com.br
+- Site: https://www.segundatemporada.com.br

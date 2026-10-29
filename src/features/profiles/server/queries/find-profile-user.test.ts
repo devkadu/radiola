@@ -9,6 +9,7 @@ vi.mock("@/server/database/session", () => ({ createClient: mocks.session }));
 
 import { findProfileUser } from "./find-profile-user";
 import { PublicProfileView } from "../../views/public-profile-view/public-profile-view";
+import { generateMetadata } from "../metadata/public-profile-view.metadata";
 
 const user = { id: "account-a", created_at: "2025-01-01", email: "private@example.test", user_metadata: { username: "fixture", profile_public: true } } as unknown as User;
 const directory = () => {
@@ -75,6 +76,22 @@ describe("indexed profile lookup", () => {
     mocks.getUserById.mockResolvedValue({ data: { user: { ...user, user_metadata: { username: "fixture", profile_public: false } } }, error: null });
     await PublicProfileView({ params: Promise.resolve({ username: "fixture" }) });
     expect(mocks.from).toHaveBeenCalledExactlyOnceWith("profile_directory");
+    expect(mocks.session).not.toHaveBeenCalled();
+  });
+
+  it("excludes private profiles from indexing without reading their activity", async () => {
+    mocks.getUserById.mockResolvedValue({ data: { user: { ...user, user_metadata: { username: "fixture", profile_public: false } } }, error: null });
+    const metadata = await generateMetadata({ params: Promise.resolve({ username: "fixture" }) });
+    expect(metadata.robots).toEqual({ index: false, follow: false });
+    expect(metadata.title).toBe("Perfil privado");
+    expect(mocks.session).not.toHaveBeenCalled();
+  });
+
+  it("uses the not-found boundary for an unknown profile during metadata generation", async () => {
+    lookup.maybeSingle.mockResolvedValue({ data: null, error: null });
+    await expect(generateMetadata({ params: Promise.resolve({ username: "unknown" }) }))
+      .rejects.toThrow("NEXT_HTTP_ERROR_FALLBACK;404");
+    expect(mocks.getUserById).not.toHaveBeenCalled();
     expect(mocks.session).not.toHaveBeenCalled();
   });
 });

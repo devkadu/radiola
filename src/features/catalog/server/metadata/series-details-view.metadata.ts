@@ -1,4 +1,5 @@
-import { getSeriesDetails } from "@/server/integrations/tmdb/requests/get-series-details";
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
+import { resolveSeriesPage } from "../queries/resolve-catalog-page";
 
 import type { Metadata } from "next";
 
@@ -6,13 +7,9 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
   const { slug } = await params;
-  const id = slug.split("-").pop()!;
-  const series = await getSeriesDetails(id).catch(() => null);
-  if (!series) return {};
+  const { series, path } = await resolveSeriesPage(slug);
 
   const description =
     series.overview?.slice(0, 155) ??
@@ -26,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: series.name,
     description,
-    alternates: { canonical: `${siteUrl}/series/${slug}` },
+    alternates: { canonical: `${siteUrl}${path}` },
     openGraph: {
       title: series.name,
       description,
@@ -40,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: image ? [image] : ["/opengraph-image"],
     },
   };
-}
+};
 
 export async function generateStaticParams() {
   const { supabase } = await import("@/server/database/public");

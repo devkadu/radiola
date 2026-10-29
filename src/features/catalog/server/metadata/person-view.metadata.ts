@@ -1,4 +1,4 @@
-
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
 
 import { getPersonDetails } from "@/server/integrations/tmdb/requests/get-person-details";
 
@@ -7,8 +7,6 @@ import type { Metadata } from "next";
 interface Props {
   params: Promise<{ id: string }>;
 }
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;

@@ -1,7 +1,7 @@
-import { withCatalogNotFound } from "@/features/catalog/server/queries/with-catalog-not-found";
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
+import { resolveSeriesPage } from "@/features/catalog/server/queries/resolve-catalog-page";
 import { getSeasonDetails } from "@/server/integrations/tmdb/requests/get-season-details";
 import { getSeriesCredits } from "@/server/integrations/tmdb/requests/get-series-credits";
-import { getSeriesDetails } from "@/server/integrations/tmdb/requests/get-series-details";
 import { getWatchProviders } from "@/server/integrations/tmdb/requests/get-watch-providers";
 import type { WatchProviders } from "@/server/integrations/tmdb/schemas";
 import { serializeJsonLd } from "@/shared/utils/serialize-json-ld";
@@ -22,7 +22,6 @@ import Image from "@/shared/components/image/image";
 
 import Link from "next/link";
 
-
 interface CastMember {
   id: number;
   name: string;
@@ -34,12 +33,10 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
-
-export async function SeriesDetailsView({ params }: Props) {
-  const { slug } = await params;
-  const id = slug.split("-").pop()!;
-  const series = await withCatalogNotFound(getSeriesDetails(id));
+export const SeriesDetailsView = async ({ params }: Props) => {
+  const { slug: requestedSlug } = await params;
+  const { series, slug, id: seriesId } = await resolveSeriesPage(requestedSlug);
+  const id = String(seriesId);
 
   const seasons = series.seasons?.filter((s) => s.season_number > 0) ?? [];
   const initialSeason = seasons[0]
@@ -331,4 +328,4 @@ export async function SeriesDetailsView({ params }: Props) {
       </div>
     </main>
   );
-}
+};

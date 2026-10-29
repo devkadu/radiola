@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/shared/constants/site";
 import { requireUser } from "@/server/auth/auth";
 import { supabaseAdmin } from "@/server/database/admin";
 import { apiError } from "@/server/http/api-error";
@@ -10,7 +11,6 @@ import { z } from "zod";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = "Segunda Temporada <notificacoes@mail.segundatemporada.com.br>";
-const SITE_URL = "https://segundatemporada.com.br";
 
 function emailHtml(replierUsername: string, episodeTitle: string, episodeFullUrl: string, profileUrl: string) {
   const safeUsername = escapeHtml(replierUsername);

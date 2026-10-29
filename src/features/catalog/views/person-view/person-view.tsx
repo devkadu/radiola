@@ -1,3 +1,4 @@
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
 import { serializeJsonLd } from "@/shared/utils/serialize-json-ld";
 import Image from "@/shared/components/image/image";
 
@@ -10,12 +11,9 @@ import { notFound } from "next/navigation";
 
 import { seriesSlug as makeSlug } from "@/features/catalog/utils/slugs";
 
-
 interface Props {
   params: Promise<{ id: string }>;
 }
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
 export async function PersonView({ params }: Props) {
   const { id } = await params;

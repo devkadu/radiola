@@ -1,14 +1,7 @@
-import { withCatalogNotFound } from "@/features/catalog/server/queries/with-catalog-not-found";
-import { getEpisodeDetails } from "@/server/integrations/tmdb/requests/get-episode-details";
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
+import { resolveEpisodePage } from "@/features/catalog/server/queries/resolve-catalog-page";
 import { getEpisodeVideos } from "@/server/integrations/tmdb/requests/get-episode-videos";
-import { getSeriesDetails } from "@/server/integrations/tmdb/requests/get-series-details";
 import { serializeJsonLd } from "@/shared/utils/serialize-json-ld";
-
-import {
-idFromSeriesSlug,
-numberFromEpisodeSlug,
-numberFromSeasonSlug,
-} from "@/features/catalog/utils/slugs";
 
 import { EpisodeReactions } from "@/features/discussions/components/episode-reactions/episode-reactions";
 
@@ -33,12 +26,9 @@ import Image from "@/shared/components/image/image";
 
 import Link from "next/link";
 
-
 interface Props {
   params: Promise<{ slug: string; season: string; episode: string }>;
 }
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr + "T12:00:00")
@@ -50,17 +40,14 @@ function formatDate(dateStr: string) {
     .replace(/\s+de\s+/g, " ");
 }
 
-export async function EpisodeDetailsView({ params }: Props) {
-  const { slug, season: seasonParam, episode: episodeParam } = await params;
-  const seriesId = idFromSeriesSlug(slug);
-  const seasonNumber = numberFromSeasonSlug(seasonParam);
-  const episodeNumber = numberFromEpisodeSlug(episodeParam);
+export const EpisodeDetailsView = async ({ params }: Props) => {
+  const { slug: requestedSlug, season: requestedSeason, episode: requestedEpisode } = await params;
+  const { series, episode: ep, id, slug, seasonParam, episodeParam, seasonNumber, episodeNumber } = await resolveEpisodePage(requestedSlug, requestedSeason, requestedEpisode);
+  const seriesId = String(id);
 
   const computedEpisodeId = episodeId(seriesId, seasonNumber, episodeNumber);
 
-  const [series, ep, videos, reactionsResult, commentsResult] = await Promise.all([
-    withCatalogNotFound(getSeriesDetails(seriesId)),
-    withCatalogNotFound(getEpisodeDetails(seriesId, seasonNumber, episodeNumber)),
+  const [videos, reactionsResult, commentsResult] = await Promise.all([
     getEpisodeVideos(seriesId, seasonNumber, episodeNumber).catch(() => ({ results: [] })),
     supabase.from("episode_reactions").select("reaction_key").eq("episode_id", computedEpisodeId),
     supabase.from("comments").select("id", { count: "exact", head: true }).eq("episode_id", computedEpisodeId),
@@ -265,4 +252,4 @@ export async function EpisodeDetailsView({ params }: Props) {
 
     </main>
   );
-}
+};

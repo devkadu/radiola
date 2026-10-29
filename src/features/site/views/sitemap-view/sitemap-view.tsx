@@ -1,4 +1,4 @@
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://segundatemporada.com.br";
+import { SITE_URL as siteUrl } from "@/shared/constants/site";
 
 type Route = {
   path: string;
