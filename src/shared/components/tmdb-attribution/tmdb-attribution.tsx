@@ -1,8 +1,9 @@
 import tmdbLogo from "@/shared/assets/icons/tmdb-logo.svg";
 import Image from "next/image";
+import { LegalLinks } from "@/features/privacy/components/legal-links";
 
 export const TmdbAttribution = () => (
-  <footer className="border-t border-[var(--border)] px-4 py-1.5 flex items-center gap-2 mb-16 lg:mb-0 shrink-0">
+  <footer className="border-t border-[var(--border)] px-4 py-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 mb-16 lg:mb-0 shrink-0">
     <Image
       src={tmdbLogo}
       alt="The Movie Database"
@@ -13,5 +14,6 @@ export const TmdbAttribution = () => (
     <p className="text-[9px] text-[var(--text-muted)] leading-none">
       Dados fornecidos pelo TMDB. Não endossado pelo TMDB.
     </p>
+    <LegalLinks />
   </footer>
 );

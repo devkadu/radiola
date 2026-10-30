@@ -1,3 +1,4 @@
+import { getProfileUsername } from "@/features/profiles/functions/get-profile-username";
 import { SITE_URL } from "@/shared/constants/site";
 import { requireUser } from "@/server/auth/auth";
 import { supabaseAdmin } from "@/server/database/admin";
@@ -91,7 +92,7 @@ function emailHtml(replierUsername: string, episodeTitle: string, episodeFullUrl
 </html>`;
 }
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   try {
     const { user, supabase } = await requireUser();
     const { replyCommentId, episodeTitle, episodeUrl } = z.object({
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
     if (!reply?.parent_id) return NextResponse.json({ error: "Resposta não encontrada" }, { status: 404 });
 
     // 3. Username vem da sessão autenticada, não do body
-    const replierUsername = user.user_metadata?.username || user.email?.split("@")[0] || "alguém";
+    const replierUsername = getProfileUsername(user);
 
     // 4. Busca o comentário pai
     const { data: parent, error: parentError } = await supabaseAdmin
@@ -136,7 +137,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, reason: "sem email" });
     }
 
-    if (targetUser?.user_metadata?.notify_replies === false) {
+    if (targetUser?.user_metadata?.notify_replies !== true) {
       return NextResponse.json({ ok: false, reason: "notificações desativadas" });
     }
 

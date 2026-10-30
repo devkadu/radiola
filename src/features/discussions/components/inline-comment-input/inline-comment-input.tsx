@@ -1,4 +1,6 @@
 "use client";
+import { MAX_COMMENT_LENGTH } from "@/features/discussions/schemas/comment.schema";
+import { getProfileUsername } from "@/features/profiles/functions/get-profile-username";
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
 import { LoginSheet } from "@/features/auth/components/login-sheet/login-sheet";
 import { commentsService } from "@/features/discussions/api/comments.api";
@@ -11,7 +13,7 @@ interface InlineCommentInputProps {
   onCommentAdded?: () => void;
 }
 
-export function InlineCommentInput({ episodeId: epId, placeholder, onCommentAdded }: InlineCommentInputProps) {
+export const InlineCommentInput = ({ episodeId: epId, placeholder, onCommentAdded }: InlineCommentInputProps) => {
   const { user } = useAuth();
   const [expanded, setExpanded] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
@@ -20,7 +22,7 @@ export function InlineCommentInput({ episodeId: epId, placeholder, onCommentAdde
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "";
+  const username = user ? getProfileUsername(user) : "";
   const avatarUrl = user?.user_metadata?.avatar_url ?? null;
 
   const handleClick = () => {
@@ -40,7 +42,7 @@ export function InlineCommentInput({ episodeId: epId, placeholder, onCommentAdde
     setSubmitting(true);
     setError(null);
     try {
-      await commentsService.addComment(epId, user.id, username, avatarUrl, text.trim());
+      await commentsService.addComment(epId, user.id, text.trim());
       onCommentAdded?.();
       handleCancel();
     } catch (e: unknown) {
@@ -89,7 +91,8 @@ export function InlineCommentInput({ episodeId: epId, placeholder, onCommentAdde
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={placeholder ?? "Adicionar um comentário..."}
-            rows={3}
+            maxLength={MAX_COMMENT_LENGTH}
+        rows={3}
             className="w-full bg-[var(--bg-elevated)] border border-[var(--yellow)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] px-4 py-3 outline-none resize-none transition-colors"
           />
           {error && <p className="text-xs text-red-400">{error}</p>}

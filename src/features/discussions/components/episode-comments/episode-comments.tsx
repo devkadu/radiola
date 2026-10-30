@@ -1,4 +1,5 @@
 "use client";
+import { MAX_COMMENT_LENGTH } from "@/features/discussions/schemas/comment.schema";
 import { endpoints } from "@/shared/constants/endpoint";
 
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
@@ -56,14 +57,12 @@ interface ReplyBoxProps {
   onCancel: () => void;
 }
 
-function ReplyBox({ epId, parentId, parentUsername, episodeTitle, episodeUrl, onSubmit, onCancel }: ReplyBoxProps) {
+const ReplyBox = ({ epId, parentId, parentUsername, episodeTitle, episodeUrl, onSubmit, onCancel }: ReplyBoxProps) => {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "";
-  const avatarUrl = user?.user_metadata?.avatar_url ?? null;
 
   useEffect(() => {
     textareaRef.current?.focus();
@@ -74,7 +73,7 @@ function ReplyBox({ epId, parentId, parentUsername, episodeTitle, episodeUrl, on
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const comment = await commentsService.addComment(epId, user.id, username, avatarUrl, text.trim(), parentId);
+      const comment = await commentsService.addComment(epId, user.id, text.trim(), parentId);
       onSubmit(comment);
       setText("");
       // Dispara notificação de resposta em background (sem bloquear a UI)
@@ -104,6 +103,7 @@ function ReplyBox({ epId, parentId, parentUsername, episodeTitle, episodeUrl, on
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Escreva sua resposta..."
+        maxLength={MAX_COMMENT_LENGTH}
         rows={3}
         className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] focus:border-[var(--yellow)] rounded-xl text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] px-3 py-2 outline-none resize-none transition-colors"
       />

@@ -9,20 +9,25 @@ interface Props {
   episodeId: string;
 }
 
-function Star({ filled, hovered, onClick, onEnter, onLeave, size = 32 }: {
+const Star = ({ filled, hovered, onClick, onEnter, onLeave, disabled, label, size = 32 }: {
   filled: boolean;
   hovered: boolean;
   onClick: () => void;
   onEnter: () => void;
   onLeave: () => void;
+  disabled: boolean;
+  label: string;
   size?: number;
-}) {
+}) => {
   const active = filled || hovered;
   return (
     <button
       onClick={onClick}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
+      disabled={disabled}
+      aria-label={label}
+      aria-pressed={filled}
       className="p-1 transition-transform hover:scale-110 active:scale-95"
     >
       <svg width={size} height={size} viewBox="0 0 24 24" fill={active ? "var(--yellow)" : "none"} stroke={active ? "var(--yellow)" : "var(--border)"} strokeWidth="1.5" strokeLinejoin="round">
@@ -41,37 +46,43 @@ export const EpisodeReactions = ({ episodeId }: Props) => {
   const [submitting, setSubmitting] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [readError, setReadError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const userId = user?.id;
+  const loadKey = `${episodeId}:${userId ?? ""}`;
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
 
   useEffect(() => {
+    let active = true;
     const fetchData = async () => {
-      const supabase = createClient();
-
-      const { data: all } = await supabase
-        .from("episode_reactions")
-        .select("reaction_key")
-        .eq("episode_id", episodeId);
-
-      const nums = (all ?? [])
-        .map((r) => parseInt(r.reaction_key))
-        .filter((n) => !isNaN(n) && n >= 1 && n <= 5);
-      setRatings(nums);
-
-      if (user) {
-        const { data: mine } = await supabase
-          .from("episode_reactions")
-          .select("reaction_key")
-          .eq("episode_id", episodeId)
-          .eq("user_id", user.id)
-          .maybeSingle();
-        const n = mine ? parseInt(mine.reaction_key) : NaN;
-        setUserRating(!isNaN(n) && n >= 1 && n <= 5 ? n : null);
+      try {
+        const supabase = createClient();
+        const [all, mine] = await Promise.all([
+          supabase.from("episode_reactions").select("reaction_key").eq("episode_id", episodeId),
+          userId
+            ? supabase.from("episode_reactions").select("reaction_key").eq("episode_id", episodeId).eq("user_id", userId).maybeSingle()
+            : Promise.resolve({ data: null, error: null }),
+        ]);
+        if (all.error || mine.error) throw all.error ?? mine.error;
+        if (!active) return;
+        const nums = (all.data ?? []).map((r) => Number(r.reaction_key))
+          .filter((n) => Number.isInteger(n) && n >= 1 && n <= 5);
+        const n = Number(mine.data?.reaction_key);
+        setRatings(nums);
+        setUserRating(Number.isInteger(n) && n >= 1 && n <= 5 ? n : null);
+        setReadError(false);
+      } catch {
+        if (active) setReadError(true);
+      } finally {
+        if (active) {
+          setLoadedKey(loadKey);
+          setLoading(false);
+        }
       }
-
-      setLoading(false);
     };
-
-    fetchData();
-  }, [episodeId, user]);
+    void fetchData();
+    return () => { active = false; };
+  }, [episodeId, userId, loadKey, attempt]);
 
   const handleRate = async (star: number) => {
     if (!user) { setShowLoginPrompt(true); return; }
@@ -119,9 +130,19 @@ export const EpisodeReactions = ({ episodeId }: Props) => {
 
   const total = ratings.length;
   const avg = total === 0 ? 0 : ratings.reduce((a, b) => a + b, 0) / total;
-  if (loading) {
+  if (loading || loadedKey !== loadKey) {
     return <div className="h-24 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl animate-pulse" />;
   }
+
+  if (readError) return (
+    <div role="alert" className="py-4 text-sm text-[var(--text-muted)]">
+      <p>Não foi possível carregar as avaliações.</p>
+      <button className="mt-2 text-[var(--yellow)] underline" onClick={() => {
+        setLoading(true);
+        setAttempt((value) => value + 1);
+      }}>Tentar novamente</button>
+    </div>
+  );
 
   return (
     <>
@@ -146,6 +167,8 @@ export const EpisodeReactions = ({ episodeId }: Props) => {
               onClick={() => handleRate(star)}
               onEnter={() => setHovered(star)}
               onLeave={() => {}}
+              disabled={submitting}
+              label={`Avaliar com ${star} de 5 estrelas`}
             />
           ))}
           {userRating && (

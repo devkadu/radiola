@@ -1,4 +1,5 @@
 "use client";
+import { getProfileUsername } from "@/features/profiles/functions/get-profile-username";
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
 import { favoritesService } from "@/features/progress/api/favorites.api";
 import { useSearchOverlay } from "@/features/search/components/search-provider/search-provider.client";
@@ -58,7 +59,7 @@ export const Sidebar = () => {
       setSigningOut(false);
     }
   };
-  const username = user?.user_metadata?.username || user?.email?.split("@")[0];
+  const username = user ? getProfileUsername(user) : "";
   const avatarUrl = user?.user_metadata?.avatar_url ?? user?.user_metadata?.picture ?? null;
   const initials = username?.slice(0, 2).toUpperCase();
   const { data: favorites = [] } = useQuery<Favorite[]>({

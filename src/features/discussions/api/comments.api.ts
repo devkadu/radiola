@@ -1,4 +1,5 @@
 import { createClient } from "@/shared/lib/supabase-browser";
+import { commentInputSchema } from "../schemas/comment.schema";
 
 export interface Comment {
   id: string;
@@ -12,36 +13,35 @@ export interface Comment {
 }
 
 export const commentsService = {
-  async getComments(epId: string): Promise<Comment[]> {
+  getComments: async (epId: string): Promise<Comment[]> => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("comments")
-      .select("*")
+      .select("id, user_id, username, avatar_url, text, likes, created_at, parent_id")
       .eq("episode_id", epId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true }).order("id");
     if (error) throw error;
     return data ?? [];
   },
 
-  async addComment(
+  addComment: async (
     epId: string,
     userId: string,
-    username: string,
-    avatarUrl: string | null,
     text: string,
     parentId?: string | null,
-  ): Promise<Comment> {
+  ): Promise<Comment> => {
+    const input = commentInputSchema.parse({ episode_id: epId, user_id: userId, text, parent_id: parentId ?? null });
     const supabase = createClient();
     const { data, error } = await supabase
       .from("comments")
-      .insert({ episode_id: epId, user_id: userId, username, avatar_url: avatarUrl, text, parent_id: parentId ?? null })
+      .insert(input)
       .select()
       .single();
     if (error) throw error;
     return data;
   },
 
-  async deleteComment(id: string): Promise<void> {
+  deleteComment: async (id: string): Promise<void> => {
     const supabase = createClient();
     const { error } = await supabase.from("comments").delete().eq("id", id);
     if (error) throw error;

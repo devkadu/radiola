@@ -10,10 +10,10 @@ export const getProfileIdentity = (user: User): ProfileIdentity => {
     createdAt: user.created_at,
     avatarUrl: typeof metadata.avatar_url === "string" ? metadata.avatar_url : null,
     preferences: {
-      notify_replies: metadata.notify_replies !== false,
+      notify_replies: metadata.notify_replies === true,
       notify_weekly: metadata.notify_weekly === true,
-      notify_premiere: metadata.notify_premiere !== false,
-      profile_public: metadata.profile_public !== false,
+      notify_premiere: metadata.notify_premiere === true,
+      profile_public: metadata.profile_public === true,
     },
   };
 };

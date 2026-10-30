@@ -7,8 +7,10 @@ interface Props {
   title: string;
 }
 
-export function VideoPlayButton({ youtubeKey, title }: Props) {
+export const VideoPlayButton = ({ youtubeKey, title }: Props) => {
   const [open, setOpen] = useState(false);
+  const [loadPlayer, setLoadPlayer] = useState(false);
+  const close = () => { setOpen(false); setLoadPlayer(false); };
 
   return (
     <>
@@ -27,24 +29,34 @@ export function VideoPlayButton({ youtubeKey, title }: Props) {
       {open && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 px-4"
-          onClick={() => setOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Trailer: ${title}`}
+          onClick={close}
+          onKeyDown={(event) => { if (event.key === "Escape") close(); }}
         >
           <div className="relative w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => setOpen(false)}
+              onClick={close}
               className="absolute -top-10 right-0 text-white/70 hover:text-white text-3xl leading-none"
               aria-label="Fechar"
             >
               ×
             </button>
-            <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-              <iframe
-                src={`https://www.youtube.com/embed/${youtubeKey}?autoplay=1&rel=0`}
+            <div className={`relative w-full rounded-xl overflow-hidden${loadPlayer ? " aspect-video" : ""}`}>
+              {loadPlayer ? <iframe
+                src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(youtubeKey)}?autoplay=1&rel=0`}
                 title={title}
+                referrerPolicy="strict-origin-when-cross-origin"
                 allow="autoplay; encrypted-media; fullscreen"
                 allowFullScreen
                 className="absolute inset-0 w-full h-full"
-              />
+              /> : <div className="h-full flex flex-col justify-center items-center gap-4 bg-[var(--bg-surface)] p-6 text-center">
+                <p className="text-white">Este trailer é carregado pelo YouTube.</p>
+                <p className="max-w-md text-sm text-white/70">Ao carregar o vídeo, seu navegador se conecta ao Google, que pode tratar dados técnicos e usar armazenamento próprio.</p>
+                <a href="/cookies" className="text-sm text-[var(--yellow)] underline">Sobre conteúdo externo</a>
+                <button autoFocus onClick={() => setLoadPlayer(true)} className="rounded-lg bg-[var(--yellow)] px-4 py-2 font-semibold text-black">Carregar vídeo do YouTube</button>
+              </div>}
             </div>
           </div>
         </div>

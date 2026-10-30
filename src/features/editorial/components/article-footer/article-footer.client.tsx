@@ -12,7 +12,7 @@ interface Props {
   articleUrl: string;
 }
 
-export function ArticleFooter({ articleId, articleTitle, articleUrl }: Props) {
+export const ArticleFooter = ({ articleId, articleTitle, articleUrl }: Props) => {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -20,8 +20,6 @@ export function ArticleFooter({ articleId, articleTitle, articleUrl }: Props) {
   const [copied, setCopied] = useState(false);
 
   const commentId = `article-${articleId}`;
-  const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "";
-  const avatarUrl = user?.user_metadata?.avatar_url ?? null;
 
   const handleShare = async () => {
     const url = `${window.location.origin}${articleUrl}`;
@@ -38,7 +36,7 @@ export function ArticleFooter({ articleId, articleTitle, articleUrl }: Props) {
     if (!text.trim() || !user || submitting) return;
     setSubmitting(true);
     try {
-      await commentsService.addComment(commentId, user.id, username, avatarUrl, text.trim());
+      await commentsService.addComment(commentId, user.id, text.trim());
       setText("");
       setRefreshKey((k) => k + 1);
     } finally {

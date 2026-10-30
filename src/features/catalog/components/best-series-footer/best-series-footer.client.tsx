@@ -14,7 +14,7 @@ interface Props {
   pageTitle: string;
 }
 
-export function MelhoresFooter({ plataforma, platformName, pageUrl, pageTitle }: Props) {
+export const MelhoresFooter = ({ plataforma, platformName, pageUrl, pageTitle }: Props) => {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -23,8 +23,6 @@ export function MelhoresFooter({ plataforma, platformName, pageUrl, pageTitle }:
   const [refreshKey, setRefreshKey] = useState(0);
 
   const commentId = `melhores-${plataforma}`;
-  const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "";
-  const avatarUrl = user?.user_metadata?.avatar_url ?? null;
 
   const handleShare = async () => {
     const url = `${window.location.origin}${pageUrl}`;
@@ -41,7 +39,7 @@ export function MelhoresFooter({ plataforma, platformName, pageUrl, pageTitle }:
     if (!text.trim() || !user || submitting) return;
     setSubmitting(true);
     try {
-      await commentsService.addComment(commentId, user.id, username, avatarUrl, text.trim());
+      await commentsService.addComment(commentId, user.id, text.trim());
       setText("");
       setRefreshKey((k) => k + 1);
     } finally {
