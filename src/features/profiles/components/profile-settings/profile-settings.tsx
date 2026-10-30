@@ -4,6 +4,7 @@ import { FaArrowLeft,FaPencil } from "react-icons/fa6";
 import type { useAvatarUpload } from "../../hooks/use-avatar-upload";
 import type { useProfileSettings } from "../../hooks/use-profile-settings";
 import { ProfileToggle } from "../profile-toggle/profile-toggle";
+import { PrivacyContact } from "@/features/privacy/components/privacy-contact";
 interface Props { username: string; avatar: ReturnType<typeof useAvatarUpload>; settings: ReturnType<typeof useProfileSettings>; onBack: () => void; onSignOut: () => void; signingOut: boolean; }
 export const ProfileSettings = ({ username, avatar, settings, onBack, onSignOut, signingOut }: Props) => {
  const { fileRef, avatarUrl, uploading, error, handleFileChange } = avatar;
@@ -60,7 +61,7 @@ export const ProfileSettings = ({ username, avatar, settings, onBack, onSignOut,
           <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Privacidade</p>
           <ProfileToggle
             label="Perfil público"
-            desc="Outros usuários podem ver seus comentários e séries favoritas"
+            desc="Exibe a página com favoritos e atividade recente. Comentários, notas e relações de seguidores continuam públicos mesmo com o perfil privado."
             value={preferences.profile_public}
             onToggle={() => toggle("profile_public")} disabled={settings.pending}
           />
@@ -90,6 +91,7 @@ export const ProfileSettings = ({ username, avatar, settings, onBack, onSignOut,
         </div>
 
         {settings.error && <p role="alert" className="text-red-400 mb-3">Não foi possível salvar. Tente novamente.</p>}
+        <PrivacyContact />
         {/* Sair */}
         <button
           onClick={onSignOut}

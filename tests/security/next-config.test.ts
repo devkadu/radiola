@@ -29,5 +29,7 @@ it.each(["development", "production", "test"] as const)(
     expect(directives.get("script-src")).not.toContain("data:");
     expect(directives.get("object-src")).toEqual(["'none'"]);
     expect(directives.get("frame-ancestors")).toEqual(["'none'"]);
+    expect(policy).not.toMatch(/googletagmanager|google-analytics\.com/);
+    expect(directives.get("frame-src")).toEqual(["https://www.youtube-nocookie.com"]);
   },
 );

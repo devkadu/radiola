@@ -9,6 +9,22 @@ const loginAsFixture = async (page: Page) => {
   await expect(page.getByRole("heading", { name: /Olá, fixture/ })).toBeVisible();
 };
 
+test("privacy information is public, reachable and does not load audience trackers", async ({ page }) => {
+  const externalTracking: string[] = [];
+  page.on("request", (request) => {
+    if (/google-analytics\.com|googletagmanager\.com/.test(request.url())) externalTracking.push(request.url());
+  });
+  await page.goto("/privacidade");
+  await expect(page.getByRole("heading", { name: "Política de privacidade", exact: true })).toBeVisible();
+  await expect(page.getByText(/Carlos Eduardo Batista dos Santos/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "contato@segundatemporada.com.br", exact: true }).first()).toHaveAttribute("href", /^mailto:/);
+  await page.getByRole("navigation", { name: "Informações legais" }).getByRole("link", { name: "Cookies", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Cookies e conteúdo externo", exact: true })).toBeVisible();
+  await page.getByRole("navigation", { name: "Informações legais" }).getByRole("link", { name: "Termos de uso", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Termos de uso", exact: true })).toBeVisible();
+  expect(externalTracking).toEqual([]);
+});
+
 test("public profiles use one indexed lookup and private profiles expose no activity", async ({ request }) => {
   const history = async () => (await (await request.get("http://127.0.0.1:15432/__fixture__/requests")).json()) as { pathname: string }[];
   const start = (await history()).length;

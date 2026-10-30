@@ -1,4 +1,5 @@
 "use client";
+import { getProfileUsername } from "@/features/profiles/functions/get-profile-username";
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
 import { ProfileQuickActions } from "@/features/profiles/components/profile-quick-actions/profile-quick-actions";
 import { ROUTES } from "@/shared/constants/routes";
@@ -19,7 +20,7 @@ export const BottonNavigator = () => {
   const { user } = useAuth();
 
   const avatarUrl = user?.user_metadata?.avatar_url ?? user?.user_metadata?.picture ?? null;
-  const username = user?.user_metadata?.username || user?.email?.split("@")[0] || "";
+  const username = user ? getProfileUsername(user) : "";
   const initials = username.slice(0, 2).toUpperCase();
 
   const tabs = [

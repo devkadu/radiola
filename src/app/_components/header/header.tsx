@@ -1,4 +1,5 @@
 "use client";
+import { getProfileUsername } from "@/features/profiles/functions/get-profile-username";
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
 import { useSearchOverlay } from "@/features/search/components/search-provider/search-provider.client";
 import { useCatalogSearch } from "@/features/search/hooks/use-catalog-search";
@@ -31,7 +32,7 @@ export const Header = () => {
   const router = useRouter();
   const { user } = useAuth();
   const { open } = useSearchOverlay();
-  const username = user?.user_metadata?.username || user?.email?.split("@")[0];
+  const username = user ? getProfileUsername(user) : "";
   const initials = username?.slice(0, 2).toUpperCase();
   const avatarUrl = user?.user_metadata?.avatar_url ?? user?.user_metadata?.picture ?? null;
 

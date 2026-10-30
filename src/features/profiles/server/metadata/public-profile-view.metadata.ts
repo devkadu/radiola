@@ -9,7 +9,7 @@ interface Props {
 export const generateMetadata = async ({ params }: Props): Promise<Metadata> => {
   const { username } = await params;
   const user = await getPublicProfileUser(username);
-  const isPublic = user.user_metadata?.profile_public !== false;
+  const isPublic = user.user_metadata?.profile_public === true;
   return {
     title: isPublic ? username : "Perfil privado",
     description: isPublic

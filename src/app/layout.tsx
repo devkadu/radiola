@@ -5,7 +5,6 @@ import { AuthProvider } from "@/features/auth/components/auth-provider/auth-prov
 import "@/shared/styles/globals.css";
 import { socialPreviewMetadata } from "@/shared/constants/social-preview";
 import { serializeJsonLd } from "@/shared/utils/serialize-json-ld";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata,Viewport } from "next";
 import localFont from "next/font/local";
 
@@ -87,7 +86,7 @@ const jsonLd = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="pt-BR">
       <body
@@ -102,8 +101,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <NavigationProgress />
           <AuthProvider>{children}</AuthProvider>
         </Providers>
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
       </body>
     </html>
   );
 }
+
+export default RootLayout;

@@ -68,6 +68,11 @@ export const getSitemapEntries = async (): Promise<MetadataRoute.Sitemap> => {
 
   const entries: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, priority: 1, changeFrequency: "daily" },
+    ...["privacidade", "cookies", "termos"].map((page) => ({
+      url: `${SITE_URL}/${page}`,
+      priority: 0.3,
+      changeFrequency: "monthly" as const,
+    })),
     ...["series", "comunidade", "debates", "em-breve"].map((page) => ({
       url: `${SITE_URL}/${page}`,
       priority: 0.8,

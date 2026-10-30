@@ -57,7 +57,7 @@ export const PublicProfileView = async ({ params }: Props) => {
   const { username } = await params;
   const target = await getPublicProfileUser(username);
 
-  if (target.user_metadata?.profile_public === false) {
+  if (target.user_metadata?.profile_public !== true) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-[var(--text-muted)]">
         <p className="text-4xl">🔒</p>

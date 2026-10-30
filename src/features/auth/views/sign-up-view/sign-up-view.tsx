@@ -9,8 +9,14 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/shared/lib/supabase-browser";
 
 import { OAuthButtons } from "@/features/auth/components/o-auth-buttons/o-auth-buttons";
+import { z } from "zod";
 
-export function SignUpView() {
+const signupSchema = z.object({
+  username: z.string().trim().min(3).max(30).regex(/^[a-zA-Z0-9_-]+$/),
+  password: z.string().min(12).max(128),
+});
+
+export const SignUpView = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -26,8 +32,9 @@ export function SignUpView() {
     setError("");
     setLoading(true);
 
-    if (password.length < 6) {
-      setError("A senha precisa ter pelo menos 6 caracteres.");
+    const parsed = signupSchema.safeParse({ username, password });
+    if (!parsed.success) {
+      setError("Use um nome de 3 a 30 letras, números, hífens ou sublinhados e uma senha de 12 a 128 caracteres.");
       setLoading(false);
       return;
     }
@@ -37,13 +44,21 @@ export function SignUpView() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { username } },
+        options: { data: {
+          username: parsed.data.username,
+          profile_public: false,
+          notify_replies: false,
+          notify_weekly: false,
+          notify_premiere: false,
+        } },
       });
 
       if (error) {
         setError(error.message === "User already registered"
           ? "Este e-mail já está cadastrado."
-          : error.message || "Erro ao criar conta. Tente novamente.");
+          : error.message === "Database error saving new user"
+            ? "Não foi possível criar a conta. Tente outro nome de usuário ou entre em contato."
+            : error.message || "Erro ao criar conta. Tente novamente.");
         return;
       }
 
@@ -125,6 +140,10 @@ export function SignUpView() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="seunome"
+              minLength={3}
+              maxLength={30}
+              pattern="[a-zA-Z0-9_-]+"
+              autoComplete="username"
               required
               className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--yellow)] transition-colors"
             />
@@ -148,7 +167,10 @@ export function SignUpView() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="mínimo 6 caracteres"
+              placeholder="mínimo 12 caracteres"
+              minLength={12}
+              maxLength={128}
+              autoComplete="new-password"
               required
               className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--yellow)] transition-colors"
             />
@@ -168,6 +190,12 @@ export function SignUpView() {
             {loading ? "Criando conta..." : "Criar conta grátis"}
           </button>
         </form>
+
+        <p className="text-xs leading-5 text-[var(--text-muted)]">
+          Ao criar sua conta, inclusive pelo Google, você aceita os <Link href="/termos" className="underline">termos de uso</Link>.
+          Consulte a <Link href="/privacidade" className="underline">política de privacidade</Link> para saber como seus dados são usados.
+          O perfil começa privado; publicações na comunidade são públicas.
+        </p>
 
         {/* Divisor */}
         <div className="flex items-center gap-3">

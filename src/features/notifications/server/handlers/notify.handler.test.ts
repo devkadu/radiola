@@ -37,9 +37,18 @@ it("rejects external or protocol-relative links", async () => {
 it("uses the persisted parent and idempotency key and exposes a provider failure", async () => {
   mocks.from.mockReturnValueOnce(chain({ data: { parent_id: parentId, episode_id: "700-s1-e1" }, error: null }))
     .mockReturnValueOnce(chain({ data: { user_id: "recipient", episode_id: "700-s1-e1" }, error: null }));
-  mocks.getUserById.mockResolvedValue({ data: { user: { email: "recipient@example.test", user_metadata: {} } }, error: null });
+  mocks.getUserById.mockResolvedValue({ data: { user: { email: "recipient@example.test", user_metadata: { notify_replies: true } } }, error: null });
   mocks.send.mockResolvedValue({ data: null, error: { message: "unavailable" } });
   const response = await POST(request({ type: "reply", replyCommentId: replyId, episodeUrl: "/series/test-700" }));
   expect(response.status).toBe(500);
   expect(mocks.send).toHaveBeenCalledWith(expect.objectContaining({ to: "recipient@example.test" }), { idempotencyKey: `reply/${replyId}` });
+});
+
+it.each([{}, { notify_replies: false }, { notify_replies: "true" }])("does not send optional email without an explicit opt-in: %j", async (preferences) => {
+  mocks.from.mockReturnValueOnce(chain({ data: { parent_id: parentId, episode_id: "700-s1-e1" }, error: null }))
+    .mockReturnValueOnce(chain({ data: { user_id: "recipient", episode_id: "700-s1-e1" }, error: null }));
+  mocks.getUserById.mockResolvedValue({ data: { user: { email: "recipient@example.test", user_metadata: preferences } }, error: null });
+  const response = await POST(request({ type: "reply", replyCommentId: replyId }));
+  expect(response.status).toBe(200);
+  expect(mocks.send).not.toHaveBeenCalled();
 });

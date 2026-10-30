@@ -1,4 +1,6 @@
 "use client";
+import { MAX_COMMENT_LENGTH } from "@/features/discussions/schemas/comment.schema";
+import { commentsService } from "@/features/discussions/api/comments.api";
 
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
 import { createClient } from "@/shared/lib/supabase-browser";
@@ -37,7 +39,7 @@ export function WatchedBottomSheet(props: Props) {
   return props.open ? <WatchedBottomSheetContent key={props.episodeId} {...props} /> : null;
 }
 
-function WatchedBottomSheetContent({ open, episodeId, seriesName, episodeLabel, onClose }: Props) {
+const WatchedBottomSheetContent = ({ open, episodeId, seriesName, episodeLabel, onClose }: Props) => {
   const { user } = useAuth();
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
@@ -66,16 +68,15 @@ function WatchedBottomSheetContent({ open, episodeId, seriesName, episodeLabel, 
   const sendComment = async () => {
     if (!user || !comment.trim() || sending) return;
     setSending(true);
-    const supabase = createClient();
-    const { error } = await supabase.from("comments").insert({
-      user_id: user.id,
-      episode_id: episodeId,
-      text: comment.trim(),
-      username: user.user_metadata?.username ?? user.email?.split("@")[0] ?? "usuário",
-      avatar_url: user.user_metadata?.avatar_url ?? null,
-    });
-    setSending(false);
-    if (error) { setError("Não foi possível salvar seu comentário."); return; }
+    try {
+      setError(null);
+      await commentsService.addComment(episodeId, user.id, comment.trim());
+    } catch {
+      setError("Não foi possível salvar seu comentário.");
+      return;
+    } finally {
+      setSending(false);
+    }
     onClose(); // fecha ao enviar
   };
 
@@ -147,6 +148,7 @@ function WatchedBottomSheetContent({ open, episodeId, seriesName, episodeLabel, 
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendComment()}
+            maxLength={MAX_COMMENT_LENGTH}
             placeholder="o que achou desse episódio?"
             className="flex-1 bg-transparent text-sm text-white placeholder-white/25 outline-none"
           />

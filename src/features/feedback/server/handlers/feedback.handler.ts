@@ -1,3 +1,4 @@
+import { getProfileUsername } from "@/features/profiles/functions/get-profile-username";
 import { requireUser } from "@/server/auth/auth";
 import { apiError } from "@/server/http/api-error";
 import { readJson } from "@/server/http/read-json";
@@ -11,11 +12,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = "Segunda Temporada <notificacoes@mail.segundatemporada.com.br>";
 const TO = "contato@segundatemporada.com.br";
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   try {
     const { user } = await requireUser();
     const { message } = z.object({ message: z.string().trim().min(10).max(1000) }).strict().parse(await readJson(request));
-    const username = user.user_metadata?.username || user.email?.split("@")[0] || "Anônimo";
+    const username = getProfileUsername(user);
     const email = user.email ?? "—";
 
     const { error: sendError } = await resend.emails.send({

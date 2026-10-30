@@ -2,6 +2,7 @@ import { AppMark } from "@/shared/components/icons/app-mark/app-mark";
 import { ROUTES } from "@/shared/constants/routes";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LegalLinks } from "@/features/privacy/components/legal-links";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -14,7 +15,7 @@ const perks = [
   { emoji: "👥", text: "Encontre quem assiste o que você assiste" },
 ];
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen flex">
       {/* Lado esquerdo — branding (só desktop) */}
@@ -76,7 +77,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <div className="flex-1 flex items-center justify-center px-6 py-10">{children}</div>
+        <footer className="px-6 pb-6"><LegalLinks /></footer>
       </div>
     </div>
   );
 }
+
+export default AuthLayout;
