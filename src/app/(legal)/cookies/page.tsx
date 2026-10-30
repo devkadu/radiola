@@ -15,9 +15,17 @@ const CookiesPage = () => (
       A infraestrutura pode utilizar mecanismos estritamente necessários à segurança e entrega das páginas.
     </p></section>
     <section><h2>Medição de audiência</h2><p>
-      Nesta versão não carregamos Google Analytics nem scripts opcionais de medição de audiência
-      ou publicidade. Se introduzirmos essas tecnologias, informaremos finalidades, duração e escolhas
-      antes da ativação, obtendo consentimento quando exigido.
+      Usamos Vercel Web Analytics para contar visitas e entender quais páginas públicas são acessadas,
+      com relatórios agregados de origem, região aproximada, navegador e dispositivo. Essa medição
+      não utiliza cookies nem é vinculada à sua conta. Segundo a Vercel, o identificador técnico de
+      visita é descartado após 24 horas; isso não significa que os relatórios agregados sejam apagados
+      nesse prazo.
+    </p><p>
+      Excluímos páginas de login, conta, administração e perfis de usuários e removemos parâmetros de
+      busca e fragmentos das URLs enviadas. Não enviamos conteúdo de comentários nem dados de
+      cadastro como propriedades de análise. Não utilizamos Google Analytics ou publicidade
+      comportamental. Você pode solicitar esclarecimentos ou exercer seus direitos pelo contato
+      indicado na <Link href="/privacidade">política de privacidade</Link>.
     </p></section>
     <section><h2>Trailers do YouTube</h2><p>
       O player externo só é carregado depois de você escolher carregar o vídeo no aviso do trailer.

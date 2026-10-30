@@ -2,6 +2,7 @@ import { SITE_URL as siteUrl } from "@/shared/constants/site";
 import { NavigationProgress } from "@/app/_components/navigation-progress/navigation-progress";
 import { Providers } from "@/app/providers";
 import { AuthProvider } from "@/features/auth/components/auth-provider/auth-provider.client";
+import { WebAnalytics } from "@/features/privacy/components/web-analytics.client";
 import "@/shared/styles/globals.css";
 import { socialPreviewMetadata } from "@/shared/constants/social-preview";
 import { serializeJsonLd } from "@/shared/utils/serialize-json-ld";
@@ -101,6 +102,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
           <NavigationProgress />
           <AuthProvider>{children}</AuthProvider>
         </Providers>
+        {process.env.VERCEL_ENV === "production" && <WebAnalytics />}
       </body>
     </html>
   );

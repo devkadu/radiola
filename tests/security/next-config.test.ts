@@ -12,6 +12,8 @@ it.each(["development", "production", "test"] as const)(
     vi.resetModules();
     const { default: config } = await import("../../next.config");
     const routes = await config.headers!();
+    expect(routes[0].headers.find((header) => header.key === "Referrer-Policy")?.value)
+      .toBe("strict-origin");
     const policy = routes[0].headers.find(
       (header) => header.key === "Content-Security-Policy",
     )!.value;
