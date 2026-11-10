@@ -79,3 +79,38 @@ it("retains the account when a failed logout leaves its local session active", a
   expect(screen.queryByText("anonymous")).toBeNull();
   expect(screen.queryByRole("alert")).toBeNull();
 });
+
+const RefreshConsumer = () => {
+  const { user, refreshUser } = useAuth();
+  return <>
+    <p>{user?.user_metadata?.username ?? "anonymous"}</p>
+    <button onClick={() => { void refreshUser(); }}>Atualizar perfil</button>
+  </>;
+};
+
+it("refreshes the nick used by consumers without clearing the account cache", async () => {
+  const first = { id: "account-a", user_metadata: { username: "antigo" } } as unknown as User;
+  auth.getUser.mockResolvedValueOnce({ data: { user: first }, error: null })
+    .mockResolvedValueOnce({ data: { user: { ...first, user_metadata: { username: "novo" } } }, error: null });
+  const client = new QueryClient();
+  render(<QueryClientProvider client={client}><AuthProvider><RefreshConsumer /></AuthProvider></QueryClientProvider>);
+  await screen.findByText("antigo");
+  client.setQueryData(["profile", "account-a", "lists"], [{ name: "Minha lista" }]);
+  fireEvent.click(screen.getByRole("button", { name: "Atualizar perfil" }));
+  await screen.findByText("novo");
+  expect(client.getQueryData(["profile", "account-a", "lists"])).toEqual([{ name: "Minha lista" }]);
+});
+
+it("does not restore a signed-out account when a profile refresh finishes late", async () => {
+  const first = { id: "account-a", user_metadata: { username: "antigo" } } as unknown as User;
+  let finish!: (value: { data: { user: User }; error: null }) => void;
+  auth.getUser.mockResolvedValueOnce({ data: { user: first }, error: null })
+    .mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  render(<QueryClientProvider client={new QueryClient()}><AuthProvider><RefreshConsumer /></AuthProvider></QueryClientProvider>);
+  await screen.findByText("antigo");
+  fireEvent.click(screen.getByRole("button", { name: "Atualizar perfil" }));
+  act(() => auth.callback?.("SIGNED_OUT", null));
+  await screen.findByText("anonymous");
+  await act(async () => finish({ data: { user: first }, error: null }));
+  expect(screen.getByText("anonymous")).toBeTruthy();
+});

@@ -1,15 +1,38 @@
 "use client";
 import Image from "next/image";
+import { useState, type FormEvent } from "react";
 import { FaArrowLeft,FaPencil } from "react-icons/fa6";
 import type { useAvatarUpload } from "../../hooks/use-avatar-upload";
 import type { useProfileSettings } from "../../hooks/use-profile-settings";
 import { ProfileToggle } from "../profile-toggle/profile-toggle";
 import { PrivacyContact } from "@/features/privacy/components/privacy-contact";
+import { profileUsernameSchema } from "../../schemas/profile-settings.schema";
 interface Props { username: string; avatar: ReturnType<typeof useAvatarUpload>; settings: ReturnType<typeof useProfileSettings>; onBack: () => void; onSignOut: () => void; signingOut: boolean; }
 export const ProfileSettings = ({ username, avatar, settings, onBack, onSignOut, signingOut }: Props) => {
  const { fileRef, avatarUrl, uploading, error, handleFileChange } = avatar;
  const initials = username.slice(0, 2).toUpperCase();
  const { preferences, toggle } = settings;
+ const [draftUsername, setDraftUsername] = useState(username);
+ const [usernameError, setUsernameError] = useState("");
+ const [usernameSaved, setUsernameSaved] = useState(false);
+ const handleSaveUsername = async (event: FormEvent<HTMLFormElement>) => {
+   event.preventDefault();
+   if (settings.pending) return;
+   setUsernameSaved(false);
+   const parsed = profileUsernameSchema.safeParse(draftUsername);
+   if (!parsed.success) {
+     setUsernameError(parsed.error.issues[0].message);
+     return;
+   }
+   setUsernameError("");
+   try {
+     await settings.saveUsername(parsed.data);
+     setDraftUsername(parsed.data);
+     setUsernameSaved(true);
+   } catch {
+     // The mutation exposes the server error below.
+   }
+ };
     return (
       <main className="px-4 py-6 lg:py-10 max-w-lg pb-28 animate-in slide-in-from-bottom-4 duration-200">
         <div className="flex items-center gap-3 mb-6">
@@ -56,6 +79,36 @@ export const ProfileSettings = ({ username, avatar, settings, onBack, onSignOut,
           </div>
         </div>
 
+        <form onSubmit={handleSaveUsername} className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
+          <label htmlFor="profile-username" className="block text-sm font-bold text-[var(--text-primary)] mb-2">Nick (nome de usuário)</label>
+          <input
+            id="profile-username"
+            name="username"
+            type="text"
+            autoComplete="username"
+            autoCapitalize="none"
+            spellCheck={false}
+            value={draftUsername}
+            disabled={settings.pending}
+            aria-describedby="profile-username-hint profile-username-feedback"
+            aria-invalid={Boolean(usernameError)}
+            onChange={(event) => {
+              setDraftUsername(event.target.value);
+              setUsernameError("");
+              setUsernameSaved(false);
+            }}
+            className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50"
+          />
+          <p id="profile-username-hint" className="text-xs text-[var(--text-muted)] mt-2">Use de 3 a 30 letras sem acento, números, hífens ou sublinhados. Ao mudar o nick, o link do seu perfil também muda.</p>
+          <div id="profile-username-feedback">
+            {usernameError && <p role="alert" className="text-xs text-red-400 mt-2">{usernameError}</p>}
+            {usernameSaved && <p role="status" className="text-xs text-[var(--yellow)] mt-2">Nick atualizado!</p>}
+          </div>
+          <button type="submit" disabled={settings.pending || draftUsername.trim() === username} className="mt-3 px-4 py-2 rounded-lg bg-[var(--yellow)] text-black text-sm font-semibold disabled:opacity-50">
+            Salvar nick
+          </button>
+        </form>
+
         {/* Privacidade */}
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 mb-4">
           <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)] mb-1">Privacidade</p>
@@ -90,7 +143,7 @@ export const ProfileSettings = ({ username, avatar, settings, onBack, onSignOut,
           />
         </div>
 
-        {settings.error && <p role="alert" className="text-red-400 mb-3">Não foi possível salvar. Tente novamente.</p>}
+        {settings.error && <p role="alert" className="text-red-400 mb-3">{settings.error.message}</p>}
         <PrivacyContact />
         {/* Sair */}
         <button
