@@ -23,9 +23,9 @@ import { ProfileStats } from "../profile-stats/profile-stats";
 import { ProfileVisibilityBadge as BadgePublic } from "../profile-visibility-badge/profile-visibility-badge";
 export const ProfileClient = ({ profile, isAdmin }: { profile: ProfileIdentity; isAdmin?: boolean }) => {
  const { handleSignOut, signingOut, signOutError } = useSignOut();
- const username = profile.username;
  const avatar = useAvatarUpload(profile.id, profile.avatarUrl);
- const settings = useProfileSettings(profile.preferences);
+ const settings = useProfileSettings(profile.preferences, profile.username);
+ const username = settings.username;
  const isPublic = settings.preferences.profile_public;
  const [now] = useState(() => Date.now());
  const [editingProfile, setEditingProfile] = useState(false);

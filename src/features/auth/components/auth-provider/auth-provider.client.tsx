@@ -9,12 +9,14 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   signOut: async () => {},
+  refreshUser: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -67,8 +69,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    const { data, error } = await createClient().auth.getUser();
+    if (error) throw error;
+    // A profile refresh must not restore an account that has since signed out.
+    setUser((current) => current?.id === data.user?.id ? data.user : current);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signOut, refreshUser }}>
       {children}
       {signOutNotice && (
         <div role="alert" className="fixed bottom-24 left-4 right-4 z-50 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 text-sm shadow-lg lg:bottom-6 lg:left-auto lg:max-w-sm">

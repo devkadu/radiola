@@ -1,2 +1,24 @@
 # Local documentation and private reports must not be uploaded by the Vercel CLI.
 docs/
+
+# An explicit .vercelignore replaces .gitignore for CLI uploads.
+.env*
+!.env.example
+node_modules/
+.next/
+.next-check/
+.open-next/
+.wrangler/
+.vercel/
+.git/
+.agents/
+.codex/
+.aws/
+.claude/
+coverage/
+playwright-report/
+test-results/
+supabase/.temp/
+*.tsbuildinfo
+*.pem
+*-debug.log*

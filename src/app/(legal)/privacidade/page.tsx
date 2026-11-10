@@ -22,6 +22,7 @@ const PrivacyPage = () => (
       <li><strong>Preferências e foto:</strong> visibilidade do perfil, opções de e-mail e avatar enviado por você.</li>
       <li><strong>Atendimento:</strong> mensagens de feedback, pedidos sobre dados e denúncias, para responder e moderar a comunidade.</li>
       <li><strong>Dados técnicos:</strong> informações de conexão, como IP, navegador, horários e registros de erro, tratadas pela infraestrutura para entregar o site, prevenir abuso e investigar falhas.</li>
+      <li><strong>Audiência:</strong> estatísticas agregadas de visitas às páginas públicas, origem do acesso, região aproximada, navegador e tipo de dispositivo, por meio do Vercel Web Analytics, para entender o uso e melhorar o site. Não associamos essas estatísticas à sua conta.</li>
     </ul><p>Evite publicar documentos, endereço, telefone, informações sensíveis ou dados de outras pessoas em comentários e no perfil.</p></section>
     <section><h2>Fundamentos do tratamento</h2><p>
       Usamos os dados necessários à conta e às funções solicitadas para executar a relação de prestação
@@ -51,7 +52,7 @@ const PrivacyPage = () => (
     </p></section>
     <section><h2>Serviços que ajudam a operar o site</h2><ul>
       <li><strong>Supabase:</strong> autenticação, banco de dados e armazenamento de avatares.</li>
-      <li><strong>Vercel:</strong> hospedagem, entrega de páginas e registros técnicos de operação.</li>
+      <li><strong>Vercel:</strong> hospedagem, entrega de páginas, registros técnicos de operação e estatísticas agregadas de audiência.</li>
       <li><strong>Resend:</strong> entrega de e-mails e encaminhamento de feedback.</li>
       <li><strong>Google:</strong> autenticação, se você escolher esse login; YouTube, se decidir carregar um trailer.</li>
       <li><strong>TMDB:</strong> catálogo e imagens de séries. Requisições externas podem transmitir dados técnicos necessários ao carregamento.</li>
@@ -59,7 +60,10 @@ const PrivacyPage = () => (
       Esses serviços podem processar dados fora do Brasil, conforme sua infraestrutura e
       subcontratados. A região do banco não define o local de todo processamento. Você pode pedir
       informações sobre compartilhamento e transferências pelo nosso contato de privacidade.
-      Google Analytics e outros coletores opcionais de audiência não são carregados nesta versão.
+      O Vercel Web Analytics não utiliza cookies para medir audiência. Removemos parâmetros e
+      fragmentos das URLs enviadas e excluímos páginas de login, conta, administração e perfis de
+      usuários da medição. Não enviamos e-mail, nome de usuário ou identificador da conta como
+      propriedades de análise. Não utilizamos Google Analytics.
     </p></section>
     <section><h2>Por quanto tempo guardamos</h2><p>
       Mantemos o cadastro e a atividade enquanto necessários à conta e às funcionalidades utilizadas,

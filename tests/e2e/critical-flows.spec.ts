@@ -9,7 +9,7 @@ const loginAsFixture = async (page: Page) => {
   await expect(page.getByRole("heading", { name: /Olá, fixture/ })).toBeVisible();
 };
 
-test("privacy information is public, reachable and does not load audience trackers", async ({ page }) => {
+test("privacy information is public, reachable and does not load Google Analytics", async ({ page }) => {
   const externalTracking: string[] = [];
   page.on("request", (request) => {
     if (/google-analytics\.com|googletagmanager\.com/.test(request.url())) externalTracking.push(request.url());

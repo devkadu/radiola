@@ -5,9 +5,11 @@ const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
   from: vi.fn(),
   updateUser: vi.fn(),
+  directory: vi.fn(),
   getSeriesDetails: vi.fn(),
   cacheSeries: vi.fn(),
 }));
+vi.mock("@/server/database/admin", () => ({ supabaseAdmin: { from: mocks.directory } }));
 vi.mock("@/server/database/session", () => ({
   createClient: async () => ({
     auth: { getUser: mocks.getUser, updateUser: mocks.updateUser },
@@ -38,6 +40,8 @@ const query = (result: { data?: unknown; error: unknown; count?: number | null }
   const chain = {
     select: vi.fn(),
     eq: vi.fn(),
+    ilike: vi.fn(),
+    neq: vi.fn(),
     order: vi.fn(),
     insert: vi.fn(),
     delete: vi.fn(),
@@ -49,6 +53,8 @@ const query = (result: { data?: unknown; error: unknown; count?: number | null }
   for (const method of [
     chain.select,
     chain.eq,
+    chain.ilike,
+    chain.neq,
     chain.order,
     chain.insert,
     chain.delete,
@@ -67,6 +73,9 @@ beforeEach(() => {
   mocks.updateUser.mockResolvedValue({ error: null });
   mocks.from.mockImplementation(() => {
     throw new Error("Unexpected database access");
+  });
+  mocks.directory.mockImplementation(() => {
+    throw new Error("Unexpected directory access");
   });
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
@@ -264,6 +273,72 @@ describe("authenticated writes", () => {
     );
     expect(response.status).toBe(200);
     expect(mocks.updateUser).toHaveBeenCalledWith({ data: { profile_public: false } });
+    expect(mocks.directory).not.toHaveBeenCalled();
+  });
+
+  it.each(["", "ab", "a".repeat(31), "nome com espaço", "josé", "nome%"])(
+    "rejects an invalid nick before lookups or writes: %s", async (username) => {
+      const response = await updateSettings(request("/api/profile/settings", { username }, "PATCH"));
+      expect(response.status).toBe(400);
+      expect(mocks.directory).not.toHaveBeenCalled();
+      expect(mocks.updateUser).not.toHaveBeenCalled();
+    },
+  );
+
+  it("saves a trimmed nick for the session owner and treats underscores literally", async () => {
+    const lookup = query({ data: null, error: null });
+    mocks.directory.mockReturnValue(lookup);
+    const response = await updateSettings(request("/api/profile/settings", { username: "  Meu_nick-1  " }, "PATCH"));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(mocks.directory).toHaveBeenCalledWith("profile_directory");
+    expect(lookup.ilike).toHaveBeenCalledWith("username", "Meu\\_nick-1");
+    expect(lookup.neq).toHaveBeenCalledWith("user_id", userId);
+    expect(mocks.updateUser).toHaveBeenCalledWith({ data: { username: "Meu_nick-1" } });
+  });
+
+  it("requires a verified session to rename a profile", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: null }, error: new Error("Expired token") });
+    const response = await updateSettings(request("/api/profile/settings", { username: "new-nick" }, "PATCH"));
+    expect(response.status).toBe(401);
+    expect(mocks.directory).not.toHaveBeenCalled();
+    expect(mocks.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects an attempt to rename another account", async () => {
+    const response = await updateSettings(request("/api/profile/settings", { username: "new-nick", user_id: "another-user" }, "PATCH"));
+    expect(response.status).toBe(400);
+    expect(mocks.directory).not.toHaveBeenCalled();
+    expect(mocks.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("reports a conflicting nick without changing metadata", async () => {
+    const lookup = query({ data: { user_id: "another-user" }, error: null });
+    mocks.directory.mockReturnValue(lookup);
+    const response = await updateSettings(request("/api/profile/settings", { username: "Fixture" }, "PATCH"));
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({ error: "Este nick já está em uso. Escolha outro." });
+    expect(mocks.updateUser).not.toHaveBeenCalled();
+  });
+
+  it("reports a concurrent nick conflict after a rejected auth update", async () => {
+    const lookup = query({ data: null, error: null });
+    lookup.maybeSingle.mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: { user_id: "another-user" }, error: null });
+    mocks.directory.mockReturnValue(lookup);
+    mocks.updateUser.mockResolvedValue({ error: new Error("Database error updating user") });
+    const response = await updateSettings(request("/api/profile/settings", { username: "new-nick" }, "PATCH"));
+    expect(response.status).toBe(409);
+    expect(mocks.directory).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not save when nick availability cannot be checked", async () => {
+    const lookup = query({ data: null, error: new Error("Private database detail") });
+    mocks.directory.mockReturnValue(lookup);
+    const response = await updateSettings(request("/api/profile/settings", { username: "new-nick" }, "PATCH"));
+    expect(response.status).toBe(500);
+    expect(await response.text()).not.toContain("Private database detail");
+    expect(mocks.updateUser).not.toHaveBeenCalled();
   });
 
   it("does not report a rejected preference update as success", async () => {
