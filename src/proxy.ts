@@ -67,6 +67,18 @@ export const proxy = async (request: NextRequest) => {
     return NextResponse.next({ request });
   }
 
+  const hasSessionCookie = request.cookies.getAll().some((cookie) => cookie.name.startsWith("sb-"));
+
+  if (!hasSessionCookie) {
+    if (pathname.startsWith("/perfil")) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    if (pathname.startsWith("/admin")) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
