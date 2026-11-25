@@ -60,4 +60,51 @@ describe("declared bot protection", () => {
     );
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
+
+  it("blocks commercial SEO crawlers such as AhrefsBot and SERankingBacklinksBot", async () => {
+    for (const agent of [
+      "Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)",
+      "Mozilla/5.0 (compatible; SERankingBacklinksBot/1.0; +https://seranking.com/backlinks-bot.html)",
+      "Mozilla/5.0 (compatible; SemrushBot/7~bl; +http://www.semrush.com/bot.html)",
+    ]) {
+      const response = await proxy(
+        new NextRequest("https://example.test/pessoa/4678745", {
+          headers: { "User-Agent": agent },
+        }),
+      );
+      expect(response.status).toBe(403);
+    }
+  });
+
+  it("short-circuits anonymous requests to auth and private routes without contacting Supabase", async () => {
+    const loginResponse = await proxy(
+      new NextRequest("https://example.test/login", {
+        headers: { "User-Agent": "Mozilla/5.0 Chrome/150.0.0.0 Safari/537.36" },
+      }),
+    );
+    expect(loginResponse.headers.get("x-middleware-next")).toBe("1");
+
+    const signupResponse = await proxy(
+      new NextRequest("https://example.test/criar-conta", {
+        headers: { "User-Agent": "Mozilla/5.0 Chrome/150.0.0.0 Safari/537.36" },
+      }),
+    );
+    expect(signupResponse.headers.get("x-middleware-next")).toBe("1");
+
+    const profileResponse = await proxy(
+      new NextRequest("https://example.test/perfil", {
+        headers: { "User-Agent": "Mozilla/5.0 Chrome/150.0.0.0 Safari/537.36" },
+      }),
+    );
+    expect(profileResponse.status).toBe(307);
+    expect(profileResponse.headers.get("location")).toBe("https://example.test/login");
+
+    const adminResponse = await proxy(
+      new NextRequest("https://example.test/admin/artigos", {
+        headers: { "User-Agent": "Mozilla/5.0 Chrome/150.0.0.0 Safari/537.36" },
+      }),
+    );
+    expect(adminResponse.status).toBe(307);
+    expect(adminResponse.headers.get("location")).toBe("https://example.test/");
+  });
 });

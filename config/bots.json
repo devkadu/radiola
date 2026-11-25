@@ -7,6 +7,16 @@
     "Bytespider",
     "meta-externalagent",
     "anthropic-ai",
-    "Claude-Web"
+    "Claude-Web",
+    "AhrefsBot",
+    "AhrefsSiteAudit",
+    "SERankingBacklinksBot",
+    "SEBot-WA",
+    "SemrushBot",
+    "DotBot",
+    "MJ12bot",
+    "BLEXBot",
+    "DataForSeoBot",
+    "PetalBot"
   ]
 }
