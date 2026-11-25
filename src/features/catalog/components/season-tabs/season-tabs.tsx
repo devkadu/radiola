@@ -3,7 +3,7 @@
 import { episodeSlug,seasonSlug } from "@/features/catalog/utils/slugs";
 import { createClient } from "@/shared/lib/supabase-browser";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useRouter,useSearchParams } from "next/navigation";
 import { useEffect,useState } from "react";
 import { useSeason } from "../../hooks/use-season";

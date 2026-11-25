@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 const ProfileNotFound = () => (
   <main className="min-h-screen flex flex-col items-center justify-center gap-3 text-(--text-muted)">

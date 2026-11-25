@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.
 import { watchedEpisodesService } from "@/features/progress/api/watched-episodes.api";
 import { WatchedBottomSheet } from "@/features/progress/components/watched-bottom-sheet/watched-bottom-sheet";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useRef,useState } from "react";
 import { FaComment } from "react-icons/fa6";
 

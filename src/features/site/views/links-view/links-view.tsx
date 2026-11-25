@@ -1,5 +1,5 @@
 import { AppMark } from "@/shared/components/icons/app-mark/app-mark";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 import { FaHouse,FaInstagram,FaTiktok,FaXTwitter } from "react-icons/fa6";
 

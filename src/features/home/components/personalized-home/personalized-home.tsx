@@ -6,7 +6,7 @@ import { NextEpisodeCard } from "@/features/progress/components/next-episode-car
 import { useSearchOverlay } from "@/features/search/components/search-provider/search-provider.client";
 import { fetchJson } from "@/shared/http/fetch-json";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { FaBell } from "react-icons/fa6";
 import { FiSearch } from "react-icons/fi";
 

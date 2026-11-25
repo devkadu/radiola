@@ -5,7 +5,7 @@ import { fetchJson } from "@/shared/http/fetch-json";
 
 import { useMutation,useQuery,useQueryClient } from "@tanstack/react-query";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useState } from "react";
 import { FaChevronDown,FaChevronUp,FaGlobe,FaLock,FaPlus,FaTrash } from "react-icons/fa6";
 

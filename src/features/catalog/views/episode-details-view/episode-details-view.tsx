@@ -24,7 +24,7 @@ import { EpisodeRatingOverlay } from "@/features/discussions/components/episode-
 
 import Image from "@/shared/components/image/image";
 
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 interface Props {
   params: Promise<{ slug: string; season: string; episode: string }>;

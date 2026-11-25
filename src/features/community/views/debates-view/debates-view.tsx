@@ -1,6 +1,6 @@
 import Image from "@/shared/components/image/image";
 
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 import { getTrendingNow } from "@/server/integrations/tmdb/requests/get-trending-now";
 import { getUpcomingSeries } from "@/server/integrations/tmdb/requests/get-upcoming-series";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { LegalLinks } from "@/features/privacy/components/legal-links";
 
 const LegalLayout = ({ children }: { children: React.ReactNode }) => (

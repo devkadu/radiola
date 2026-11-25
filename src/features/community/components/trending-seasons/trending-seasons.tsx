@@ -3,7 +3,7 @@ import { endpoints } from "@/shared/constants/endpoint";
 
 import { useQuery } from "@tanstack/react-query";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 interface TrendingSeason {
   key: string;

@@ -3,7 +3,7 @@
 import { seriesSlug } from "@/features/catalog/utils/slugs";
 import { FavoriteButton } from "@/features/progress/components/favorite-button/favorite-button";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useState } from "react";
 import { useDiscoverSeries } from "../../hooks/use-discover-series";
 import type { Series } from "../../types/tmdb";

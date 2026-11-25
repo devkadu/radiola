@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useEffect,useState } from "react";
 import { FaCheck,FaShareNodes } from "react-icons/fa6";
 

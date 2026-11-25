@@ -7,7 +7,7 @@ import { Comment,commentsService } from "@/features/discussions/api/comments.api
 import { episodeId } from "@/features/progress/functions/episode-id";
 import { fetchJson } from "@/shared/http/fetch-json";
 import { useQuery,useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useEffect,useRef,useState } from "react";
 import { FaHeart,FaTrash } from "react-icons/fa6";
 

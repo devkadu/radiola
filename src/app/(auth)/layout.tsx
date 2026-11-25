@@ -1,7 +1,7 @@
 import { AppMark } from "@/shared/components/icons/app-mark/app-mark";
 import { ROUTES } from "@/shared/constants/routes";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { LegalLinks } from "@/features/privacy/components/legal-links";
 
 export const metadata: Metadata = {

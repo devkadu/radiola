@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { PRIVACY_UPDATED_AT } from "@/features/privacy/constants/privacy";
 
 export const metadata: Metadata = { title: "Cookies e conteúdo externo", alternates: { canonical: "/cookies" } };

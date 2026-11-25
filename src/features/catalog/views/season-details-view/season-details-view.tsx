@@ -6,7 +6,7 @@ import { BackTopBar } from "@/shared/components/back-top-bar/back-top-bar";
 
 import Image from "@/shared/components/image/image";
 
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 interface Props {
   params: Promise<{ slug: string; season: string }>;

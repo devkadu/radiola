@@ -4,7 +4,7 @@ import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.
 import { ProfileQuickActions } from "@/features/profiles/components/profile-quick-actions/profile-quick-actions";
 import { ROUTES } from "@/shared/constants/routes";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { usePathname } from "next/navigation";
 import { FaCircleUser,FaHouse,FaTv,FaUsers } from "react-icons/fa6";
 
