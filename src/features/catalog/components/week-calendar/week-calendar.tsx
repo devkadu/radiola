@@ -6,7 +6,7 @@ import { getSeriesDetails } from "@/server/integrations/tmdb/requests/get-series
 import { getWatchProviders } from "@/server/integrations/tmdb/requests/get-watch-providers";
 import { mapWithConcurrency } from "@/shared/utils/map-with-concurrency";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 const DAY_LABELS: Record<number, string> = {
   0: "dom",

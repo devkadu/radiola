@@ -2,7 +2,7 @@
 
 import { useSearchOverlay } from "@/features/search/components/search-provider/search-provider.client";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FaMagnifyingGlass, FaXmark } from "react-icons/fa6";

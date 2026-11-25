@@ -20,7 +20,7 @@ import { AddToListButton } from "@/features/lists/components/add-to-list-button/
 
 import Image from "@/shared/components/image/image";
 
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 interface CastMember {
   id: number;

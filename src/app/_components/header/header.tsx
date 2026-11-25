@@ -6,7 +6,7 @@ import { useCatalogSearch } from "@/features/search/hooks/use-catalog-search";
 import { AppMark } from "@/shared/components/icons/app-mark/app-mark";
 import { ROUTES } from "@/shared/constants/routes";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { usePathname,useRouter } from "next/navigation";
 import { useEffect,useRef,useState } from "react";
 import { FaMagnifyingGlass,FaXmark } from "react-icons/fa6";

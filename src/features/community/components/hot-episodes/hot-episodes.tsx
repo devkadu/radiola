@@ -3,7 +3,7 @@ import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.
 import { favoritesService } from "@/features/progress/api/favorites.api";
 import { endpoints } from "@/shared/constants/endpoint";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useState } from "react";
 
 interface HotEpisode {

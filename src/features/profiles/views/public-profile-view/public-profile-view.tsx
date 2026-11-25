@@ -4,7 +4,7 @@ import { getProfileIdentity } from "@/features/profiles/functions/get-profile-id
 
 import { createClient } from "@/server/database/session";
 
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 import { FollowButton } from "@/features/profiles/components/follow-button/follow-button.client";
 

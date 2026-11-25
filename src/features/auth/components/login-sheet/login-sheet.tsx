@@ -1,6 +1,6 @@
 "use client";
 import { ROUTES } from "@/shared/constants/routes";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useEffect,useRef } from "react";
 interface Props {
   show: boolean;

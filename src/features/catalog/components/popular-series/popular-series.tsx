@@ -6,7 +6,7 @@ import { seriesSlug as toSlug } from "@/features/catalog/utils/slugs";
 import { fetchJson } from "@/shared/http/fetch-json";
 import { useQuery } from "@tanstack/react-query";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 function SeriesSkeleton() {
   return (

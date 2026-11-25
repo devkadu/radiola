@@ -6,7 +6,7 @@ import { fetchJson } from "@/shared/http/fetch-json";
 import { useSignOut } from "@/features/auth/hooks/use-sign-out";
 import { useQuery } from "@tanstack/react-query";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useEffect, useState } from "react";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { calculateProfileBadges } from "../../functions/calculate-profile-badges";

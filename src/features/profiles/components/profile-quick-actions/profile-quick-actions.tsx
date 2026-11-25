@@ -3,7 +3,7 @@
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
 import { useSignOut } from "@/features/auth/hooks/use-sign-out";
 import { ROUTES } from "@/shared/constants/routes";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent, PointerEvent, ReactNode } from "react";
 import { FaArrowRightFromBracket, FaListUl } from "react-icons/fa6";

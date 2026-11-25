@@ -1,7 +1,7 @@
 "use client";
 import { endpoints } from "@/shared/constants/endpoint";
 import { createClient } from "@/shared/lib/supabase-browser";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useEffect,useState } from "react";
 
 interface Stats {

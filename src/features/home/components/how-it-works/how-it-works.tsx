@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 export function HowItWorks() {
   return (

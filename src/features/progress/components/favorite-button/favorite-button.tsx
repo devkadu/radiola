@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useRouter } from "next/navigation";
 import { useEffect,useRef,useState } from "react";
 import { FaHeart,FaRegHeart,FaXmark } from "react-icons/fa6";

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { PRIVACY_CONTACT, privacyRequestUrl } from "../constants/privacy";
 
 export const PrivacyContact = () => (

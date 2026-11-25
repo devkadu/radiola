@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { PRIVACY_CONTACT, PRIVACY_UPDATED_AT, privacyRequestUrl } from "@/features/privacy/constants/privacy";
 
 export const metadata: Metadata = { title: "Termos de uso", alternates: { canonical: "/termos" } };

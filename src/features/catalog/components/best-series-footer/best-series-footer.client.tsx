@@ -2,7 +2,7 @@
 import { useAuth } from "@/features/auth/components/auth-provider/auth-provider.client";
 import { commentsService } from "@/features/discussions/api/comments.api";
 import { EpisodeComments } from "@/features/discussions/components/episode-comments/episode-comments";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { useState } from "react";
 import { FaCheck,FaHeart,FaShareNodes } from "react-icons/fa6";
 

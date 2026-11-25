@@ -7,7 +7,7 @@ import { AppMark } from "@/shared/components/icons/app-mark/app-mark";
 import { ROUTES } from "@/shared/constants/routes";
 import { useQuery } from "@tanstack/react-query";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { usePathname,useRouter } from "next/navigation";
 import { useState } from "react";
 import {

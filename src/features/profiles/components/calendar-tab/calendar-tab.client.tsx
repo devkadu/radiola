@@ -5,7 +5,7 @@ import { fetchJson } from "@/shared/http/fetch-json";
 
 import { useQuery } from "@tanstack/react-query";
 import Image from "@/shared/components/image/image";
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 import { FaShareNodes } from "react-icons/fa6";
 
 interface WatchedEp {

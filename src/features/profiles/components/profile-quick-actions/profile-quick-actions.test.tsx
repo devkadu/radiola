@@ -13,7 +13,15 @@ vi.mock("@/features/auth/components/auth-provider/auth-provider.client", () => (
   useAuth: () => auth,
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
-vi.mock("next/link", () => ({ default: (props: ComponentProps<"a">) => <a {...props} /> }));
+vi.mock("next/link", () => ({
+  default: ({
+    prefetch,
+    ...props
+  }: ComponentProps<"a"> & { prefetch?: boolean | null }) => {
+    void prefetch;
+    return <a {...props} />;
+  },
+}));
 
 beforeEach(() => {
   vi.useFakeTimers();

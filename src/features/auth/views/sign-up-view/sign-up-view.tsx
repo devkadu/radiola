@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 import { useRouter } from "next/navigation";
 

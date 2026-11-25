@@ -4,7 +4,7 @@ import { cacheService } from "@/features/catalog/server/cache";
 
 import Image from "@/shared/components/image/image";
 
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 import { FaMagnifyingGlass } from "react-icons/fa6";
 

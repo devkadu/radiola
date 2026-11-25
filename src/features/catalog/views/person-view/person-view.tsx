@@ -2,7 +2,7 @@ import { SITE_URL as siteUrl } from "@/shared/constants/site";
 import { serializeJsonLd } from "@/shared/utils/serialize-json-ld";
 import Image from "@/shared/components/image/image";
 
-import Link from "next/link";
+import Link from "@/shared/components/link/link";
 
 import { getPersonDetails } from "@/server/integrations/tmdb/requests/get-person-details";
 import { getPersonTvCredits } from "@/server/integrations/tmdb/requests/get-person-tv-credits";
